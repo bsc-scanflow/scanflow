@@ -14,6 +14,15 @@ from scanflow.agent import Agent
 #from scanflow.graph import ApplicationGraph
 
 # scanflow deployer
+from scanflow.server.utils import (
+    set_server_uri,
+    is_server_uri_set,
+    get_server_uri,
+)
+import requests
+import json
+
+from scanflow.tools.scanflowtools import check_verbosity
 
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
@@ -22,15 +31,14 @@ logging.getLogger().setLevel(logging.INFO)
 
 class ScanflowClient:
     def __init__(self,
-                 scanflow_controller_uri=None,
+                 scanflow_server_uri=None,
                  registry=None,
                  deployer="argo",
                  scanflowType="local",
                  verbose=True):
         """
-            scanflowClient = ScanflowClient()
-            scanflow_controller_uri=http://172.30.0.50:46666
-                      =http://scanflow-controller-service.scanflow-system.svc.cluster.local
+            scanflow_server_uri=http://172.30.0.50:46666
+                      =http://scanflow-server-service.scanflow-system.svc.cluster.local
             general backend for scanflow is kubernetes
             deployer: deploy backend to run workflows
                       for offline batch usually use 'argo'
@@ -39,10 +47,14 @@ class ScanflowClient:
         """
         self.verbose = verbose
         check_verbosity(verbose)
-        self.scanflow_controller_uri = scanflow_controller_uri
+        if scanflow_server_uri is not None:
+           set_server_uri(scanflow_server_uri)
+        if not is_server_uri_set():
+            raise ValueError("Scanflow_server_uri is not provided")
+        self.scanflow_server_uri = get_server_uri()
         self.registry = registry
         self.scanflowType = scanflowType
-        self.deployer = get_deployer(deployer)
+        self.deployer = self.get_deployer(deployer)
 
 ### Scanflow deploy
     def get_deployer(self, deployer):
@@ -54,28 +66,25 @@ class ScanflowClient:
                 from scanflow.deployer.volcanoDeployer import VolcanoDeployer
                 return VolcanoDeployer(self.verbose)
             elif deployer == "seldon":
-                from scanflow.deployer.seldonDeployer import seldonDeployer
+                from scanflow.deployer.seldonDeployer import SeldonDeployer
                 return SeldonDeployer(self.verbose)
             else:
                 raise ValueError("unknown deployer: " + deployer)
         elif self.scanflowType == "server":
-            return None
+                url = f"http://{self.scanflow_server_uri}/get_deployer/{deployer}"
+                response = requests.get(url=url,
+                                        headers={"accept": "application/json"})
+                response_json = json.loads(response.text)
+                print(response_json)
+                return None
         else:
             logging.info("Cannot find scanflowType")
 
     def create_environment(self, app_name, team_name):
         if self.scanflowType == "local":
-            if deployer == "argo":
-                from scanflow.deployer.argoDeployer import ArgoDeployer
-                self.deployer = ArgoDeployer(self.verbose)
-            elif deployer == "volcano":
-                logging.info("volcano backend is not ready!")
-            elif deployer == "seldon":
-                logging.info("seldon backend is not ready!")
-            else:
-                raise ValueError("unknown deployer: " + deployer)
+            self.deployer.create_environment
         elif self.scanflowType == "server":
-            
+            url = f"http://{self.scanflow_server_uri}/check_health_deployer/checker/anomaly"
         else:
             logging.info("Cannot find scanflowType")
 

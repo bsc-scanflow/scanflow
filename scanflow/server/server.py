@@ -4,6 +4,9 @@ import logging
 
 from fastapi import FastAPI
 
+#scanflow
+
+
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
@@ -29,7 +32,20 @@ async def list_workflow():
     return response
 
 
-## deployment
+## deployer
+@app.post("/get/deployer")
+async def get_deployer(deployer: str):
+    log = ""
+    if deployer == "argo":
+        log = "argo deployer exsits"
+    elif deployer == "volcano":
+        log = "volcano deployer exsits"
+    elif deployer == "seldon":
+        log = "seldon deployer exists"
+    else:
+        log = "unknown deployer"
+
+    return {"log":log}
 
 async def build_workflows():
     response = ""
