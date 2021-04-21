@@ -1,0 +1,39 @@
+version: '3'
+services:
+  get_new_data:
+    image: get_new_data
+    container_name: get_new_data-20200225151052
+    networks:
+    - network-workflow3
+    depends_on:
+    - tracker-workflow3
+    environment:
+      MLFLOW_TRACKING_URI: http://tracker-workflow3:8003
+    volumes:
+    - /home/guess/Desktop/scanflow/examples/demo2/data-eng/:/app
+    - /home/guess/Desktop/scanflow/examples/demo2/data-eng/ad-stuff/ad-tracker/tracker-workflow3:/mlflow
+    tty: 'true'
+  preprocessing_new_data:
+    image: preprocessing_new_data
+    container_name: preprocessing_new_data-20200225151052
+    networks:
+    - network-workflow3
+    depends_on:
+    - tracker-workflow3
+    environment:
+      MLFLOW_TRACKING_URI: http://tracker-workflow3:8003
+    volumes:
+    - /home/guess/Desktop/scanflow/examples/demo2/data-eng/:/app
+    - /home/guess/Desktop/scanflow/examples/demo2/data-eng/ad-stuff/ad-tracker/tracker-workflow3:/mlflow
+    tty: 'true'
+  tracker-workflow3:
+    image: tracker-workflow3
+    container_name: tracker-workflow3-20200225151052
+    networks:
+    - network-workflow3
+    volumes:
+    - /home/guess/Desktop/scanflow/examples/demo2/data-eng/ad-stuff/ad-tracker/tracker-workflow3:/mlflow
+    ports:
+    - 8008:8003
+networks:
+  network_workflow3: null

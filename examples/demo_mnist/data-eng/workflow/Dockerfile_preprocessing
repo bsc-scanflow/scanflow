@@ -1,0 +1,8 @@
+
+FROM continuumio/miniconda3
+
+RUN mkdir /app
+ADD req_preprocessing.txt /app
+WORKDIR /app
+RUN pip install -r req_preprocessing.txt
+

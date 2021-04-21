@@ -1,0 +1,55 @@
+#mlflow for saving artifacts
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-tracker
+  namespace: {{ .Release.Namespace }} 
+  labels:
+    app: scanflow-tracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scanflow-tracker
+  template:
+    metadata:
+      labels:
+        app: scanflow-tracker
+    spec:
+      containers:
+        - image: {{.Values.basic.scanflow_trakcer_image_name}}:{{.Values.basic.image_tag_version}}
+          imagePullPolicy: Always
+          name: {{ .Release.Name }}-tracker
+          env:
+            - name: MLFLOW_STORAGE
+              value: {{.Values.tracker.scanflow_tracker_storage_backend}}://{{.Values.tracker.scanflow_tracker_storage_username}}:{{.Values.tracker.scanflow_tracker_storage_password}}@{{.Values.tracker.scanflow_tracker_storage_url}}/scanflow
+            - name: MLFLOW_ARTIFACT
+              value: {{.Values.tracker.scanflow_tracker_artifact_backend}}://scanflow
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: {{.Values.tracker.scanflow_tracker_artifact_url}}
+            - name: AWS_ACCESS_KEY_ID
+              value: {{.Values.tracker.scanflow_tracker_artifact_username}}
+            - name: AWS_SECRET_ACCESS_KEY
+              value: {{.Values.tracker.scanflow_tracker_artifact_password}}
+          #command: [ "/bin/bash", "-c", "--" ]
+          #args: [ "while true; do sleep 30; done;" ]
+          #command: ["mlflow server --backend-store-uri $(MLFLOW_STORAGE)  --default-artifact-root $(MLFLOW_ARTIFACT) --host 0.0.0.0"]
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-tracker-service
+  namespace: {{ .Release.Namespace }} 
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 5000
+    nodePort: 46667
+  selector:
+    app: scanflow-tracker
+  type: NodePort

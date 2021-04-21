@@ -1,0 +1,13 @@
+
+FROM continuumio/miniconda3
+LABEL maintainer='scanflow'
+
+ENV CHECKER_HOME  /checker
+
+RUN pip install tensorflow==2.4.1
+RUN pip install mlflow==1.14.1
+RUN mkdir $CHECKER_HOME
+
+WORKDIR $CHECKER_HOME
+
+

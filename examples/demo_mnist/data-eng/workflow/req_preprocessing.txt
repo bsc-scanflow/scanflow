@@ -1,0 +1,7 @@
+pandas
+sklearn
+numpy
+requests
+click
+mlflow
+six

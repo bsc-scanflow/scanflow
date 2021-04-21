@@ -1,0 +1,21 @@
+
+FROM continuumio/miniconda3
+LABEL maintainer='scanflow'
+
+ENV AGENT_BASE_PATH  /improver
+ENV AGENT_HOME  /improver/agent
+ENV AGENT_PORT  8006
+
+RUN pip install mlflow==1.14.1
+RUN pip install fastapi
+RUN pip install uvicorn
+RUN pip install aiohttp
+RUN pip install aiodns
+
+RUN mkdir $AGENT_BASE_PATH
+RUN mkdir -p $AGENT_HOME
+
+WORKDIR $AGENT_HOME
+
+CMD uvicorn improver_agent:app --reload --host 0.0.0.0 --port $AGENT_PORT
+

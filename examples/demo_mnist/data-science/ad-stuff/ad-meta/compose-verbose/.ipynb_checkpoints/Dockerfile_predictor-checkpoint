@@ -1,0 +1,8 @@
+
+FROM continuumio/miniconda3
+
+RUN mkdir /app
+ADD req_predictor.txt /app
+WORKDIR /app
+RUN pip install -r req_predictor.txt
+

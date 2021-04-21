@@ -1,0 +1,81 @@
+#for developing server, I mount the current path to the server container, but this can be remove later once scanflow is stable.
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-scanflow-server
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-scanflow-server
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi 
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: scanflow-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scanflow-controller
+  template:
+    metadata:
+      labels:
+        app: scanflow-controller
+    spec:
+      volumes:
+        - name: pvc-scanflow-server
+          persistentVolumeClaim:
+            claimName: pvc-scanflow-server
+      containers:
+          - name: {{ .Release.Name }}-controller
+            image: {{.Values.basic.scanflow_controller_image_name}}:{{.Values.basic.image_tag_version}}
+            imagePullPolicy: Always
+            env:
+              - name: MLFLOW_TRACKING_URI
+                value: http://{{ .Release.Name }}-tracker-service.{{ .Release.Namespace }}.svc.cluster.local
+            volumeMounts:
+              - mountPath: /app
+                name: pvc-scanflow-server
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-controller-service
+  namespace: {{ .Release.Namespace }} 
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 46666
+  selector:
+    app: scanflow-controller
+  type: NodePort

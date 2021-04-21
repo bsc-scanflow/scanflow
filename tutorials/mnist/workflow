@@ -1,0 +1,96 @@
+{
+  "app_name": "mnist",
+  "app_dir": "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini/scanflow/tutorials/examples/mnist/datascience",
+  "team_name": "datascience",
+  "workflows": [
+    {
+      "name": "mnist-wf",
+      "executors": [
+        {
+          "name": "load_data",
+          "mainfile": "loaddata.py",
+          "parameters": {
+            "app_name": "mnist",
+            "team_name": "data"
+          },
+          "requirements": "req_loaddata.txt",
+          "dockerfile": null,
+          "env": null
+        },
+        {
+          "name": "modeling_cnn",
+          "mainfile": "modeling.py",
+          "parameters": {
+            "x_train_path": "./data/mnist/train_images.npy",
+            "y_train_path": "./data/mnist/train_labels.npy",
+            "x_test_path": "./data/mnist/test_images.npy",
+            "y_test_path": "./data/mnist/test_labels.npy"
+          },
+          "requirements": "req_modeling.txt",
+          "dockerfile": null,
+          "env": null
+        },
+        {
+          "name": "modeling_cnn1",
+          "mainfile": "modeling.py",
+          "parameters": {
+            "x_train_path": "./data/mnist/train_images.npy",
+            "y_train_path": "./data/mnist/train_labels.npy",
+            "x_test_path": "./data/mnist/test_images.npy",
+            "y_test_path": "./data/mnist/test_labels.npy"
+          },
+          "requirements": "req_modeling.txt",
+          "dockerfile": null,
+          "env": null
+        }
+      ],
+      "dependencies": [
+        {
+          "depender": "modeling_cnn",
+          "dependee": "load_data",
+          "priority": 0
+        },
+        {
+          "depender": "modeling_cnn1",
+          "dependee": "load_data",
+          "priority": 0
+        }
+      ]
+    },
+    {
+      "name": "mnist-checker-wf",
+      "executors": [
+        {
+          "name": "load_data",
+          "mainfile": "loaddata.py",
+          "parameters": {
+            "app_name": "mnist",
+            "team_name": "data"
+          },
+          "requirements": "req_loaddata.txt",
+          "dockerfile": null,
+          "env": null
+        },
+        {
+          "name": "checker",
+          "mainfile": "modeling.py",
+          "parameters": {
+            "x_train_path": "./data/mnist/train_images.npy"
+          },
+          "requirements": "req_modeling.txt",
+          "dockerfile": null,
+          "env": null
+        }
+      ],
+      "dependencies": [
+        {
+          "depender": "checker",
+          "dependee": "load_data",
+          "priority": 0
+        }
+      ]
+    }
+  ],
+  "agents": null,
+  "verbose": true
+}

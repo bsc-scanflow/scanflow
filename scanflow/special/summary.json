@@ -1,0 +1,1 @@
+{"feedback": {"n_anomalies": 7, "percentage_anomalies": 0.7}, "conclusions": {"msg": "Retraining the model!, 7 anomalies", "current_model": "Model.1.0", "planner": {"plan": "Changing model=Model.1.0 by the new model=Model.2.0"}}}

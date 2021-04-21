@@ -1,0 +1,19 @@
+
+FROM continuumio/miniconda3
+LABEL maintainer='scanflow'
+
+ENV MLFLOW_HOME  /mlflow
+ENV MLFLOW_HOST  0.0.0.0
+ENV MLFLOW_PORT  8003
+ENV MLFLOW_BACKEND  /mlflow/mlruns
+ENV MLFLOW_ARTIFACT  /mlflow/mlruns
+
+RUN pip install mlflow
+RUN mkdir $MLFLOW_HOME
+RUN mkdir -p $MLFLOW_BACKEND
+RUN mkdir -p $MLFLOW_ARTIFACT
+
+WORKDIR $MLFLOW_HOME
+
+CMD mlflow server                  --backend-store-uri $MLFLOW_BACKEND                 --default-artifact-root $MLFLOW_ARTIFACT                 --host $MLFLOW_HOST -p $MLFLOW_PORT
+

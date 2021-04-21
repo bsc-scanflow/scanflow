@@ -1,0 +1,25 @@
+version: '3'
+services:
+  predictor:
+    image: predictor
+    container_name: predictor-20210404121603
+    networks:
+    - network-mnist
+    depends_on:
+    - tracker-mnist
+    environment:
+      MLFLOW_TRACKING_URI: http://tracker-mnist:8002
+    volumes:
+    - /gpfs/bsc_home/xpliu/pv/jupyterhubpeini/scanflow/examples/demo_mnist/data-science/:/app
+    - /gpfs/bsc_home/xpliu/pv/jupyterhubpeini/scanflow/examples/demo_mnist/data-science/ad-stuff/ad-tracker/tracker-mnist:/mlflow
+  tracker-mnist:
+    image: tracker-mnist
+    container_name: tracker-mnist-20210404121603
+    networks:
+    - network-mnist
+    volumes:
+    - /gpfs/bsc_home/xpliu/pv/jupyterhubpeini/scanflow/examples/demo_mnist/data-science/ad-stuff/ad-tracker/tracker-mnist:/mlflow
+    ports:
+    - 8007:8002
+networks:
+  network_mnist: null
