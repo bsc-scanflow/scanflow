@@ -61,7 +61,7 @@ class ScanflowClient:
         if self.scanflowType == "local":
             if deployer == "argo":
                 from scanflow.deployer.argoDeployer import ArgoDeployer
-                return ArgoDeployer(self.verbose)
+                return ArgoDeployer(self.scanflowType, self.verbose)
             elif deployer == "volcano":
                 from scanflow.deployer.volcanoDeployer import VolcanoDeployer
                 return VolcanoDeployer(self.verbose)

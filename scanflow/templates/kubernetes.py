@@ -8,19 +8,26 @@ logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
 
+from scanflow.tools.scanflowtools import check_verbosity
+
 
 class Kubernetes:
     def __init__(self,
                  configdir=None,
+                 scanflowType=None,
                  verbose=True):
         self.verbose = verbose
-        
-        if configdir is not None:
-            config.load_kube_config(configdir)
-        else:
-            config.load_kube_config()
+        check_verbosity(verbose)
 
-        config.load_incluster_config()
+        if scanflowType == "local":        
+            if configdir is not None:
+                config.load_kube_config(configdir)
+            else:
+                config.load_kube_config()
+        elif scanflowType == "server":
+            config.load_incluster_config()
+        else:
+            logging.info("unknown scanflowtype")
 
 
     def create_namespace(self, namespace):

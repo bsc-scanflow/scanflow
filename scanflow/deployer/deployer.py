@@ -13,9 +13,13 @@ logging.getLogger().setLevel(logging.INFO)
 
 class Deployer():
     def __init__(self,
+                 scanflowType=None,
                  verbose=True):
         self.verbose = verbose
         check_verbosity(verbose)
+
+        self.kubeclient = Kubernetes(scanflowType=scanflowType)
+
 
     def create_environment(self, app_name, team_name):
         """
@@ -23,8 +27,10 @@ class Deployer():
         """
         self.namespace = f"{app_name}-{team_name}"
         logging.info(f'[++]Creating namespace "{self.namespace}"')
-
-        
+        self.kubeclient.create_namespace(self.namespace)
+        logging.info(f"[++]Creating Role for 'default service account'")
+        rolebinding = self.kubeclient.build_rolebinding(self.namespace)
+        self.kubeclient.create_rolebinding(self.namespace, rolebinding)
 
     def start_local_tracker(self):
         """
