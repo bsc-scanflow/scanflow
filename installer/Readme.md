@@ -17,13 +17,13 @@ tracker(mlflow)
 - artifact store - Minio
 - backend store - PostgreSQL
 
-# Building scanflow controller by dockerfile
+# Building scanflow server by dockerfile
 
 You can use the provided [Dockerfile](dockerfile/Dockerfile)
 
 ```bash
-$ docker build -f dockerfile/controller/Dockerfile -t 172.30.0.49:5000/scanflow-controller .
-$ docker push 172.30.0.49:5000/scanflow-controller
+$ docker build -f dockerfile/server/Dockerfile -t 172.30.0.49:5000/scanflow-server .
+$ docker push 172.30.0.49:5000/scanflow-server
 
 $ docker build -f dockerfile/tracker/Dockerfile -t 172.30.0.49:5000/scanflow-tracker .
 $ docker push 172.30.0.49:5000/scanflow-tracker
@@ -67,8 +67,8 @@ The following are the list configurable parameters of Volcano Chart and their de
 | Parameter|Description|Default Value|
 |----------------|-----------------|----------------------|
 |`basic.image_tag_version`| Docker image version Tag | `latest`|
-|`basic.scanflow_controller_image_name`|Controller Docker Image Name|`172.30.0.49/scanflow-controller`|
-|`basic.scanflow_tracker_image_name`|Controller Docker Image Name|`172.30.0.49/scanflow-tracker`|
+|`basic.scanflow_server_image_name`|server Docker Image Name|`172.30.0.49/scanflow-server`|
+|`basic.scanflow_tracker_image_name`|server Docker Image Name|`172.30.0.49/scanflow-tracker`|
 |`basic.image_pull_policy`|Image Pull Policy|`IfNotPresent`|
 |`trakcer.scanflow_trakcer_storage_backend`|||
 |`trakcer.scanflow_trakcer_storage_url`|||

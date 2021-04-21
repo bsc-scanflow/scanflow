@@ -33,27 +33,27 @@ spec:
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: {{ .Release.Name }}-controller
+  name: {{ .Release.Name }}-server
   namespace: {{ .Release.Namespace }}
   labels:
-    app: scanflow-controller
+    app: scanflow-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: scanflow-controller
+      app: scanflow-server
   template:
     metadata:
       labels:
-        app: scanflow-controller
+        app: scanflow-server
     spec:
       volumes:
         - name: pvc-scanflow-server
           persistentVolumeClaim:
             claimName: pvc-scanflow-server
       containers:
-          - name: {{ .Release.Name }}-controller
-            image: {{.Values.basic.scanflow_controller_image_name}}:{{.Values.basic.image_tag_version}}
+          - name: {{ .Release.Name }}-server
+            image: {{.Values.basic.scanflow_server_image_name}}:{{.Values.basic.image_tag_version}}
             imagePullPolicy: Always
             env:
               - name: MLFLOW_TRACKING_URI
@@ -68,7 +68,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-controller-service
+  name: {{ .Release.Name }}-server-service
   namespace: {{ .Release.Namespace }} 
 spec:
   ports:
@@ -77,5 +77,5 @@ spec:
     targetPort: 8080
     nodePort: 46666
   selector:
-    app: scanflow-controller
+    app: scanflow-server
   type: NodePort
