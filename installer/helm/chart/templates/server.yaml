@@ -55,15 +55,20 @@ spec:
           - name: {{ .Release.Name }}-server
             image: {{.Values.basic.scanflow_server_image_name}}:{{.Values.basic.image_tag_version}}
             imagePullPolicy: Always
-            env:
-              - name: SCANFLOW_TRACKER_URI
-                value: http://{{ .Release.Name }}-tracker-service.{{ .Release.Namespace }}.svc.cluster.local
-              - name: MLFLOW_S3_ENDPOINT_URL
-                value: {{.Values.tracker.scanflow_tracker_artifact_url}}
-              - name: AWS_ACCESS_KEY_ID
-                value: {{.Values.tracker.scanflow_tracker_artifact_username}}
-              - name: AWS_SECRET_ACCESS_KEY
-                value: {{.Values.tracker.scanflow_tracker_artifact_password}}
+            #env:
+            #  - name: SCANFLOW_TRACKER_URI
+            #    value: http://{{ .Release.Name }}-tracker-service.{{ .Release.Namespace }}.svc.cluster.local
+            #  - name: MLFLOW_S3_ENDPOINT_URL
+            #    value: {{.Values.tracker.scanflow_tracker_artifact_url}}
+            #  - name: AWS_ACCESS_KEY_ID
+            #    value: {{.Values.tracker.scanflow_tracker_artifact_username}}
+            #  - name: AWS_SECRET_ACCESS_KEY
+            #    value: {{.Values.tracker.scanflow_tracker_artifact_password}}
+            envFrom:
+              - secretRef:
+                  name: scanflow-secret
+              - configMapRef:
+                  name: scanflow-server-env
             volumeMounts:
               - mountPath: /app
                 name: pvc-scanflow-server

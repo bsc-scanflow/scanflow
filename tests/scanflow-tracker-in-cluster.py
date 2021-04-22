@@ -13,9 +13,9 @@ def set_env_vars():
 
 if __name__ == "__main__":
     print("Running the test script ...")
-    set_env_vars()
+    #set_env_vars()
     client = ScanflowTrackerClient()
-    #client.download_app(app_name="mnist", 
-    #                team_name="data",
-    #                local_dir="/")
-    client.metric()
+    client.download_artifacts(app_name="mnist", 
+                    team_name="data",
+                    local_dir="/")
+    #client.metric()

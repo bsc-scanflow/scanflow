@@ -1,10 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: env-server-config
+  name: scanflow-server-env
   namespace: {{ .Release.Namespace }}
 data:
   SCANFLOW_TRACKER_URI: http://{{ .Release.Name }}-tracker-service.{{ .Release.Namespace }}.svc.cluster.local
-  MLFLOW_S3_ENDPOINT_URL: {{.Values.tracker.scanflow_tracker_artifact_url}}
-  AWS_ACCESS_KEY_ID: {{.Values.tracker.scanflow_tracker_artifact_username}}
-  AWS_SECRET_ACCESS_KEY: {{.Values.tracker.scanflow_tracker_artifact_password}}

@@ -32,18 +32,6 @@ class Application:
         self.verbose = verbose
         check_verbosity(verbose)
 
-    @property
-    def local_tracker(self):
-        return self.local_tracker
-    
-    @local_tracker.setter
-    def local_tracker(self, 
-                      tracker: ):
-        if not isinstance(tracker, Tracker):
-            raise ValueError("local_tracker should be a scanflow Tracker")
-        else:
-            self.local_tracker = tracker
-
     def to_dict(self):
         tmp_dict = {}
         app_dict = self.__dict__
