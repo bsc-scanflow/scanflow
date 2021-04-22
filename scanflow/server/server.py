@@ -20,7 +20,6 @@ app = FastAPI(title='Scanflow API',
               )
 
 
-
 ## scanflow app
 
 @app.post("/submit/scanflowApplication",

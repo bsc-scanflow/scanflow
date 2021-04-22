@@ -32,9 +32,6 @@ spec:
               value: {{.Values.tracker.scanflow_tracker_artifact_username}}
             - name: AWS_SECRET_ACCESS_KEY
               value: {{.Values.tracker.scanflow_tracker_artifact_password}}
-          #command: [ "/bin/bash", "-c", "--" ]
-          #args: [ "while true; do sleep 30; done;" ]
-          #command: ["mlflow server --backend-store-uri $(MLFLOW_STORAGE)  --default-artifact-root $(MLFLOW_ARTIFACT) --host 0.0.0.0"]
       restartPolicy: Always
 
 ---

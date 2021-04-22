@@ -40,15 +40,15 @@ class Tracker():
         check_verbosity(verbose)
 
     
-    def save_app(self, app_name=None, team_name=None, app_dir=None, tolocal=False):
+    def save_artifacts(self, app_name=None, team_name=None, app_dir=None, tolocal=False):
         raise NotImplementedError("tracker:save_app")
 
-    def download_app(self, app_name=None, run_id=None, team_name=None, local_dir=None, fromlocal=False):
+    def download_artifacts(self, app_name=None, run_id=None, team_name=None, local_dir=None, fromlocal=False):
         raise NotImplementedError("tracker:download_app")
 
-    def list_app(self):
+    def list_artifacts(self):
         raise NotImplementedError("tracker:list_app")
 
-    def search_app(self):
+    def search_artifacts(self):
         raise NotImplementedError("tracker:search_app")
     

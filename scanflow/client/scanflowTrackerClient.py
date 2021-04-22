@@ -34,13 +34,13 @@ class ScanflowTrackerClient:
             raise ValueError("unknown tracker backend: " + tracker)
 
 
-    def save_app(self, app_name=None, team_name=None, app_dir=None,tolocal=False):
+    def save_artifacts(self, app_name, team_name, app_dir,tolocal=False):
         """
            save local implemented app to scanflow server
         """
-        self.tracker.save_app(app_name, team_name, app_dir, tolocal)
+        self.tracker.save_artifacts(app_name, team_name, app_dir, tolocal)
 
-    def download_app(self, app_name=None, run_id=None, team_name=None, local_dir=None, fromlocal=False):
+    def download_artifacts(self, app_name, run_id=None, team_name=None, local_dir=None, fromlocal=False):
         """
            download remote app to local app_dir
            app_name: project name (e.g., mnist)
@@ -48,14 +48,4 @@ class ScanflowTrackerClient:
            team_name: who stored this artifact (e.g., datascienceteam)
            local_dir: local dir to save the project
         """
-        if app_name is None:
-            logging.info(f"must provide app_name {app_name} ")
-            return
-
-        self.tracker.download_app(app_name, run_id, team_name, local_dir, fromlocal)
-
-    def metric(self):
-        import mlflow
-        mlflow.set_tracking_uri("http://scanflow-tracker-service.scanflow-system.svc.cluster.local")
-        mlflow.set_experiment("test")
-        mlflow.log_metric("metric1", 1)
+        self.tracker.download_artifacts(app_name, run_id, team_name, local_dir, fromlocal)

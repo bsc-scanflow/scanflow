@@ -38,7 +38,7 @@ class Application:
     
     @local_tracker.setter
     def local_tracker(self, 
-                      tracker: Tracker):
+                      tracker: ):
         if not isinstance(tracker, Tracker):
             raise ValueError("local_tracker should be a scanflow Tracker")
         else:

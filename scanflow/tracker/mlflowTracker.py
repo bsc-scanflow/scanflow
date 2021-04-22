@@ -17,7 +17,7 @@ class MlflowTracker(Tracker):
         super(MlflowTracker, self).__init__(scanflow_tracker_uri,scanflow_tracker_local_uri,verbose)
 
 
-    def save_app(self, app_name=None, team_name=None, app_dir=None, tolocal=False):
+    def save_artifacts(self, app_name=None, team_name=None, app_dir=None, tolocal=False):
         mlflow.set_tracking_uri(get_tracker_uri(tolocal))
         logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
         self.client = MlflowClient()
@@ -29,7 +29,7 @@ class MlflowTracker(Tracker):
             mlflow.log_artifacts(app_dir, 
                    artifact_path=f"{app_name}/{team_name}")
 
-    def download_app(self, app_name=None, run_id=None, team_name=None, local_dir="/tmp", fromlocal=False):
+    def download_artifacts(self, app_name=None, run_id=None, team_name=None, local_dir="/tmp", fromlocal=False):
         mlflow.set_tracking_uri(get_tracker_uri(fromlocal))
         logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
         self.client = MlflowClient()
