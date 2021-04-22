@@ -29,9 +29,12 @@ class Tracker():
             set_tracker_local_uri(scanflow_tracker_local_uri)
 
         if not is_tracker_uri_set():
-            logging.error("Scanflow_tracker_uri is not provided")
+            logging.info("Scanflow_tracker_uri is not provided")
         if not is_tracker_local_uri_set():
-            logging.error("Scanflow_tracker_local_uri is not provided")
+            logging.info("Scanflow_tracker_local_uri is not provided")
+        
+        if (not is_tracker_local_uri_set() and not is_tracker_uri_set):
+            raise EnvironmentError("NO SCANFLOW TRACKER FOUND")
 
         self.verbose = verbose
         check_verbosity(verbose)

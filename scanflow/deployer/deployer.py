@@ -13,24 +13,62 @@ logging.getLogger().setLevel(logging.INFO)
 
 class Deployer():
     def __init__(self,
-                 scanflowType=None,
+                 k8s_config_file=None,
                  verbose=True):
         self.verbose = verbose
         check_verbosity(verbose)
 
-        self.kubeclient = Kubernetes(scanflowType=scanflowType)
+        self.kubeclient = Kubernetes(k8s_config_file=k8s_config_file, 
+        verbose = verbose)
 
 
-    def create_environment(self, app_name, team_name):
+    def create_environment(self, app):
         """
-          create namespace, secret...
+          create namespace, role, agents...
         """
-        self.namespace = f"{app_name}-{team_name}"
+        # 1. create namespace
+        step1 = self.create_namespace(app)
+        # 2. create role
+        step2 = self.create_role()
+        # 3. start_local_tracker
+        step3 = self.start_local_tracker()
+        # 4. start_agent if has
+        step4 = self.start_agents()
+
+        return  step1 and step2 and step3 and step4 
+
+    def clean_environment(self):
+        """
+           delete env and stop agents
+        """
+        # 1. delete agent
+        step1 = self.stop_agents()
+        # 2. delete local_tracker
+        step2 = self.stop_local_tracker()
+        # 3. delete role
+        step3 = self.delete_role() 
+        # 4. delete namespace
+        step4 = self.delete_namespace()
+        
+        return step1 and step2 and step3 and step4
+
+    def create_namespace(self, app):
+        self.namespace = f"{app.app_name}-{app.team_name}"
         logging.info(f'[++]Creating namespace "{self.namespace}"')
-        self.kubeclient.create_namespace(self.namespace)
+        return self.kubeclient.create_namespace(self.namespace)
+
+    def delete_namespace(self):
+        logging.info(f'[++]Delete namespace "{self.namespace}"')
+        return self.kubeclient.delete_namespace(self.namespace)
+
+    def create_role(self):
         logging.info(f"[++]Creating Role for 'default service account'")
         rolebinding = self.kubeclient.build_rolebinding(self.namespace)
-        self.kubeclient.create_rolebinding(self.namespace, rolebinding)
+        return self.kubeclient.create_rolebinding(self.namespace, rolebinding)
+
+    def delete_role(self):
+        logging.info(f'[++]Delete rolebinding default-admin')
+        return self.kubeclient.delete_rolebinding(self.namespace)
 
     def start_local_tracker(self):
         """
@@ -67,11 +105,5 @@ class Deployer():
            delete batch workflow
         """
         raise NotImplementedError("Backend:delete_workflows")
-
-    def clean_environment(self):
-        """
-           delete workflow and stop agents
-        """
-        raise NotImplementedError("Backend:clean env")
 
     

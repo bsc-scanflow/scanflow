@@ -14,6 +14,9 @@ RUN pip install uvicorn
 RUN pip install aiohttp
 RUN pip install aiodns
 
+#minio
+RUN pip install boto3
+
 WORKDIR $SERVER_HOME
 
 CMD uvicorn server:app --reload --host 0.0.0.0 --port 8080

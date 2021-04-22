@@ -53,3 +53,9 @@ class ScanflowTrackerClient:
             return
 
         self.tracker.download_app(app_name, run_id, team_name, local_dir, fromlocal)
+
+    def metric(self):
+        import mlflow
+        mlflow.set_tracking_uri("http://scanflow-tracker-service.scanflow-system.svc.cluster.local")
+        mlflow.set_experiment("test")
+        mlflow.log_metric("metric1", 1)

@@ -14,8 +14,8 @@ class Dependency(Edge):
       Scanflow relation
     """
     def __init__(self,
-                 dependee: str = None,
-                 depender: str = None,
+                 dependee: str,
+                 depender: str,
                  priority: int = 0):
         """
           a relation from dependee to depender, will generate a edge from dependee -> depender

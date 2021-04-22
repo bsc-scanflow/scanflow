@@ -22,9 +22,9 @@ spec:
           imagePullPolicy: Always
           name: {{ .Release.Name }}-tracker
           env:
-            - name: MLFLOW_STORAGE
+            - name: TRACKER_STORAGE
               value: {{.Values.tracker.scanflow_tracker_storage_backend}}://{{.Values.tracker.scanflow_tracker_storage_username}}:{{.Values.tracker.scanflow_tracker_storage_password}}@{{.Values.tracker.scanflow_tracker_storage_url}}/scanflow
-            - name: MLFLOW_ARTIFACT
+            - name: TRACKER_ARTIFACT
               value: {{.Values.tracker.scanflow_tracker_artifact_backend}}://scanflow
             - name: MLFLOW_S3_ENDPOINT_URL
               value: {{.Values.tracker.scanflow_tracker_artifact_url}}

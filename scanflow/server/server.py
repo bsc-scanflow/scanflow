@@ -5,7 +5,10 @@ import logging
 from fastapi import FastAPI
 
 #scanflow
-
+from scanflow.deployer.deployer import Deployer
+from scanflow.deployer.argoDeployer import ArgoDeployer
+from scanflow.deployer.volcanoDeployer import VolcanoDeployer
+from scanflow.deployer.seldonDeployer import SeldonDeployer
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -18,35 +21,46 @@ app = FastAPI(title='Scanflow API',
 
 
 
-## workflow
+## scanflow app
 
-@app.post("/submit/workflow",
-          tags=['Workflow'],
-          summary="Save workflow and artifacts by name")
-async def save_workflow(wf_name: str):
+@app.post("/submit/scanflowApplication",
+          tags=['ScanflowApplication'],
+          summary="Save scanflow application metadata")
+async def save_scanflowApplication(scanflowApp: str):
+    """
+      scanflowApp: scanflowapplication json file
+    """
     response = ""
     return response
 
-async def list_workflow():
+@app.post("/list/"
+
+)
+async def list_scanflowApplication(app_name, team_name):
+    """
+    """
     response = ""
     return response
 
 
-## deployer
-@app.post("/get/deployer")
-async def get_deployer(deployer: str):
-    log = ""
-    if deployer == "argo":
-        log = "argo deployer exsits"
-    elif deployer == "volcano":
-        log = "volcano deployer exsits"
-    elif deployer == "seldon":
-        log = "seldon deployer exists"
-    else:
-        log = "unknown deployer"
+## scanflow app environment
+@app.post("/create_environment",
+           tag=['Environment'],
+           summary="create environment for scanflow app")
+async def create_environment(app_name, team_name):
+    deployer = Deployer()
+    result = deployer.create_environment(app)
+    return {"success": result}
 
-    return {"log":log}
+@app.post("/clean_environment",
+           tag=['Environment'],
+           summary="clean environment for scanflow app")
+async def clean_environment(app_name, team_name):
 
+    return {}
+
+
+## scanflow workflow deployer operations
 async def build_workflows():
     response = ""
     return response

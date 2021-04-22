@@ -13,21 +13,18 @@ from scanflow.tools.scanflowtools import check_verbosity
 
 class Kubernetes:
     def __init__(self,
-                 configdir=None,
-                 scanflowType=None,
+                 k8s_config_file=None,
                  verbose=True):
         self.verbose = verbose
         check_verbosity(verbose)
 
-        if scanflowType == "local":        
-            if configdir is not None:
-                config.load_kube_config(configdir)
-            else:
-                config.load_kube_config()
-        elif scanflowType == "server":
+        try:
+            config.load_kube_config(config_file=k8s_config_file)
+            logging.info("found local kubernetes configuration {k8s_config_file}")
+        except Exception:
+            logging.info("cannot find local kubernetes configuration {k8s_config_file}, trying incluster config")
             config.load_incluster_config()
-        else:
-            logging.info("unknown scanflowtype")
+            logging.info("set incluster kubernetes config")
 
 
     def create_namespace(self, namespace):
@@ -37,16 +34,20 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.create_namespace(namespacebody)
+            return True
         except: 
             logging.error(f"create_namespace error") 
+            return False
             
 
     def delete_namespace(self, namespace):
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespace(name=namespace)
+            return True
         except: 
-            logging.error(f"delete_namespace error") 
+            logging.error(f"delete_namespace error")
+            return False 
 
 # Service
 #{'api_version': 'v1',
@@ -119,15 +120,19 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.create_namespaced_service(namespace=namespace, body=service)
+            return True
         except:
             logging.error(f"create_service error") 
+            return False
 
     def delete_service(self, namespace=None, name=None):
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespaced_service(name=name, namespace=namespace)
+            return True
         except:
             logging.error(f"delete_service error") 
+            return False
 
 # Secret
 #{'api_version': None,
@@ -338,8 +343,10 @@ class Kubernetes:
         api_instance = client.AppsV1Api()
         try:
             api_instance.create_namespaced_deployment(namespace=namespace, body=deployment)
+            return True
         except:
             logging.error(f"create_deployment error") 
+            return False
 
     def apply_deployment(self, namespace=None, name=None, deployment=None):
         api_instance = client.AppsV1Api()
@@ -350,8 +357,10 @@ class Kubernetes:
         api_instance = client.AppsV1Api()
         try:
             api_instance.delete_namespaced_deployment(name=name, namespace=namespace, body=client.V1DeleteOptions(propagation_policy="Foreground", grace_period_seconds=5))
+            return True
         except:
             logging.error(f"delete_deployment error") 
+            return False
 
 # PVC
 #{'api_version': 'v1',
@@ -406,15 +415,19 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.create_namespaced_persistent_volume_claim(namespace=namespace, body=persistentvolumeclaim)
+            return True
         except:
             logging.error(f"create_pvc error") 
+            return False
 
     def delete_persistentvolumeclaim(self, namespace=None, name=None):
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespaced_persistent_volume_claim(namespace=namespace, name=name)
+            return True
         except:
             logging.error(f"delete_pvc error") 
+            return False
 
 
 #PV
@@ -504,15 +517,19 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.create_persistent_volume(body=persistentvolume)
+            return True
         except:
             logging.error(f"create_pv error")
+            return False
 
     def delete_persistentvolume(self, name=None):
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_persistent_volume(name=name)
+            return True
         except:
             logging.error(f"delete_pv error")
+            return False
 
 
 
@@ -543,13 +560,17 @@ class Kubernetes:
         api_instance = client.RbacAuthorizationV1Api()
         try:
             api_instance.create_namespaced_role_binding(namespace, rolebinding)
+            return True
         except:
             logging.error(f"create_rolebinding error")
+            return False
 
     def delete_rolebinding(self, namespace=None, name='default-admin'):
         api_instance = client.RbacAuthorizationV1Api()
         try:
             api_instance.delete_namespaced_role_binding(name=name, namespace=namespace)
+            return True
         except:
             logging.error(f"delete_rolebinding error")
+            return False
 

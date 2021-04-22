@@ -20,7 +20,7 @@ class Application:
                  app_name: str,
                  app_dir: str,
                  team_name: str,
-                 workflows: List[Workflow] = None,
+                 workflows: List[Workflow]=None,
                  agents: List[Agent]=None,
                  verbose: bool = False):
 
@@ -37,7 +37,8 @@ class Application:
         return self.local_tracker
     
     @local_tracker.setter
-    def local_tracker(self, tracker=None):
+    def local_tracker(self, 
+                      tracker: Tracker):
         if not isinstance(tracker, Tracker):
             raise ValueError("local_tracker should be a scanflow Tracker")
         else:

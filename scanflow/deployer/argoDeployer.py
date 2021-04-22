@@ -17,7 +17,6 @@ logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
 logging.getLogger().setLevel(logging.INFO)
 
 
-
 class ArgoDeployer(deployer.Deployer):
     def __init__(self,
                  scanflowType=None,
@@ -25,6 +24,12 @@ class ArgoDeployer(deployer.Deployer):
         super(ArgoDeployer, self).__init__(scanflowType, verbose)
 
         self.argoclient = ArgoWorkflows()
+
+    def create_environment(self, app):
+        super(ArgoDeployer, self).create_environment(app)
+
+    def clean_environment(self, app_name, team_name):
+        super(ArgoDeployer, self).clean_environment(app_name, team_name)
  
     def start_agents(self):
 
@@ -343,13 +348,3 @@ class ArgoDeployer(deployer.Deployer):
                 logging.info(f"[+] Workflow Agents: [{wflow_user['name']}] agents were deleted successfully.")
         else:
             raise ValueError('You must provide a workflow.')
-
-    def clean_environment(self):
-        self.delete_workflows()
-        self.stop_agents()
-        # delete role
-        self.kubeclient.delete_rolebinding(self.namespace)
-        logging.info(f'[++]Delete rolebinding default-admin')
-        # delete namespace
-        self.kubeclient.delete_namespace(self.namespace)
-        logging.info(f'[++]Delete namespace "{self.namespace}"')

@@ -11,10 +11,10 @@ logging.getLogger().setLevel(logging.INFO)
 
 class ArgoWorkflows:
     def __init__(self,
-                 configdir=None,
+                 k8s_config_file=None,
                  verbose=True):
         self.verbose = verbose
-        self.k8sconfig = configdir
+        self.k8s_config_file = k8s_config_file
 
     def submitWorkflow(self, namespace=None):
         if self.k8sconfig is not None:

@@ -6,9 +6,9 @@ from scanflow.app import Dependency
 
 class Workflow(object):
     def __init__(self,
-                 name: str = None,
-                 executors: List[Executor] = None,
-                 dependencies: List[Dependency] = None):
+                 name: str,
+                 executors: List[Executor],
+                 dependencies: List[Dependency]):
 
         self.name = name
         self.executors = executors
