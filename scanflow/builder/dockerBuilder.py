@@ -81,10 +81,9 @@ class DockerBuilder(builder.Builder):
             logging.info(f"dockerfile for using {dockerfile} from {build_path}")
             
             try:    
-                image = self.client.images.build(path=build_path,
+                image, stat = self.client.images.build(path=build_path,
                                       dockerfile=dockerfile,
                                     tag=image_name)
-                print(image)
                 logging.info(f'[+] Image [{source.name}] was built successfully. image_tag {image.tags}')
                 self.client.images.push(image_name)
                 logging.info(f'[+] Image [{source.name}] was pushed to registry successfully.')
@@ -126,10 +125,17 @@ class DockerBuilder(builder.Builder):
                     FROM 172.30.0.49:5000/scanflow-executor
     
                     COPY {executor.name} /app/{executor.name}
-                    RUN pip install -r /app/{executor.name}/{executor.requirements}
-    
-                    CMD ["python", "/app/{executor.name}/{executor.mainfile}"]
         ''')
+        if executor.requirements is not None:
+            req_template = dedent(f'''
+                    RUN pip install -r /app/{executor.name}/{executor.requirements}
+            ''')
+            template  += req_template
+        if executor.mainfile is not None:
+            exec_template = dedent(f''' 
+                    CMD ["python", "/app/{executor.name}/{executor.mainfile}"]
+            ''')
+            template += exec_template
         logging.info(f"{executor.name} 's Dockerfile {template}")
         return template
  

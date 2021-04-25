@@ -34,13 +34,13 @@ class ScanflowTrackerClient:
             raise ValueError("unknown tracker backend: " + tracker)
 
 
-    def save_artifacts(self, app_name, team_name, app_dir,tolocal=False):
+    def save_artifacts(self, app_name, team_name, app_dir="/tmp",tolocal=False):
         """
            save local implemented app to scanflow server
         """
         self.tracker.save_artifacts(app_name, team_name, app_dir, tolocal)
 
-    def download_artifacts(self, app_name, run_id=None, team_name=None, local_dir=None, fromlocal=False):
+    def download_artifacts(self, app_name, run_id=None, team_name=None, local_dir="/tmp", fromlocal=False):
         """
            download remote app to local app_dir
            app_name: project name (e.g., mnist)
