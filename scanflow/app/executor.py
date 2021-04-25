@@ -19,7 +19,8 @@ class Executor(Node):
                  parameters: dict = None,
                  requirements: str = None,
                  dockerfile: str = None,
-                 env: dict = None):
+                 env: dict = None,
+                 image: str = None):
 
         super(Executor, self).__init__(name=name)
         self.mainfile = mainfile
@@ -27,12 +28,13 @@ class Executor(Node):
         self.requirements = requirements
         self.dockerfile = dockerfile
         self.env = env
+        self.image = image
 
     @property
     def image(self):
-        return self.image
+        return self.__image
 
     @image.setter
     def image(self,
               image: str):
-        self.image = image
+        self.__image = image

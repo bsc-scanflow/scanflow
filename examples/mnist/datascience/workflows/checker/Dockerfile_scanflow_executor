@@ -1,0 +1,8 @@
+
+FROM 172.30.0.49:5000/scanflow-executor
+
+COPY checker /app/checker
+
+RUN pip install -r /app/checker/req_checker.txt
+
+CMD ["python", "/app/checker/checker.py"]

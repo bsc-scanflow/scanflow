@@ -20,7 +20,6 @@ class MlflowTracker(Tracker):
     def save_artifacts(self, app_name, team_name, app_dir="/tmp", tolocal=False):
         mlflow.set_tracking_uri(get_tracker_uri(tolocal))
         logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
-        self.client = MlflowClient()
         mlflow.set_experiment(app_name)
         with mlflow.start_run(run_name=team_name):
             # Fetch the artifact uri root directory

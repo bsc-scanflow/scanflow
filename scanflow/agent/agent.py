@@ -7,6 +7,7 @@ class Agent():
                  mainfile: str = None,
                  parameters: dict = None,
                  dockerfile: str = None,
+                 image: str = None,
                  verbose: bool = False):
         
         self.name = name
@@ -14,17 +15,18 @@ class Agent():
         self.mainfile = mainfile
         self.parameters = parameters
         self.dockerfile = dockerfile
+        self.image = image
         self.verbose = verbose
         check_verbosity(verbose)
 
     @property
     def image(self):
-        return self.image
+        return self.__image
 
     @image.setter
     def image(self,
               image: str):
-        self.image = image
+        self.__image = image
 
     def to_dict(self):
         tmp_dict = {}

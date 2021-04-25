@@ -33,6 +33,8 @@ class ScanflowTrackerClient:
         else:
             raise ValueError("unknown tracker backend: " + tracker)
 
+    def get_tracker_uri(self, islocal):
+        return self.tracker.get_tracker_uri(islocal)
 
     def save_artifacts(self, app_name, team_name, app_dir="/tmp",tolocal=False):
         """

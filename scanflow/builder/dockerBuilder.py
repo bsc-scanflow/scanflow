@@ -23,8 +23,6 @@ class DockerBuilder(builder.Builder):
                  registry: str):
         super(DockerBuilder, self).__init__(registry)
         self.client = docker.from_env()
-        #test
-        self.paths = get_scanflow_paths("/gpfs/bsc_home/xpliu/pv/jupyterhubpeini/scanflow/examples/mnist/datascience")
 
     def build_ScanflowApplication(self, app: Application):
         self.paths = get_scanflow_paths(app.app_dir)
@@ -32,13 +30,14 @@ class DockerBuilder(builder.Builder):
             self.build_ScanflowAgents(app.agents)
         if app.workflows is not None:
             self.build_ScanflowWorkflows(app.workflows)
+        return app
 
     def build_ScanflowAgents(self, agents: List[Agent]):
         for agent in agents:
             self.build_ScanflowAgent(agent)
 
     def build_ScanflowAgent(self, agent: Agent):
-        self.__build_image_to_registry(agent)
+        agent.image = self.__build_image_to_registry(agent)
 
     def build_ScanflowWorkflows(self, workflows: List[Workflow]):
         for workflow in workflows:
@@ -52,7 +51,7 @@ class DockerBuilder(builder.Builder):
             self.build_ScanflowExecutor(executor)
 
     def build_ScanflowExecutor(self, executor: Executor):
-        self.__build_image_to_registry(executor)
+        executor.image = self.__build_image_to_registry(executor)
 
     def __build_image_to_registry(self, source):
 

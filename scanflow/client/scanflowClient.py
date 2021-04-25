@@ -1,9 +1,6 @@
 import logging
 import os
 
-from shutil import copy2
-from textwrap import dedent
-from multiprocessing import Pool
 from typing import List, Dict
 
 # scanflow app
@@ -20,6 +17,7 @@ from scanflow.server.utils import (
     is_server_uri_set,
     get_server_uri,
 )
+import requests
 
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
@@ -45,7 +43,6 @@ class ScanflowClient:
 
         self.builderbackend = self.get_builder(builder, registry)
 
-## scanflow app build and submit
     def get_builder(self, builder, registry):
         if builder == "docker":
             from scanflow.builder import DockerBuilder
@@ -55,7 +52,25 @@ class ScanflowClient:
 
     def build_ScanflowApplication(self,
                                   app: Application):
-        self.builderbackend.build_ScanflowApplication(app)
+        #build scanflowapp
+        return self.builderbackend.build_ScanflowApplication(app)
+
+    def submit_ScanflowApplication(self,
+                                   app: Application):
+        #check isbuildapp
+        isbuildapp = True
+        #for agent in app.agents:
+        #    if agent.image is None:
+        #        isbuildapp = False
+        #for workflow in app.workflows:
+        #    for executor in workflow.executors:
+        #        if executor.image is None:
+        #            isbuildapp = False
+        
+        if isbuildapp:
+            url = f"{self.scanflow_server_uri}/submit/scanflowApplication" 
+            response = requests.get(url=url, headers={"accept": "application/json"})
+            print(response) 
 
     def build_ScanflowExecutor(self,
                                executor: Executor):

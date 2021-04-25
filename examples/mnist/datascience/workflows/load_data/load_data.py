@@ -1,5 +1,5 @@
 # load data from scanflow-mnist repo to datascience env tracker registry
-
+import mlflow
 import click
 import logging
 import pandas as pd
@@ -18,6 +18,8 @@ def loaddata(app_name, team_name):
     #load the latest mnist data from data team
     client.download_artifacts(app_name = app_name, 
                               team_name = team_name)
+    
+    with mlflow.start_run(run_name='modeling') as mlrun:
 
     #save the data to local tracker
     client.save_artifacts(app_name = app_name, 

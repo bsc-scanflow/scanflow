@@ -1,6 +1,6 @@
 {
   "app_name": "mnist",
-  "app_dir": "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini/scanflow/tutorials/examples/mnist/datascience",
+  "app_dir": "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini/scanflow/examples/mnist/datascience",
   "team_name": "datascience",
   "workflows": [
     {
@@ -13,27 +13,19 @@
             "app_name": "mnist",
             "team_name": "data"
           },
-          "requirements": "req_loaddata.txt",
+          "requirements": null,
           "dockerfile": null,
-          "env": null
-        },
-        {
-          "name": "modeling_cnn",
-          "mainfile": "modeling.py",
-          "parameters": {
-            "x_train_path": "./data/mnist/train_images.npy",
-            "y_train_path": "./data/mnist/train_labels.npy",
-            "x_test_path": "./data/mnist/test_images.npy",
-            "y_test_path": "./data/mnist/test_labels.npy"
-          },
-          "requirements": "req_modeling.txt",
-          "dockerfile": null,
-          "env": null
+          "env": null,
+          "_Executor__image": [
+            "172.30.0.49:5000/load_data:latest"
+          ]
         },
         {
           "name": "modeling_cnn1",
           "mainfile": "modeling.py",
           "parameters": {
+            "model_name": "mnist_cnn",
+            "model_version": 1,
             "x_train_path": "./data/mnist/train_images.npy",
             "y_train_path": "./data/mnist/train_labels.npy",
             "x_test_path": "./data/mnist/test_images.npy",
@@ -41,7 +33,28 @@
           },
           "requirements": "req_modeling.txt",
           "dockerfile": null,
-          "env": null
+          "env": null,
+          "_Executor__image": [
+            "172.30.0.49:5000/modeling_cnn1:latest"
+          ]
+        },
+        {
+          "name": "modeling_cnn2",
+          "mainfile": "modeling.py",
+          "parameters": {
+            "model_name": "mnist_cnn",
+            "model_version": 2,
+            "x_train_path": "./data/mnist/train_images.npy",
+            "y_train_path": "./data/mnist/train_labels.npy",
+            "x_test_path": "./data/mnist/test_images.npy",
+            "y_test_path": "./data/mnist/test_labels.npy"
+          },
+          "requirements": "req_modeling.txt",
+          "dockerfile": null,
+          "env": null,
+          "_Executor__image": [
+            "172.30.0.49:5000/modeling_cnn2:latest"
+          ]
         }
       ],
       "dependencies": [
@@ -67,19 +80,27 @@
             "app_name": "mnist",
             "team_name": "data"
           },
-          "requirements": "req_loaddata.txt",
+          "requirements": null,
           "dockerfile": null,
-          "env": null
+          "env": null,
+          "_Executor__image": [
+            "172.30.0.49:5000/load_data:latest"
+          ]
         },
         {
           "name": "checker",
-          "mainfile": "modeling.py",
+          "mainfile": "checker.py",
           "parameters": {
+            "model_name": "mnist_detector",
+            "model_version": 1,
             "x_train_path": "./data/mnist/train_images.npy"
           },
-          "requirements": "req_modeling.txt",
+          "requirements": "req_checker.txt",
           "dockerfile": null,
-          "env": null
+          "env": null,
+          "_Executor__image": [
+            "172.30.0.49:5000/checker:latest"
+          ]
         }
       ],
       "dependencies": [

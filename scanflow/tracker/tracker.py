@@ -9,6 +9,7 @@ from scanflow.tracker.utils import (
     set_tracker_local_uri,
     is_tracker_local_uri_set,
     is_tracker_uri_set,
+    get_tracker_uri,
 )
 
 
@@ -39,7 +40,9 @@ class Tracker():
         self.verbose = verbose
         check_verbosity(verbose)
 
-    
+    def get_tracker_uri(self, islocal=True):
+        return get_tracker_uri(islocal)
+
     def save_artifacts(self, app_name, team_name, app_dir="/tmp", tolocal=False):
         raise NotImplementedError("tracker:save_app")
 
