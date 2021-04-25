@@ -26,10 +26,10 @@ logging.getLogger().setLevel(logging.INFO)
 
 class ScanflowDeployerClient:
     def __init__(self,
-                 user_type="local",
-                 deployer="argo",
-                 k8s_config_file=None,
-                 scanflow_server_uri=None,
+                 user_type: str = "local",
+                 deployer: str = "argo",
+                 k8s_config_file: str = None,
+                 scanflow_server_uri: str = None,
                  verbose=True):
         """
             user_type: default(local):user uses local notebook, incluster user call in cluster scanflow server
@@ -70,7 +70,7 @@ class ScanflowDeployerClient:
             raise ValueError("unknown deployer: " + deployer)
 
     def create_environment(self, 
-                           app: Application = None):
+                           app: Application):
         if app is not None:
             if self.user_type == "server":
                 url = f"http://{self.scanflow_server_uri}/create_environment"

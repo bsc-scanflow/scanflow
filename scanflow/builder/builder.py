@@ -1,35 +1,20 @@
 from scanflow.app import Application, Executor, Workflow
-from scanflow.tracker import Tracker
 from scanflow.agent import Agent
-
-from typing import List, Dict
-
 class Builder():
     def __init__(self,
-                 app: Application,
-                 registry: str = None):
+                 registry: str):
+        """
+          builder is used to generate image from the source code user provided and submit the meta data to scanflow server
+        """
         self.registry = registry
-        self.app = app
 
-    def build_ScanflowApplication(self):
-        # build scanflow tracker
-        self.build_ScanflowTracker(self.app.local_tracker)
-        # build scanflow agent
-        self.build_ScanflowAgents(self.app.agents)
-        # build scanflow workflows - executors
-        self.build_ScanflowWorkflows(self.app.workflows)
-
-
-    def build_ScanflowTracker(self, tracker: Tracker):
-        print("")
-
-
-    def build_ScanflowAgents(self, agents: List[Agent]):
-        print("")
+    def build_ScanflowApplication(self, app: Application):
+        """
+        # 1. build scanflow agent
+        # 2. build scanflow workflows - executors
+        """
+        raise NotImplementedError("build_ScanflowApplication is not implemented")
     
-    
-    def build_ScanflowWorkflows(self, workflows: List[Workflow]): 
-        print("")
+    def build_ScanflowExecutor(self, executor: Executor):
 
-    def build_ScanflowExecutors(self, executors: List[Executor]):
-        print("")
+        raise NotImplementedError("build_scanflow executor is not implemented")

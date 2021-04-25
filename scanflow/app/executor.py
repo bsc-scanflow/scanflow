@@ -19,7 +19,7 @@ class Executor(Node):
                  parameters: dict = None,
                  requirements: str = None,
                  dockerfile: str = None,
-                 env: str = None):
+                 env: dict = None):
 
         super(Executor, self).__init__(name=name)
         self.mainfile = mainfile

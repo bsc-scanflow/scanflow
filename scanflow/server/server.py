@@ -32,9 +32,9 @@ async def save_scanflowApplication(scanflowApp: str):
     response = ""
     return response
 
-@app.post("/list/"
-
-)
+@app.post("/list/scanflowApplications",
+          tags=['ScanflowApplication'],
+          summary="List all scanflow application")
 async def list_scanflowApplication(app_name, team_name):
     """
     """
@@ -44,7 +44,7 @@ async def list_scanflowApplication(app_name, team_name):
 
 ## scanflow app environment
 @app.post("/create_environment",
-           tag=['Environment'],
+           tags=['Environment'],
            summary="create environment for scanflow app")
 async def create_environment(app_name, team_name):
     deployer = Deployer()
@@ -52,7 +52,7 @@ async def create_environment(app_name, team_name):
     return {"success": result}
 
 @app.post("/clean_environment",
-           tag=['Environment'],
+           tags=['Environment'],
            summary="clean environment for scanflow app")
 async def clean_environment(app_name, team_name):
 

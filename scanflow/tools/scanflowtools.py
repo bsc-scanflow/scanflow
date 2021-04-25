@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 
 def get_scanflow_paths(app_dir):
     # 1. save workflow defined by user
@@ -24,3 +25,29 @@ def check_verbosity(verbose):
         logger.disabled = False
     else:
         logger.disabled = True
+
+def save_workflows(paths, workflows):
+    meta_dir = paths['meta_dir']
+
+    workflows_metadata_name = 'workflows.json'
+    workflows_metadata_path = os.path.join(meta_dir, workflows_metadata_name)
+
+    with open(workflows_metadata_path, 'w') as fout:
+        json.dump(workflows, fout)
+
+
+def read_workflows(paths):
+    meta_dir = paths['meta_dir']
+
+    workflows_metadata_name = 'workflows.json'
+    workflows_metadata_path = os.path.join(meta_dir, workflows_metadata_name)
+
+    try:
+        with open(workflows_metadata_path) as fread:
+            data = json.load(fread)
+
+        return data
+
+    except ValueError as e:
+        logging.error(f"{e}")
+        logging.error(f"[-] Workflows metadata has not yet saved.")

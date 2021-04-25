@@ -13,8 +13,6 @@ from scanflow.agent import Agent
 # scanflow graph
 #from scanflow.graph import ApplicationGraph
 
-#scanflow builder
-from scanflow.builder import Builder
 
 from scanflow.tools.scanflowtools import check_verbosity
 from scanflow.server.utils import (
@@ -30,7 +28,9 @@ logging.getLogger().setLevel(logging.INFO)
 
 class ScanflowClient:
     def __init__(self,
-                 scanflow_server_uri=None,
+                 builder: str = "docker",
+                 registry : str = "172.30.0.49:5000",
+                 scanflow_server_uri : str = None,
                  verbose=True):
         """
         """
@@ -43,12 +43,24 @@ class ScanflowClient:
             raise ValueError("Scanflow_server_uri is not provided")
         self.scanflow_server_uri = get_server_uri()
 
-## scanflow app build
+        self.builderbackend = self.get_builder(builder, registry)
+
+## scanflow app build and submit
+    def get_builder(self, builder, registry):
+        if builder == "docker":
+            from scanflow.builder import DockerBuilder
+            return DockerBuilder(registry)
+        else:
+            logging.info(f"unknown builder backend {builder}")
+
     def build_ScanflowApplication(self,
-                                  app: Application,
-                                  registry: str = None):
-        builder = Builder(app,registry) 
-        builder.build_ScanflowApplication()
+                                  app: Application):
+        self.builderbackend.build_ScanflowApplication(app)
+
+    def build_ScanflowExecutor(self,
+                               executor: Executor):
+        self.builderbackend.build_ScanflowExecutor(executor)
+        
 
 
 ###   Scanflow graph
@@ -82,11 +94,12 @@ class ScanflowClient:
         return Workflow(name, executors, dependencies)
 
     def ScanflowAgent(self,
-                      agent_name: str,
-                      agent_dir: str,
-                      agent_type: str,
+                      name: str,
+                      template: str,
+                      mainfile: str = None,
+                      parameters: dict = None,
                       verbose: bool = False):
-        return Agent(agent_name, agent_type, agent_dir, verbose)
+        return Agent(name, template, mainfile, parameters, verbose)
     
     def ScanflowApplication(self,
                             app_name: str,

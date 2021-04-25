@@ -14,19 +14,19 @@ class ArgoWorkflows:
                  k8s_config_file=None,
                  verbose=True):
         self.verbose = verbose
+        # if not provide config_file, couler internally uses in_cluster_config
         self.k8s_config_file = k8s_config_file
 
     def submitWorkflow(self, namespace=None):
-        if self.k8sconfig is not None:
-            submitter = ArgoSubmitter(namespace, self.k8sconfig)
+        if self.k8s_config_file is not None:
+            submitter = ArgoSubmitter(namespace, self.k8s_config_file)
         else:
             submitter = ArgoSubmitter(namespace)
-
         couler.run(submitter=submitter)
 
     def deleteWorkflow(self, namespace=None, name=None):
-        if self.k8sconfig is not None:
-            couler.delete(name=name, namespace=namespace, config_file=self.k8sconfig)
+        if self.k8s_config_file is not None:
+            couler.delete(name=name, namespace=namespace, config_file=self.k8s_config_file)
         else:
             couler.delete(name=name, namespace=namespace)
 

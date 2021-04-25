@@ -19,10 +19,11 @@ class Kubernetes:
         check_verbosity(verbose)
 
         try:
+            logging.info(f"loading kubernetes configuration from {k8s_config_file}")
             config.load_kube_config(config_file=k8s_config_file)
-            logging.info("found local kubernetes configuration {k8s_config_file}")
+            logging.info(f"found local kubernetes configuration")
         except Exception:
-            logging.info("cannot find local kubernetes configuration {k8s_config_file}, trying incluster config")
+            logging.info(f"cannot find local kubernetes configuration {k8s_config_file}, trying incluster config")
             config.load_incluster_config()
             logging.info("set incluster kubernetes config")
 
