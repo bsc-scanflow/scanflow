@@ -27,7 +27,7 @@ class Agent(BaseModel):
     image: str
     template: Optional[str] = None
     mainfile: Optional[str] = None
-    parameters: Optional[dict]
+    parameters: Optional[dict] = None
 
 class Application(BaseModel):
     app_name: str 

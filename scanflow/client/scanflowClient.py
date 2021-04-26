@@ -58,25 +58,16 @@ class ScanflowClient:
 
     def submit_ScanflowApplication(self,
                                    app: Application):
-        #check isbuildapp
-        isbuildapp = True
-        #for agent in app.agents:
-        #    if agent.image is None:
-        #        isbuildapp = False
-        #for workflow in app.workflows:
-        #    for executor in workflow.executors:
-        #        if executor.image is None:
-        #            isbuildapp = False
-        
-        if isbuildapp:
-            url = f"{self.scanflow_server_uri}/submit/scanflowApplication" 
-            response = requests.post(url=url, 
-            data= app.to_dict(),
-            headers={"accept": "application/json"})
+        url = f"{self.scanflow_server_uri}/submit/scanflowApplication" 
+        response = requests.post(url=url, 
+        data= json.dumps(app.to_dict()),
+        headers={"accept": "application/json"})
 
-            response_json = json.loads(response.text)
-            print(response_json)  
-            print(response.text) 
+        if json.loads(response.text)['status'] == 0:
+            return True
+        else:
+            logging.error(f"submit scanflow application error {response.text['status']}")
+            return False
 
     def build_ScanflowExecutor(self,
                                executor: Executor):
@@ -118,16 +109,14 @@ class ScanflowClient:
                       name: str,
                       template: str,
                       mainfile: str = None,
-                      parameters: dict = None,
-                      verbose: bool = False):
-        return Agent(name, template, mainfile, parameters, verbose)
+                      parameters: dict = None):
+        return Agent(name, template, mainfile, parameters)
     
     def ScanflowApplication(self,
                             app_name: str,
                             app_dir: str,
                             team_name: str,
                             workflows: List[Workflow]=None,
-                            agents: List[Agent]=None,
-                            verbose: bool = False):
-        return Application(app_name, app_dir, team_name, workflows, agents, verbose)
+                            agents: List[Agent]=None):
+        return Application(app_name, app_dir, team_name, workflows, agents)
 

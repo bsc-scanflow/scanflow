@@ -6,7 +6,6 @@ import json
 from scanflow.agent import Agent
 from scanflow.app import Workflow
 from scanflow.tracker import Tracker
-from scanflow.tools.scanflowtools import get_scanflow_paths, check_verbosity
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -21,16 +20,13 @@ class Application:
                  app_dir: str,
                  team_name: str,
                  workflows: List[Workflow]=None,
-                 agents: List[Agent]=None,
-                 verbose: bool = False):
+                 agents: List[Agent]=None):
 
         self.app_name = app_name
         self.app_dir = app_dir
         self.team_name = team_name
         self.workflows = workflows
         self.agents = agents
-        self.verbose = verbose
-        check_verbosity(verbose)
 
     def to_dict(self):
         tmp_dict = {}
