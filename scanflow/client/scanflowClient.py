@@ -18,6 +18,7 @@ from scanflow.server.utils import (
     get_server_uri,
 )
 import requests
+import json
 
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
@@ -69,8 +70,13 @@ class ScanflowClient:
         
         if isbuildapp:
             url = f"{self.scanflow_server_uri}/submit/scanflowApplication" 
-            response = requests.get(url=url, headers={"accept": "application/json"})
-            print(response) 
+            response = requests.post(url=url, 
+            data= app.to_dict(),
+            headers={"accept": "application/json"})
+
+            response_json = json.loads(response.text)
+            print(response_json)  
+            print(response.text) 
 
     def build_ScanflowExecutor(self,
                                executor: Executor):

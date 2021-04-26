@@ -15,7 +15,7 @@ class Executor(Node):
     """
     def __init__(self,
                  name: str,
-                 mainfile: str,
+                 mainfile: str = None,
                  parameters: dict = None,
                  requirements: str = None,
                  dockerfile: str = None,
@@ -30,11 +30,11 @@ class Executor(Node):
         self.env = env
         self.image = image
 
-    @property
-    def image(self):
-        return self.__image
-
-    @image.setter
-    def image(self,
-              image: str):
-        self.__image = image
+#    @property
+#    def image(self):
+#        return self.__image
+#
+#    @image.setter
+#    def image(self,
+#              image: str):
+#        self.__image = image

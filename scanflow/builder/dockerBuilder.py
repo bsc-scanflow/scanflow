@@ -59,7 +59,7 @@ class DockerBuilder(builder.Builder):
         logging.info(f"Building image {image_name}")
         try:
             image = self.client.images.get(image_name)
-            return image.tags
+            return image.tags[0]
     
         except docker.api.client.DockerException as e:
             logging.info(f"[+] Image [{image_name}] not found in repository. Building a new one.")
@@ -87,7 +87,7 @@ class DockerBuilder(builder.Builder):
                 self.client.images.push(image_name)
                 logging.info(f'[+] Image [{source.name}] was pushed to registry successfully.')
 
-                return image.tags
+                return image.tags[0]
             except docker.api.client.DockerException as e:
                 logging.error(f"{e}")
                 logging.error(f"[-] Image building failed.", exc_info=True)

@@ -10,9 +10,9 @@ import os
 sys.path.insert(0,'../..')
 
 from scanflow.server.message import ResponseMessageBase
+from scanflow.server.app import Application
 
 #scanflow
-from scanflow.app import Application
 
 from scanflow.client import ScanflowTrackerClient
 
@@ -37,14 +37,16 @@ app = FastAPI(title='Scanflow API',
           response_model = ResponseMessageBase, 
           tags = ['ScanflowApplication'],
           summary = "Save scanflow application metadata")
-async def save_scanflowApplication(app: str):
+async def save_scanflowApplication(app: Application):
     """
       app: scanflowapplication json 
     """
-    logging.info("call save_scanflowApplication")
+    logging.info(f"call save_scanflowApplication {app.dict()} ")
+    logging.info(f"call save_scanflowApplication {app}, {app['app_name']}")
     client = ScanflowTrackerClient(verbose=True)
     try:
         mlflow.set_tracking_uri(client.get_tracker_uri(False))
+        logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
         mlflow.set_experiment(app['app_name'])
         with mlflow.start_run(run_name=f"scanflow-{app['team_name']}"):
             mlflow.log_dict(app, f"{app['team_name']}/{app['name']}.json")

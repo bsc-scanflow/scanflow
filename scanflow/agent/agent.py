@@ -3,7 +3,7 @@ from scanflow.tools.scanflowtools import get_scanflow_paths, check_verbosity
 class Agent():
     def __init__(self,
                  name: str,
-                 template: str,
+                 template: str = None,
                  mainfile: str = None,
                  parameters: dict = None,
                  dockerfile: str = None,
@@ -19,15 +19,15 @@ class Agent():
         self.verbose = verbose
         check_verbosity(verbose)
 
-    @property
-    def image(self):
-        return self.__image
-
-    @image.setter
-    def image(self,
-              image: str):
-        self.__image = image
-
+#    @property
+#    def image(self):
+#        return self.__image
+#
+#    @image.setter
+#    def image(self,
+#              image: str):
+#        self.__image = image
+#
     def to_dict(self):
         tmp_dict = {}
         agent_dict = self.__dict__
