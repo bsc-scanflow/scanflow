@@ -36,13 +36,13 @@ class ScanflowTrackerClient:
     def get_tracker_uri(self, islocal):
         return self.tracker.get_tracker_uri(islocal)
 
-    def save_artifacts(self, app_name, team_name, app_dir="/tmp",tolocal=False):
+    def save_artifacts(self, app_name, team_name, app_dir="/workflow", tolocal=False):
         """
            save local implemented app to scanflow server
         """
         self.tracker.save_artifacts(app_name, team_name, app_dir, tolocal)
 
-    def download_artifacts(self, app_name, run_id=None, team_name=None, local_dir="/tmp", fromlocal=False):
+    def download_artifacts(self, app_name, run_id=None, team_name=None, local_dir="/workflow", fromlocal=False):
         """
            download remote app to local app_dir
            app_name: project name (e.g., mnist)
@@ -51,3 +51,15 @@ class ScanflowTrackerClient:
            local_dir: local dir to save the project
         """
         self.tracker.download_artifacts(app_name, run_id, team_name, local_dir, fromlocal)
+
+    def save_model(self, app_name, team_name, model_name):
+        """
+           save prepared production model from local env to remote scanflow tracker
+        """
+        self.tracker.save_model(app_name, team_name, model_name)
+
+    def download_model(self, app_name, team_name, model_name, model_version):
+        """
+            download  prepared model from remote scanflow tracker to local env 
+        """
+        self.tracker.download_model(app_name, team_name, model_name,model_version)

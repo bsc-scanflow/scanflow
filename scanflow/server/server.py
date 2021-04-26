@@ -30,8 +30,12 @@ app = FastAPI(title='Scanflow API',
               description='Scanflow Server.',
               )
 
+client = ScanflowTrackerClient(verbose=True)
+mlflow.set_tracking_uri(client.get_tracker_uri(False))
+logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
 
-## scanflow app
+## scanflow app meta
+## save/load/update scanflow application
 
 @app.post("/submit/scanflowApplication",
           response_model = ResponseMessageBase, 
@@ -42,10 +46,8 @@ async def save_scanflowApplication(app: Application):
       app: scanflowapplication json 
     """
     logging.info(f"call save_scanflowApplication {app.dict()} ")
-    client = ScanflowTrackerClient(verbose=True)
+    
     try:
-        mlflow.set_tracking_uri(client.get_tracker_uri(False))
-        logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
         mlflow.set_experiment(app.app_name)
         with mlflow.start_run(run_name=f"scanflow-{app.team_name}"):
             artifact_uri = mlflow.get_artifact_uri()

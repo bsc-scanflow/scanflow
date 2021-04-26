@@ -4,6 +4,9 @@ LABEL maintainer='scanflow'
 RUN mkdir /app
 WORKDIR /app
 
+RUN mkdir /workflow
+ENV SCANFLOW_WORKFLOW_OUTPUT_DIR /workflow
+
 #RUN pip install scanflow
 
 RUN pip install mlflow==1.14.1

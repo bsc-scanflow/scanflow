@@ -3,7 +3,7 @@ import click
 import logging
 import pandas as pd
 import time
-import predictor_utils
+import modeling_utils
 import numpy as np
 import torch
 import mlflow.pytorch
@@ -13,14 +13,15 @@ from pathlib import Path
 
 from scanflow.client import ScanflowTrackerClient
 
-@click.command(help="Gather an input data set")
-@click.option("--x_train_path", default='./images', type=str)
-@click.option("--y_train_path", default='./images', type=str)
-@click.option("--x_test_path", default='./images', type=str)
-@click.option("--y_test_path", default='./images', type=str)
-def modeling(x_train_path, y_train_path, x_test_path, y_test_path):
+@click.command(help="Modeling")
+@click.option("--model_name", default='mnist_cnn', type=str)
+@click.option("--epochs", default='50', type=str)
+@click.option("--x_train_path", default='/workflow/mnist/data/mnist/train_images.npy', type=str)
+@click.option("--y_train_path", default='/workflow/mnist/data/mnist/train_labels.npy', type=str)
+@click.option("--x_test_path", default='/workflow/mnist/data/mnist/test_images.npy', type=str)
+@click.option("--y_test_path", default='/workflow/mnist/data/mnist/test_labels.npy', type=str)
+def modeling(model_name, epochs, x_train_path, y_train_path, x_test_path, y_test_path):
     
-    client = ScanflowTrackerClient(verbose=True)
     
     # data
     img_rows, img_cols = 28, 28
@@ -33,24 +34,38 @@ def modeling(x_train_path, y_train_path, x_test_path, y_test_path):
     x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols)
     x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols)
     
+    #parameter
+    params = {
+      'batch_size': 64,
+      'test_batch_size': 1000,
+      'epochs': epochs,
+      'lr': 1.0,
+      'gamma': 0.7,
+      'seed': 42,
+      'log_interval': 100,
+      'save_model': True
+    }
+
     #model    
-    model_mnist = predictor_utils.fit_model(x_train, y_train, model_name='mnist_cnn.pt')
-    mnist_score = predictor_utils.evaluate(model_mnist, x_test, y_test)
-    predictions = predictor_utils.predict_model(model_mnist, x_test)
+    model_mnist = modeling_utils.fit_model(params, x_train, y_train, model_name=model_name)
+    mnist_score = modeling_utils.evaluate(model_mnist, x_test, y_test)
+    predictions = modeling_utils.predict_model(model_mnist, x_test)
     signature = infer_signature(x_test, predictions)
+
     
     #log
-    client.start_run()
-        mlflow.pytorch.log_model(model_mnist, artifact_path="mnist_cnn", 
-                                 signature=signature, registered_model_name="mnist_cnn")
-
-        mlflow.log_param(key='score', value=round(mnist_score, 2))
-
-        mlflow.log_artifact(x_train_path, 'dataset')
-        mlflow.log_artifact(y_train_path, 'dataset')
-        mlflow.log_artifact(x_test_path, 'dataset')
-        mlflow.log_artifact(y_test_path, 'dataset')
-              
+    client = ScanflowTrackerClient(verbose=True)
+    try:
+        mlflow.set_tracking_uri(client.get_tracker_uri(True))
+        logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
+        
+        mlflow.set_experiment(app.app_name)
+        with mlflow.start_run():
+            mlflow.pytorch.log_model(model_mnist, artifact_path=model_name, 
+                                 signature=signature, registered_model_name=model_name)
+            mlflow.log_param(key='score', value=round(mnist_score, 2))
+    except:
+        logging.info("mlflow logging fail")
 
 
 if __name__ == '__main__':

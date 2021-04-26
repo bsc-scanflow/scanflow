@@ -15,14 +15,14 @@ def loaddata(app_name, team_name):
 
     client = ScanflowTrackerClient(verbose=True)
 
-    #load the latest mnist data from data team
+    #load the latest mnist data from remote tracker
+    #data will be download into shared /workflow folder
     client.download_artifacts(app_name = app_name, 
-                              team_name = team_name)
+                              team_name = team_name,
+                              local_dir = "/workflow/data") 
     
-    with mlflow.start_run(run_name='modeling') as mlrun:
-
-    #save the data to local tracker
-    client.save_artifacts(app_name = app_name, 
+    #log
+    client.save_artifacts(app_name = "load_data", 
                           team_name = team_name,
                           tolocal = True)
     
