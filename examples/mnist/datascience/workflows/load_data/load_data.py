@@ -17,14 +17,22 @@ def loaddata(app_name, team_name):
 
     #load the latest mnist data from remote tracker
     #data will be download into shared /workflow folder
-    client.download_artifacts(app_name = app_name, 
-                              team_name = team_name,
-                              local_dir = "/workflow/data") 
+    client.download_app_artifacts(app_name = app_name, 
+                                  team_name = team_name,
+                                  local_dir = "/workflow/data") 
     
     #log
-    client.save_artifacts(app_name = "load_data", 
-                          team_name = team_name,
-                          tolocal = True)
+    try:
+        mlflow.set_registry_uri(client.get_tracker_uri(True))
+        logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
+
+        mlflow.set_experiment("load_data")
+        with mlflow.start_run():
+            mlflow.log_artifacts(local_dir= f"/workflow/data/{app_name}/{team_name}",
+                                 artifact_path= "data")
+    except:
+        logging.info("mlflow logging fail")
+
     
 if __name__ == '__main__':
     loaddata()

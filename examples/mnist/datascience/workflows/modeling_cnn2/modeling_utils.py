@@ -39,7 +39,6 @@ class CNN(nn.Module):
     
 def get_model_params():
     params = {
-#       'batch_size': 16,
       'batch_size': 64,
       'test_batch_size': 1000,
       'epochs': 1,
@@ -196,9 +195,9 @@ def test_model(model, device, test_loader):
 
     return round(score, 5)
 
-def fit_model(x_train, y_train, model_name='mnist_cnn.pt'):
+def fit_model(params, x_train, y_train, model_name='mnist_cnn.pt'):
 
-    params = get_model_params()
+    #params = get_model_params()
 
     device = get_device()
     # torch.manual_seed(params['seed'])

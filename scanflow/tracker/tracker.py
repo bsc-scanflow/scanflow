@@ -43,16 +43,16 @@ class Tracker():
     def get_tracker_uri(self, islocal=True):
         return get_tracker_uri(islocal)
 
-    def save_artifacts(self, app_name, team_name, app_dir="/workflow", tolocal=False):
+    def save_app_artifacts(self, app_name, team_name, app_dir="/workflow", tolocal=False):
         raise NotImplementedError("tracker:save_app")
 
-    def download_artifacts(self, app_name, run_id=None, team_name=None, local_dir="/workflow", fromlocal=False):
+    def download_app_artifacts(self, app_name, run_id=None, team_name=None, local_dir="/workflow", fromlocal=False):
         raise NotImplementedError("tracker:download_app")
 
-    def save_model(self, app_name, team_name, model_name):
+    def save_app_model(self, app_name, team_name, model_name):
         raise NotImplementedError("tracker: save model")
 
-    def download_model(self, app_name, team_name, model_name, model_version):
+    def download_app_model(self, app_name, team_name, model_name, model_version):
         raise NotImplementedError("tracker: download model")
 
     def list_artifacts(self):
