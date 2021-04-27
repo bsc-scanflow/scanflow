@@ -41,10 +41,10 @@ class Kubernetes:
             return False
             
 
-    def delete_namespace(self, namespace):
+    def delete_namespace(self, name):
         api_instance = client.CoreV1Api()
         try:
-            api_instance.delete_namespace(name=namespace)
+            api_instance.delete_namespace(name=name)
             return True
         except: 
             logging.error(f"delete_namespace error")
@@ -101,7 +101,7 @@ class Kubernetes:
         )
         return ports
 
-    def build_service(self, namespace=None, name=None, label=None, ports=None, type=None):
+    def build_service(self, namespace, name, label=None, ports=None, type=None):
         service = client.V1Service()
         service.api_version = "v1"
         service.kind = "Service"
@@ -117,16 +117,16 @@ class Kubernetes:
         service.spec = spec
         return service
 
-    def create_service(self, namespace=None, service=None):
+    def create_service(self, namespace, body):
         api_instance = client.CoreV1Api()
         try:
-            api_instance.create_namespaced_service(namespace=namespace, body=service)
+            api_instance.create_namespaced_service(namespace=namespace, body=body)
             return True
         except:
             logging.error(f"create_service error") 
             return False
 
-    def delete_service(self, namespace=None, name=None):
+    def delete_service(self, namespace, name):
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespaced_service(name=name, namespace=namespace)
@@ -158,22 +158,55 @@ class Kubernetes:
 # 'string_data': None,
 # 'type': 'Opaque'}
 
-    def build_secret(self):
+    def build_secret(self, name, namespace, stringData):
         secret = client.V1Secret()
-        secret.metadata = client.V1ObjectMeta(name="mysecret")
+        secret.metadata = client.V1ObjectMeta(name=name,
+        namespace=namespace)
         secret.type = "Opaque"
-        secret.data = {"username": "bXl1c2VybmFtZQ==", "password": "bXlwYXNzd29yZA=="}
+        secret.string_data = stringData
         return secret
 
-    def create_secret(self, secret=None, namespace='default'):
+    def create_secret(self, namespace, body):
         api_instance = client.CoreV1Api()
-        back = api_instance.create_namespaced_secret(namespace="default", body=secret)
-        return back
+        try:
+            api_instance.create_namespaced_secret(namespace=namespace, body=body)
+            return True
+        except:
+            return False
 
-    def delete_secret(self):
+    def delete_secret(self, namespace, name):
         api_instance = client.CoreV1Api()
-        back = api_instance.delete_namespaced_secret(name="mysecret", namespace="default")
-        return back
+        try:
+            api_instance.delete_namespaced_secret(name=name, namespace=namespace)
+            return True
+        except:
+            return False
+
+    def build_configmap(self, name, namespace, data):
+        configmap = client.V1ConfigMap()
+        configmap.metadata = client.V1ObjectMeta(
+            name = name,
+            namespace = namespace
+        )
+        configmap.data = data
+        return configmap
+
+    def create_configmap(self, namespace, body):
+        api_instance = client.CoreV1Api()
+        try: 
+            api_instance.create_namespaced_config_map(namespace=namespace,body=body)
+            return True
+        except:
+            return False
+
+    def delete_configmap(self, namespace, name):
+        api_instance = client.CoreV1Api()
+        try: 
+            api_instance.delete_namespaced_config_map(namespace=namespace, name=name)
+            return True
+        except:
+            return False
+
 
 
 # Deployment
@@ -340,21 +373,21 @@ class Kubernetes:
         )
         return deployment
 
-    def create_deployment(self, namespace=None, deployment=None):
+    def create_deployment(self, namespace, body):
         api_instance = client.AppsV1Api()
         try:
-            api_instance.create_namespaced_deployment(namespace=namespace, body=deployment)
+            api_instance.create_namespaced_deployment(namespace=namespace, body=body)
             return True
         except:
             logging.error(f"create_deployment error") 
             return False
 
-    def apply_deployment(self, namespace=None, name=None, deployment=None):
+    def apply_deployment(self, namespace, name, deployment):
         api_instance = client.AppsV1Api()
         back = api_instance.replace_namespaced_deployment(name=name, namespace=namespace, body=deployment)
         return back
     
-    def delete_deployment(self, namespace=None, name=None):
+    def delete_deployment(self, namespace, name):
         api_instance = client.AppsV1Api()
         try:
             api_instance.delete_namespaced_deployment(name=name, namespace=namespace, body=client.V1DeleteOptions(propagation_policy="Foreground", grace_period_seconds=5))
@@ -412,16 +445,16 @@ class Kubernetes:
             )
     )
 
-    def create_persistentvolumeclaim(self, namespace=None, persistentvolumeclaim=None):
+    def create_persistentvolumeclaim(self, namespace, body):
         api_instance = client.CoreV1Api()
         try:
-            api_instance.create_namespaced_persistent_volume_claim(namespace=namespace, body=persistentvolumeclaim)
+            api_instance.create_namespaced_persistent_volume_claim(namespace=namespace, body=body)
             return True
         except:
             logging.error(f"create_pvc error") 
             return False
 
-    def delete_persistentvolumeclaim(self, namespace=None, name=None):
+    def delete_persistentvolumeclaim(self, namespace, name):
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespaced_persistent_volume_claim(namespace=namespace, name=name)
@@ -514,16 +547,16 @@ class Kubernetes:
             )
         )
 
-    def create_persistentvolume(self, persistentvolume=None):
+    def create_persistentvolume(self, body):
         api_instance = client.CoreV1Api()
         try:
-            api_instance.create_persistent_volume(body=persistentvolume)
+            api_instance.create_persistent_volume(body=body)
             return True
         except:
             logging.error(f"create_pv error")
             return False
 
-    def delete_persistentvolume(self, name=None):
+    def delete_persistentvolume(self, name):
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_persistent_volume(name=name)
@@ -536,7 +569,7 @@ class Kubernetes:
 
 #Rolebinding
 
-    def build_rolebinding(self, namespace=None):
+    def build_rolebinding(self, namespace):
         return client.V1RoleBinding(
             api_version='rbac.authorization.k8s.io/v1',
             kind='RoleBinding',
@@ -557,16 +590,16 @@ class Kubernetes:
             )]
         )
 
-    def create_rolebinding(self, namespace=None, rolebinding=None):
+    def create_rolebinding(self, namespace, body):
         api_instance = client.RbacAuthorizationV1Api()
         try:
-            api_instance.create_namespaced_role_binding(namespace, rolebinding)
+            api_instance.create_namespaced_role_binding(namespace, body)
             return True
         except:
             logging.error(f"create_rolebinding error")
             return False
 
-    def delete_rolebinding(self, namespace=None, name='default-admin'):
+    def delete_rolebinding(self, namespace, name='default-admin'):
         api_instance = client.RbacAuthorizationV1Api()
         try:
             api_instance.delete_namespaced_role_binding(name=name, namespace=namespace)

@@ -2,6 +2,7 @@ import json
 import uvicorn
 import logging
 import mlflow
+from typing import Optional
 
 from fastapi import FastAPI
 
@@ -11,12 +12,13 @@ sys.path.insert(0,'../..')
 
 from scanflow.server.message import ResponseMessageBase
 from scanflow.server.app import Application
+from scanflow.server.deploy_env import ScanflowEnvironment
 
 #scanflow
 
 from scanflow.client import ScanflowTrackerClient
 
-#from scanflow.deployer.deployer import Deployer
+from scanflow.deployer.deployer import Deployer
 #from scanflow.deployer.argoDeployer import ArgoDeployer
 #from scanflow.deployer.volcanoDeployer import VolcanoDeployer
 #from scanflow.deployer.seldonDeployer import SeldonDeployer
@@ -34,9 +36,20 @@ client = ScanflowTrackerClient(verbose=True)
 mlflow.set_tracking_uri(client.get_tracker_uri(False))
 logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
 
+
+
+@app.on_event("startup")
+async def startup_event():
+    pass
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    pass
+
+
+
 ## scanflow app meta
 ## save/load/update scanflow application
-
 @app.post("/submit/scanflowApplication",
           response_model = ResponseMessageBase, 
           tags = ['ScanflowApplication'],
@@ -73,32 +86,42 @@ async def save_scanflowApplication(app: Application):
 #    return response
 #
 
-## scanflow app environment
-#@app.post("/create_environment",
-#           tags=['Environment'],
-#           summary="create environment for scanflow app")
-#async def create_environment(app_name, team_name):
-#    deployer = Deployer()
-#    result = deployer.create_environment(app)
-#    return {"success": result}
-#
-#@app.post("/clean_environment",
-#           tags=['Environment'],
-#           summary="clean environment for scanflow app")
-#async def clean_environment(app_name, team_name):
-#
-#    return {}
-#
-#
-### scanflow workflow deployer operations
-#async def build_workflows():
-#    response = ""
-#    return response
-#
-#async def run_workflows():
-#    response = ""
-#    return response
-#
-#async def delete_workflows():
-#    response = ""
-#    return response
+# scanflow app environment
+@app.post("/create_environment",
+           response_model = ResponseMessageBase,
+           tags=['Environment'],
+           summary="create environment for scanflow app")
+async def create_environment(app_name : str,
+                             team_name : str,
+                             scanflowEnv : Optional[ScanflowEnvironment] = None):
+    if scanflowEnv is None:
+        scanflowEnv = ScanflowEnvironment()
+        namespace = f"scanflow-{app_name}-{team_name}" 
+        scanflowEnv.namespace = namespace
+        scanflowEnv.tracker_config.TRACKER_STORAGE = f"postgresql://scanflow:scanflow123@postgresql-service.postgresql.svc.cluster.local/{namespace}"
+        scanflowEnv.tracker_config.TRACKER_ARTIFACT = f"s3://scanflow/{namespace}"
+        scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker-service.{namespace}.svc.cluster.local"
+    result = deployer.create_environment(scanflowEnv)
+    return {"success": result}
+
+@app.post("/clean_environment",
+           response_model = ResponseMessageBase,
+           tags=['Environment'],
+           summary="clean environment for scanflow app")
+async def clean_environment(app_name, team_name):
+
+    return {}
+
+
+## scanflow workflow deployer operations
+async def build_workflows():
+    response = ""
+    return response
+
+async def run_workflows():
+    response = ""
+    return response
+
+async def delete_workflows():
+    response = ""
+    return response

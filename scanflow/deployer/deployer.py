@@ -30,12 +30,18 @@ class Deployer():
         step1 = self.create_namespace(app)
         # 2. create role
         step2 = self.create_role()
-        # 3. start_local_tracker
-        step3 = self.start_local_tracker()
-        # 4. start_agent if has
-        step4 = self.start_agents()
+        # 3. create secret 
+        step3 = self.create_secret()
+        # 4. create configmap
+        step4 = self.create_configmap_tracker()
+        # 5. start local tracker 
+        step5 = self.start_local_tracker()
+        # 6. create configmap
+        step6 = self.create_configmap_scanflow()
+        # 7. start_agent if has
+        step7 = self.start_agents()
 
-        return  step1 and step2 and step3 and step4 
+        return  step1 and step2 and step3 and step4 and step5 and step6 and step7 
 
     def clean_environment(self):
         """
@@ -45,12 +51,15 @@ class Deployer():
         step1 = self.stop_agents()
         # 2. delete local_tracker
         step2 = self.stop_local_tracker()
-        # 3. delete role
+        # 3. delete others
         step3 = self.delete_role() 
+        step4 = self.delete_secrete() 
+        step5 = self.delete_configmap_tracker() 
+        step6 = self.delete_configmap_scanflow() 
         # 4. delete namespace
-        step4 = self.delete_namespace()
+        step7 = self.delete_namespace()
         
-        return step1 and step2 and step3 and step4
+        return step1 and step2 and step3 and step4 and step5 and step6 and step7
 
     def create_namespace(self, app):
         self.namespace = f"{app.app_name}-{app.team_name}"
@@ -70,29 +79,37 @@ class Deployer():
         logging.info(f'[++]Delete rolebinding default-admin')
         return self.kubeclient.delete_rolebinding(self.namespace)
 
+    def create_secrete(self):
+
+
     def start_local_tracker(self):
         """
           deploy tracker in namespaced env
         """
-        raise NotImplementedError("")
+        pass
 
     def stop_local_tracker(self):
         """
           stop local_tracker
         """
-        raise NotImplementedError("")
+        pass
 
     def start_agents(self):
         """
           deploy agents
         """
-        raise NotImplementedError("Backend:start_agents")
+        pass
 
     def stop_agents(self):
         """
            stop agents
         """
-        raise NotImplementedError("Backend:stop_agents")
+        pass
+
+
+
+
+    # with different deployer
 
     def run_workflows(self):
         """
