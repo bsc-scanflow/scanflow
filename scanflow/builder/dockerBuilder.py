@@ -6,7 +6,7 @@ from textwrap import dedent
 
 import scanflow.builder.builder as builder
 
-from scanflow.app import Application, Executor, Workflow
+from scanflow.app import Application, Executor, Workflow, Tracker
 from scanflow.agent import Agent
 
 from typing import List, Dict
@@ -24,13 +24,18 @@ class DockerBuilder(builder.Builder):
         super(DockerBuilder, self).__init__(registry)
         self.client = docker.from_env()
 
-    def build_ScanflowApplication(self, app: Application):
+    def build_ScanflowApplication(self, app: Application, trackerPort: int):
         self.paths = get_scanflow_paths(app.app_dir)
         if app.agents is not None:
             self.build_ScanflowAgents(app.agents)
         if app.workflows is not None:
             self.build_ScanflowWorkflows(app.workflows)
+        if app.tracker is None:
+            app.tracker = self.build_ScanflowTracker(nodePort=trackerPort)
         return app
+    
+    def build_ScanflowTracker(self, nodePort: int):
+        return Tracker(nodePort)
 
     def build_ScanflowAgents(self, agents: List[Agent]):
         for agent in agents:

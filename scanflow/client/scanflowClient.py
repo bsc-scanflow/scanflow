@@ -52,9 +52,9 @@ class ScanflowClient:
             logging.info(f"unknown builder backend {builder}")
 
     def build_ScanflowApplication(self,
-                                  app: Application):
+                                  app: Application, trackerPort: int):
         #build scanflowapp
-        return self.builderbackend.build_ScanflowApplication(app)
+        return self.builderbackend.build_ScanflowApplication(app, trackerPort)
 
     def submit_ScanflowApplication(self,
                                    app: Application):

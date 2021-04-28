@@ -5,7 +5,7 @@ import json
 
 from scanflow.agent import Agent
 from scanflow.app import Workflow
-from scanflow.tracker import Tracker
+from scanflow.app import Tracker
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -19,14 +19,16 @@ class Application:
                  app_name: str,
                  app_dir: str,
                  team_name: str,
-                 workflows: List[Workflow]=None,
-                 agents: List[Agent]=None):
+                 workflows: List[Workflow] = None,
+                 agents: List[Agent] = None,
+                 tracker: Tracker = None):
 
         self.app_name = app_name
         self.app_dir = app_dir
         self.team_name = team_name
         self.workflows = workflows
         self.agents = agents
+        self.tracker = tracker
 
     def to_dict(self):
         tmp_dict = {}
@@ -42,7 +44,7 @@ class Application:
                 for agent in v:
                     agents_list.append(agent.to_dict())
                 tmp_dict[k] = agents_list
-            elif k == 'local_tracker' and v is not None:
+            elif k == 'tracker' and v is not None:
                 tmp_dict[k] = v.__dict__
             else:
                 tmp_dict[k] = v

@@ -310,15 +310,36 @@ class Kubernetes:
 # 'status': None}
 
     def build_env(self, **kwargs):
-        envs = []
+        env_list = []
         for k, v in kwargs.items():
-            envs.append(
+            env_list.append(
                 client.V1EnvVar(
                     name=k,
                     value=v
                 ),
             )
-        return envs
+        return env_list
+
+    def build_env_from_source(self, **kwargs):
+        env_from_list = []
+        for k, v in kwargs.items():
+            if k == "config_map_ref":
+                env_from_list.append(
+                    client.V1EnvFromSource(
+                        config_map_ref=client.V1ConfigMapEnvSource(
+                            name = v
+                        )
+                    )
+                )
+            elif k == "secret_ref":
+                env_from_list.append(
+                    client.V1EnvFromSource(
+                        secret_ref=client.V1SecretEnvSource(
+                            name = v
+                        )
+                    )
+                )
+        return env_from_list
 
     def build_volumeMount(self, **kwargs):
         volumeMount = []
@@ -342,7 +363,7 @@ class Kubernetes:
             )
         return volumes
 
-    def build_deployment(self, namespace=None, name=None, label=None, image=None, volumes=None, env=None, volumeMount=None): 
+    def build_deployment(self, namespace=None, name=None, label=None, image=None, volumes=None, env=None, env_from=None, volumeMount=None): 
         spec = client.V1DeploymentSpec(
             selector=client.V1LabelSelector(match_labels={label:name}),
             template=client.V1PodTemplateSpec(),
@@ -353,6 +374,7 @@ class Kubernetes:
             image=image,
             image_pull_policy="IfNotPresent",
             env=env,
+            env_from=env_from,
             volume_mounts=volumeMount
         )
         spec.template.metadata = client.V1ObjectMeta(

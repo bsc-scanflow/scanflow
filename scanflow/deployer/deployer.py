@@ -4,7 +4,7 @@ abstract deployer class
 import logging
 
 from typing import List
-from scanflow.app import Application
+from scanflow.app import Application, Tracker
 from scanflow.agent import Agent
 
 from scanflow.tools.scanflowtools import get_scanflow_paths, check_verbosity
@@ -31,6 +31,7 @@ class Deployer():
                            scanflowSecret: dict,
                            scanflowTrackerConfig: dict,
                            scanflowClientConfig: dict,
+                           tracker : Tracker = None,
                            agents: List[Agent] = None):
         """
           create namespace, role, agents...
@@ -47,7 +48,7 @@ class Deployer():
         # 5. create client configmap
         step5 = self.__create_configmap_client(namespace, scanflowClientConfig)
         # 6. start local tracker 
-        step6 = self.__start_local_tracker(namespace)
+        step6 = self.__start_local_tracker(namespace, tracker)
         # 7. start_agent if has
         if agents is not None:
             step7 = self.start_agents()
@@ -125,19 +126,47 @@ class Deployer():
 
 
 
-    def __start_local_tracker(self, namespace):
+    def __start_local_tracker(self, namespace, tracker):
         """
           deploy tracker in namespaced env
         """
-        return True
+        tracker_name = "scanflow-tracker"
+        logging.info(f"[+] Starting local tracker: [{tracker_name}].")
+        # deployment
+        env_from_list = self.kubeclient.build_env_from_source(
+            secret_ref = "scanflow-secret",
+            config_map_ref = "scanflow-tracker-env"
+        )
+        deployment = self.kubeclient.build_deployment(namespace = namespace, 
+        name = tracker_name, 
+        label = "scanflow", 
+        image = tracker.image,
+        env_from = env_from_list)
+
+        step1 = self.kubeclient.create_deployment(namespace, deployment)
+        logging.info(f"[+] Created tracker Deployment {step1}")
+
+        #service
+        ports= self.kubeclient.build_servicePort('TCP',port=80,targetPort=5000, nodePort=tracker.nodePort)
+        service=self.kubeclient.build_service(namespace = namespace, 
+        name = tracker_name, 
+        label = "scanflow", 
+        ports = ports,
+        type = "NodePort")
+        step2 = self.kubeclient.create_service(namespace = namespace, body=service)
+        logging.info(f"[+] Created tracker Service {step2}")
+
+        return step1 and step2
 
     def __stop_local_tracker(self, namespace):
         """
           stop local_tracker
         """
-        return True
-
-
+        tracker_name = "scanflow-tracker"
+        logging.info(f"[++] Stopping tracker: [{tracker_name}].")
+        step1 = self.kubeclient.delete_deployment(namespace, tracker_name)
+        step2 = self.kubeclient.delete_service(namespace, tracker_name)
+        return step1 and step2
 
     #agents
 

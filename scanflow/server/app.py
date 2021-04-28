@@ -29,10 +29,16 @@ class Agent(BaseModel):
     mainfile: Optional[str] = None
     parameters: Optional[dict] = None
 
+
+class Tracker(BaseModel):
+    nodePort: int
+    image: str
+
 class Application(BaseModel):
     app_name: str 
     app_dir: str 
     team_name: str 
     workflows: Optional[List[Workflow]] = None
     agents: Optional[List[Agent]] = None
+    tracker: Optional[Tracker] = None
 
