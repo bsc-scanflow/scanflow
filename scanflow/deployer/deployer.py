@@ -3,6 +3,10 @@ abstract deployer class
 """
 import logging
 
+from typing import List
+from scanflow.app import Application
+from scanflow.agent import Agent
+
 from scanflow.tools.scanflowtools import get_scanflow_paths, check_verbosity
 from scanflow.templates import Kubernetes
 
@@ -22,94 +26,137 @@ class Deployer():
         verbose = verbose)
 
 
-    def create_environment(self, app):
+    def create_environment(self, 
+                           namespace: str, 
+                           scanflowSecret: dict,
+                           scanflowTrackerConfig: dict,
+                           scanflowClientConfig: dict,
+                           agents: List[Agent] = None):
         """
           create namespace, role, agents...
         """
+        logging.info(f'[++]Creating env')
         # 1. create namespace
-        step1 = self.create_namespace(app)
+        step1 = self.__create_namespace(namespace)
         # 2. create role
-        step2 = self.create_role()
+        step2 = self.__create_role(namespace)
         # 3. create secret 
-        step3 = self.create_secret()
-        # 4. create configmap
-        step4 = self.create_configmap_tracker()
-        # 5. start local tracker 
-        step5 = self.start_local_tracker()
-        # 6. create configmap
-        step6 = self.create_configmap_scanflow()
+        step3 = self.__create_secret(namespace, scanflowSecret)
+        # 4. create tracker configmap
+        step4 = self.__create_configmap_tracker(namespace, scanflowTrackerConfig)
+        # 5. create client configmap
+        step5 = self.__create_configmap_client(namespace, scanflowClientConfig)
+        # 6. start local tracker 
+        step6 = self.__start_local_tracker(namespace)
         # 7. start_agent if has
-        step7 = self.start_agents()
+        if agents is not None:
+            step7 = self.start_agents()
+        else:
+            step7 = True
 
         return  step1 and step2 and step3 and step4 and step5 and step6 and step7 
 
-    def clean_environment(self):
+    def clean_environment(self,
+                          namespace: str,
+                          agents: List[Agent] = None):
         """
            delete env and stop agents
         """
         # 1. delete agent
-        step1 = self.stop_agents()
+        if agents is not None:
+            step1 = self.stop_agents()
+        else:
+            step1 = True
         # 2. delete local_tracker
-        step2 = self.stop_local_tracker()
+        step2 = self.__stop_local_tracker(namespace)
         # 3. delete others
-        step3 = self.delete_role() 
-        step4 = self.delete_secrete() 
-        step5 = self.delete_configmap_tracker() 
-        step6 = self.delete_configmap_scanflow() 
+        step3 = self.__delete_configmap_tracker(namespace) 
+        step4 = self.__delete_configmap_client(namespace) 
+        step5 = self.__delete_secret(namespace) 
+        step6 = self.__delete_role(namespace) 
         # 4. delete namespace
-        step7 = self.delete_namespace()
+        step7 = self.__delete_namespace(namespace)
         
         return step1 and step2 and step3 and step4 and step5 and step6 and step7
 
-    def create_namespace(self, app):
-        self.namespace = f"{app.app_name}-{app.team_name}"
-        logging.info(f'[++]Creating namespace "{self.namespace}"')
-        return self.kubeclient.create_namespace(self.namespace)
+    def __create_namespace(self, namespace):
+        logging.info(f'[++]Creating namespace "{namespace}"')
+        return self.kubeclient.create_namespace(namespace)
 
-    def delete_namespace(self):
-        logging.info(f'[++]Delete namespace "{self.namespace}"')
-        return self.kubeclient.delete_namespace(self.namespace)
+    def __delete_namespace(self, namespace):
+        logging.info(f'[++]Delete namespace "{namespace}"')
+        return self.kubeclient.delete_namespace(namespace)
 
-    def create_role(self):
+    def __create_role(self, namespace):
         logging.info(f"[++]Creating Role for 'default service account'")
-        rolebinding = self.kubeclient.build_rolebinding(self.namespace)
-        return self.kubeclient.create_rolebinding(self.namespace, rolebinding)
+        rolebinding = self.kubeclient.build_rolebinding(namespace)
+        return self.kubeclient.create_rolebinding(namespace, rolebinding)
 
-    def delete_role(self):
+    def __delete_role(self, namespace):
         logging.info(f'[++]Delete rolebinding default-admin')
-        return self.kubeclient.delete_rolebinding(self.namespace)
+        return self.kubeclient.delete_rolebinding(namespace)
 
-    def create_secrete(self):
+    def __create_secret(self, namespace, stringData):
+        logging.info(f"[++]Creating s3 secret {stringData}")
+        secret = self.kubeclient.build_secret("scanflow-secret",namespace, stringData)
+        return self.kubeclient.create_secret(namespace, secret)
+
+    def __delete_secret(self, namespace):
+        logging.info(f'[++]Delete s3 secret scanflow-secret')
+        return self.kubeclient.delete_secret(namespace, "scanflow-secret")
+
+    def __create_configmap_tracker(self, namespace, data):
+        logging.info(f"[++]Creating tracker configmap {data}")
+        configmap = self.kubeclient.build_configmap("scanflow-tracker-env", namespace, data)
+        return self.kubeclient.create_configmap(namespace,configmap)
+
+    def __delete_configmap_tracker(self, namespace):
+        logging.info(f'[++]Delete tracker configmap scanflow-tracker-env')
+        return self.kubeclient.delete_configmap(namespace,"scanflow-tracker-env")
+        
+    def __create_configmap_client(self, namespace, data):
+        logging.info(f"[++]Creating client configmap {data}")
+        configmap = self.kubeclient.build_configmap("scanflow-client-env", namespace, data)
+        return self.kubeclient.create_configmap(namespace,configmap)
+
+    def __delete_configmap_client(self, namespace):
+        logging.info(f'[++]Delete client configmap scanflow-client-env')
+        return self.kubeclient.delete_configmap(namespace,"scanflow-client-env")
 
 
-    def start_local_tracker(self):
+
+    def __start_local_tracker(self, namespace):
         """
           deploy tracker in namespaced env
         """
-        pass
+        return True
 
-    def stop_local_tracker(self):
+    def __stop_local_tracker(self, namespace):
         """
           stop local_tracker
         """
-        pass
+        return True
+
+
+
+    #agents
 
     def start_agents(self):
         """
           deploy agents
         """
-        pass
+        return True
 
     def stop_agents(self):
         """
            stop agents
         """
-        pass
+        return True
 
 
 
 
-    # with different deployer
+    # workflows: with different deployer
 
     def run_workflows(self):
         """

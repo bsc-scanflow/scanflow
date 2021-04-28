@@ -69,11 +69,6 @@ class ScanflowClient:
             logging.error(f"submit scanflow application error {response.text['status']}")
             return False
 
-    def build_ScanflowExecutor(self,
-                               executor: Executor):
-        self.builderbackend.build_ScanflowExecutor(executor)
-        
-
 
 ###   Scanflow graph
 

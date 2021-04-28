@@ -11,7 +11,7 @@ class ScanflowTrackerConfig(BaseModel):
     TRACKER_ARTIFACT: Optional[str] = "s3://scanflow-default"
 
 class ScanflowClientConfig(BaseModel):
-    SCANFLOW_TRACKER_URI : Optional[str] = "http://scanflow-tracker-service.scanflow-system.svc.cluster.local",
+    SCANFLOW_TRACKER_URI : Optional[str] = "http://scanflow-tracker-service.scanflow-system.svc.cluster.local"
     SCANFLOW_SERVER_URI : Optional[str] = "http://scanflow-server-service.scanflow-system.svc.cluster.local"
     SCANFLOW_TRACKER_LOCAL_URI : Optional[str] = "http://scanflow-tracker-service.scanflow-default.svc.cluster.local"
 

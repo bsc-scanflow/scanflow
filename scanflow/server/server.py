@@ -91,26 +91,38 @@ async def save_scanflowApplication(app: Application):
            response_model = ResponseMessageBase,
            tags=['Environment'],
            summary="create environment for scanflow app")
-async def create_environment(app_name : str,
-                             team_name : str,
+async def create_environment(app: Application,
                              scanflowEnv : Optional[ScanflowEnvironment] = None):
     if scanflowEnv is None:
         scanflowEnv = ScanflowEnvironment()
-        namespace = f"scanflow-{app_name}-{team_name}" 
+        namespace = f"scanflow-{app.app_name}-{app.team_name}" 
         scanflowEnv.namespace = namespace
         scanflowEnv.tracker_config.TRACKER_STORAGE = f"postgresql://scanflow:scanflow123@postgresql-service.postgresql.svc.cluster.local/{namespace}"
         scanflowEnv.tracker_config.TRACKER_ARTIFACT = f"s3://scanflow/{namespace}"
         scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker-service.{namespace}.svc.cluster.local"
-    result = deployer.create_environment(scanflowEnv)
-    return {"success": result}
+
+    deployer = Deployer()
+    result = deployer.create_environment(scanflowEnv.namespace, scanflowEnv.secret, scanflowEnv.tracker_config, scanflowEnv.client_config, app.agents)
+
+    if result:
+        return ResponseMessageBase(status=0)
+    else:
+        return ResponseMessageBase(status=1)
+
 
 @app.post("/clean_environment",
            response_model = ResponseMessageBase,
            tags=['Environment'],
            summary="clean environment for scanflow app")
-async def clean_environment(app_name, team_name):
+async def clean_environment(app: Application):
+    namespace = f"scanflow-{app.app_name}-{app.team_name}"
+    deployer = Deployer()
+    result = deployer.clean_environment(namespace)
 
-    return {}
+    if result:
+        return ResponseMessageBase(status=0)
+    else:
+        return ResponseMessageBase(status=1)
 
 
 ## scanflow workflow deployer operations

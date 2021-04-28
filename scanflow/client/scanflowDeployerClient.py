@@ -6,8 +6,6 @@ from textwrap import dedent
 from multiprocessing import Pool
 from typing import List, Dict
 
-from scanflow.app import Application
-
 # scanflow deployer
 from scanflow.server.utils import (
     set_server_uri,
@@ -18,7 +16,8 @@ import requests
 import json
 
 from scanflow.tools.scanflowtools import check_verbosity
-
+from scanflow.deployer.env import ScanflowClientConfig, ScanflowTrackerConfig, ScanflowSecret, ScanflowEnvironment
+from scanflow.app import Application
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -70,16 +69,53 @@ class ScanflowDeployerClient:
             raise ValueError("unknown deployer: " + deployer)
 
     def create_environment(self, 
-                           app: Application):
-        if app is not None:
-            if self.user_type == "server":
-                url = f"http://{self.scanflow_server_uri}/create_environment"
+                           app: Application,
+                           scanflowEnv: ScanflowEnvironment=None):
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/create_environment"
+            json_data = {
+                'app': app.to_dict(),
+                'scanflowEnv': scanflowEnv.__dict__
+            }
+            response = requests.post(url=url,
+            data= json.dumps(json_data),
+            headers={"accept": "application/json"})
 
-            else: #local
-                self.deployerbackend.create_environment(app)
-        else:
-            raise ValueError("must provide scanflow application")
+            if json.loads(response.text)['status'] == 0:
+                return True
+            else:
+                logging.error(f"create scanflow application env error {response.text['status']}")
+                return False
 
-    def clean_environment(self, app: Application):
-        print("")
+        else: #local
+            if scanflowEnv is None:
+                scanflowEnv = ScanflowEnvironment()
+                namespace = f"scanflow-{app.app_name}-{app.team_name}" 
+                scanflowEnv.namespace = namespace
+                scanflowEnv.tracker_config.TRACKER_STORAGE = f"postgresql://scanflow:scanflow123@postgresql-service.postgresql.svc.cluster.local/{namespace}"
+                scanflowEnv.tracker_config.TRACKER_ARTIFACT = f"s3://scanflow/{namespace}"
+                scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker-service.{namespace}.svc.cluster.local"
+
+            result = self.deployerbackend.create_environment(scanflowEnv.namespace, scanflowEnv.secret.__dict__, scanflowEnv.tracker_config.__dict__, scanflowEnv.client_config.__dict__, app.agents)
+            return result
+
+
+    def clean_environment(self, 
+                          app: Application):
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/clean_environment"
+            response = requests.post(url=url,
+            data= json.dumps(app.to_dict()),
+            headers={"accept": "application/json"})
+
+            if json.loads(response.text)['status'] == 0:
+                return True
+            else:
+                logging.error(f"clean scanflow application env error {response.text['status']}")
+                return False
+
+        else: #local
+            namespace = f"scanflow-{app.app_name}-{app.team_name}" 
+            result = self.deployerbackend.clean_environment(namespace)
+            return result
 

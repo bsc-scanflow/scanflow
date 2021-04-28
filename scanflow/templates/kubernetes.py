@@ -1,7 +1,7 @@
 from kubernetes import client, config, utils
 from os import path
 import yaml
-from pick import pick  # install pick using `pip install pick`
+#from pick import pick  # install pick using `pip install pick`
 
 import logging
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
