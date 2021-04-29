@@ -16,10 +16,10 @@ from scanflow.client import ScanflowTrackerClient
 @click.command(help="Modeling")
 @click.option("--model_name", default='mnist_cnn', type=str)
 @click.option("--epochs", default='50', type=str)
-@click.option("--x_train_path", default='/workflow/data/mnist/data/mnist/train_images.npy', type=str)
-@click.option("--y_train_path", default='/workflow/data/mnist/data/mnist/train_labels.npy', type=str)
-@click.option("--x_test_path", default='/workflow/data/mnist/data/mnist/test_images.npy', type=str)
-@click.option("--y_test_path", default='/workflow/data/mnist/data/mnist/test_labels.npy', type=str)
+@click.option("--x_train_path", default='/workflow/load_data/mnist/data/mnist/train_images.npy', type=str)
+@click.option("--y_train_path", default='/workflow/load_data/mnist/data/mnist/train_labels.npy', type=str)
+@click.option("--x_test_path", default='/workflow/load_data/mnist/data/mnist/test_images.npy', type=str)
+@click.option("--y_test_path", default='/workflow/load_data/mnist/data/mnist/test_labels.npy', type=str)
 def modeling(model_name, epochs, x_train_path, y_train_path, x_test_path, y_test_path):
     
     

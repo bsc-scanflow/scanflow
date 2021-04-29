@@ -5,6 +5,7 @@ from shutil import copy2
 from textwrap import dedent
 from multiprocessing import Pool
 from typing import List, Dict
+from mm import multimethod
 
 # scanflow deployer
 from scanflow.server.utils import (
@@ -68,6 +69,7 @@ class ScanflowDeployerClient:
         else:
             raise ValueError("unknown deployer: " + deployer)
 
+    @multimethod(Application, ScanflowEnvironment)
     def create_environment(self, 
                            app: Application,
                            scanflowEnv: ScanflowEnvironment=None):
@@ -99,7 +101,7 @@ class ScanflowDeployerClient:
             result = self.deployerbackend.create_environment(scanflowEnv.namespace, scanflowEnv.secret.__dict__, scanflowEnv.tracker_config.__dict__, scanflowEnv.client_config.__dict__, app.tracker, app.agents)
             return result
 
-
+    @multimethod(Application)
     def clean_environment(self, 
                           app: Application):
         if self.user_type == "incluster":
@@ -119,5 +121,34 @@ class ScanflowDeployerClient:
             result = self.deployerbackend.clean_environment(namespace)
             return result
 
-    def run_workflows(self,)
+    @multimethod(Application)
+    def run_workflows(self,
+                      app: Application):
+        if self.user_type == "incluster":
+            pass
+        else: #local
+            self.deployerbackend.run_workflows(app.workflows)
 
+    @multimethod(List[Workflow])
+    def run_workflows(self,
+                      workflows: List[Workflow]):
+        if self.user_type == "incluster":
+            pass
+        else: #local
+            self.deployerbackend.run_workflows(workflows)
+
+    @multimethod(Workflow)
+    def run_workflow(self,
+                     workflow: Workflow):
+        if self.user_type == "incluster":
+            pass
+        else: #local
+            self.deployerbackend.run_workflow(workflow)
+
+    @multimethod(Executor)
+    def run_executor(self,
+                     executor: Executor):
+        if self.user_type == "incluster":
+            pass
+        else: #local
+            self.deployerbackend.run_executor(executor)

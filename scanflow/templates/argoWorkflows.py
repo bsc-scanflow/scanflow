@@ -22,7 +22,7 @@ class ArgoWorkflows:
             submitter = ArgoSubmitter(namespace, self.k8s_config_file)
         else:
             submitter = ArgoSubmitter(namespace)
-        couler.run(submitter=submitter)
+        return couler.run(submitter=submitter)
 
     def deleteWorkflow(self, namespace=None, name=None):
         if self.k8s_config_file is not None:
@@ -42,14 +42,27 @@ class ArgoWorkflows:
             volumeMounts.append(volumeMount)
         return volumeMounts
 
-    def buildDagTask(self, name, image, env, volumeMounts, dependencies):
-        couler.set_dependencies(
-            lambda: couler.run_container(
-                step_name=name,
-                image=image,
-                env=env,
-                volume_mounts=volumeMounts,
-            ), 
-            dependencies=dependencies
-        )
+    def argoExecutor(self, name, image, env, volumeMounts):
+        return lambda: couler.run_container(
+            image = image,
+            step_name = name,
+            env = env,
+            volume_mounts= volumeMounts)
+        
+    def argoDag(self, dependency_graph):
+        couler.dag(dependency_graph)
 
+    
+
+#    def buildDagTask(self, name, image, env, volumeMounts, dependencies):
+#        couler.set_dependencies(
+#            lambda: couler.run_container(
+#                step_name=name,
+#                image=image,
+#                env=env,
+#                volume_mounts=volumeMounts,
+#            ), 
+#            dependencies=dependencies
+#        )
+#
+#

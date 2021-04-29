@@ -19,7 +19,7 @@ def loaddata(app_name, team_name):
     #data will be download into shared /workflow folder
     client.download_app_artifacts(app_name = app_name, 
                                   team_name = team_name,
-                                  local_dir = "/workflow/data") 
+                                  local_dir = "/workflow/load_data") 
     
     #log
     try:
@@ -28,7 +28,7 @@ def loaddata(app_name, team_name):
 
         mlflow.set_experiment("load_data")
         with mlflow.start_run():
-            mlflow.log_artifacts(local_dir= f"/workflow/data/{app_name}/{team_name}",
+            mlflow.log_artifacts(local_dir= f"/workflow/load_data/{app_name}/{team_name}",
                                  artifact_path= "data")
     except:
         logging.info("mlflow logging fail")

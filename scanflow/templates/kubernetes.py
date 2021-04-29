@@ -442,7 +442,7 @@ class Kubernetes:
 #          'volume_name': None},
 # 'status': None}
 
-    def build_persistentvolumeclaim(self, namespace=None, name=None, storage=None):
+    def build_persistentvolumeclaim(self, namespace=None, name=None, storage_class_name=None, access_mode=None, storage=None):
         return client.V1PersistentVolumeClaim(
             api_version='v1',
             kind='PersistentVolumeClaim',
@@ -451,9 +451,9 @@ class Kubernetes:
                 name=name
             ),
             spec=client.V1PersistentVolumeClaimSpec(
-                #storage_class_name='local-path',
+                storage_class_name=storage_class_name,
                 access_modes=[
-                    'ReadWriteMany'
+                    access_mode
                 ],
                 resources=client.V1ResourceRequirements(
                     requests={

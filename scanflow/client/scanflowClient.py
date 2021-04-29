@@ -112,7 +112,7 @@ class ScanflowClient:
                             app_dir: str,
                             team_name: str,
                             workflows: List[Workflow]=None,
-                            agents: List[Agent]=None
+                            agents: List[Agent]=None,
                             tracker: Tracker = None):
         return Application(app_name, app_dir, team_name, workflows, agents, tracker)
 

@@ -21,6 +21,7 @@ class Workflow(BaseModel):
     name: str 
     executors: List[Executor] 
     dependencies: List[Dependency]
+    output_dir: Optional[str] = None
 
 class Agent(BaseModel):
     name: str

@@ -8,11 +8,13 @@ class Workflow(object):
     def __init__(self,
                  name: str,
                  executors: List[Executor],
-                 dependencies: List[Dependency]):
+                 dependencies: List[Dependency],
+                 output_dir: str = None):
 
         self.name = name
         self.executors = executors
         self.dependencies = dependencies
+        self.output_dir = output_dir
 
     def to_dict(self):
         tmp_dict = {}
