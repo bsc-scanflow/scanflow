@@ -11,9 +11,8 @@ logging.getLogger().setLevel(logging.INFO)
 
 class ArgoDeployer(deployer.Deployer):
     def __init__(self,
-                 scanflowType=None,
-                 verbose=True):
-        super(ArgoDeployer, self).__init__(scanflowType, verbose)
+                 k8s_config_file=None):
+        super(ArgoDeployer, self).__init__(k8s_config_file)
 
         self.argoclient = ArgoWorkflows()
 

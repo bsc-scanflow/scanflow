@@ -58,7 +58,7 @@ class ScanflowDeployerClient:
     def get_deployer(self, deployer, k8s_config_file):
         if deployer == "argo":
             from scanflow.deployer.argoDeployer import ArgoDeployer
-            return ArgoDeployer(k8s_config_file, self.verbose)
+            return ArgoDeployer(k8s_config_file)
         elif deployer == "volcano":
             from scanflow.deployer.volcanoDeployer import VolcanoDeployer
             return VolcanoDeployer(self.verbose)
@@ -118,4 +118,6 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app.app_name}-{app.team_name}" 
             result = self.deployerbackend.clean_environment(namespace)
             return result
+
+    def run_workflows(self,)
 

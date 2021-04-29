@@ -4,7 +4,7 @@ import os
 from typing import List, Dict
 
 # scanflow app
-from scanflow.app import Executor, Dependency, Workflow, Application
+from scanflow.app import Executor, Dependency, Workflow, Application, Tracker
 from scanflow.agent import Agent
 
 # scanflow graph
@@ -112,6 +112,7 @@ class ScanflowClient:
                             app_dir: str,
                             team_name: str,
                             workflows: List[Workflow]=None,
-                            agents: List[Agent]=None):
-        return Application(app_name, app_dir, team_name, workflows, agents)
+                            agents: List[Agent]=None
+                            tracker: Tracker = None):
+        return Application(app_name, app_dir, team_name, workflows, agents, tracker)
 

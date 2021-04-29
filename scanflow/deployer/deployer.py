@@ -7,7 +7,6 @@ from typing import List
 from scanflow.app import Application, Tracker
 from scanflow.agent import Agent
 
-from scanflow.tools.scanflowtools import get_scanflow_paths, check_verbosity
 from scanflow.templates import Kubernetes
 
 
@@ -17,13 +16,9 @@ logging.getLogger().setLevel(logging.INFO)
 
 class Deployer():
     def __init__(self,
-                 k8s_config_file=None,
-                 verbose=True):
-        self.verbose = verbose
-        check_verbosity(verbose)
+                 k8s_config_file=None):
 
-        self.kubeclient = Kubernetes(k8s_config_file=k8s_config_file, 
-        verbose = verbose)
+        self.kubeclient = Kubernetes(k8s_config_file=k8s_config_file)
 
 
     def create_environment(self, 
@@ -193,10 +188,16 @@ class Deployer():
         """
         raise NotImplementedError("Backend:run_workflows")
 
+    def run_workflow(self):
+        raise NotImplementedError("Backend:run_workflow")
+
     def delete_workflows(self):
         """
            delete batch workflow
         """
         raise NotImplementedError("Backend:delete_workflows")
+
+    def delete_workflow(self):
+        raise NotImplementedError("Backend:delete_workflow")
 
     

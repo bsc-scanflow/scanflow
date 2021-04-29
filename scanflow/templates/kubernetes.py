@@ -8,15 +8,11 @@ logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
 
-from scanflow.tools.scanflowtools import check_verbosity
 
 
 class Kubernetes:
     def __init__(self,
-                 k8s_config_file=None,
-                 verbose=True):
-        self.verbose = verbose
-        check_verbosity(verbose)
+                 k8s_config_file=None):
 
         try:
             logging.info(f"loading kubernetes configuration from {k8s_config_file}")
