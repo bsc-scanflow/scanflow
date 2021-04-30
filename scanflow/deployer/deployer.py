@@ -46,7 +46,7 @@ class Deployer():
         step6 = self.__start_local_tracker(namespace, tracker)
         # 7. start_agent if has
         if agents is not None:
-            step7 = self.start_agents()
+            step7 = self.start_agents(namespace, agents)
         else:
             step7 = True
 
@@ -60,7 +60,7 @@ class Deployer():
         """
         # 1. delete agent
         if agents is not None:
-            step1 = self.stop_agents()
+            step1 = self.stop_agents(namespace, agents)
         else:
             step1 = True
         # 2. delete local_tracker
@@ -165,39 +165,62 @@ class Deployer():
 
     #agents
 
-    def start_agents(self):
+    def start_agents(self, 
+                     namespace: str,
+                     agents: List[Agent]):
         """
           deploy agents
         """
-        return True
+        for agent in agents:
+            self.start_agent(namespace, agent)
 
-    def stop_agents(self):
+    def start_agent(self,
+                    namespace: str,
+                    agent: Agent):
+        pass
+
+    def stop_agents(self, 
+                    namespace: str, 
+                    agents: List[Agent]):
         """
            stop agents
         """
-        return True
+        for agent in agents:
+            self.stop_agent(namespace, agent)
 
+    def stop_agent(self,
+                   namespace: str,
+                   agent: Agent):
+        pass
 
 
 
     # workflows: with different deployer
 
-    def run_workflows(self):
+    def run_workflows(self,
+                      namespace: str,
+                      workflows: List[Workflow]):
         """
            run batch workflow
         """
         raise NotImplementedError("Backend:run_workflows")
 
-    def run_workflow(self):
+    def run_workflow(self,
+                     namespace: str,
+                     workflows: Workflow):
         raise NotImplementedError("Backend:run_workflow")
 
-    def delete_workflows(self):
+    def delete_workflows(self, 
+                         namespace: str,
+                         workflows: List[Workflow]):
         """
            delete batch workflow
         """
         raise NotImplementedError("Backend:delete_workflows")
 
-    def delete_workflow(self):
+    def delete_workflow(self,
+                        namespace: str,
+                        workflow: Workflow):
         raise NotImplementedError("Backend:delete_workflow")
 
     

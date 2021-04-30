@@ -127,28 +127,39 @@ class ScanflowDeployerClient:
         if self.user_type == "incluster":
             pass
         else: #local
-            self.deployerbackend.run_workflows(app.workflows)
+            namespace = f"scanflow-{app.app_name}-{app.team_name}"
+            self.deployerbackend.run_workflows(namespace, app.workflows)
 
     @multimethod(List[Workflow])
     def run_workflows(self,
+                      app_name: str,
+                      team_name: str,
                       workflows: List[Workflow]):
         if self.user_type == "incluster":
             pass
         else: #local
-            self.deployerbackend.run_workflows(workflows)
+            namespace = f"scanflow-{app_name}-{team_name}"
+            self.deployerbackend.run_workflows(nameapce, workflows)
 
     @multimethod(Workflow)
     def run_workflow(self,
+                     app_name: str,
+                     team_name: str,
                      workflow: Workflow):
         if self.user_type == "incluster":
             pass
         else: #local
-            self.deployerbackend.run_workflow(workflow)
+            namespace = f"scanflow-{app_name}-{team_name}"
+            self.deployerbackend.run_workflow(namespace, workflow)
 
     @multimethod(Executor)
     def run_executor(self,
+                     app_name: str,
+                     team_name: str,
+                     workflow_name: str,
                      executor: Executor):
         if self.user_type == "incluster":
             pass
         else: #local
-            self.deployerbackend.run_executor(executor)
+            namespace = f"scanflow-{app_name}-{team_name}"
+            self.deployerbackend.run_executor(namespace, executor)
