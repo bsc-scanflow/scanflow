@@ -97,8 +97,9 @@ class ScanflowClient:
     def ScanflowWorkflow(self,
                          name: str,
                          executors: List[Executor],
-                         dependencies: List[Dependency]):
-        return Workflow(name, executors, dependencies)
+                         dependencies: List[Dependency],
+                         output_dir: str = None):
+        return Workflow(name, executors, dependencies, output_dir)
 
     def ScanflowAgent(self,
                       name: str,

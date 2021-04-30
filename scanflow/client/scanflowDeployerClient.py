@@ -5,7 +5,6 @@ from shutil import copy2
 from textwrap import dedent
 from multiprocessing import Pool
 from typing import List, Dict
-from mm import multimethod
 
 # scanflow deployer
 from scanflow.server.utils import (
@@ -18,7 +17,7 @@ import json
 
 from scanflow.tools.scanflowtools import check_verbosity
 from scanflow.deployer.env import ScanflowClientConfig, ScanflowTrackerConfig, ScanflowSecret, ScanflowEnvironment
-from scanflow.app import Application
+from scanflow.app import Application, Workflow, Executor
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -69,7 +68,6 @@ class ScanflowDeployerClient:
         else:
             raise ValueError("unknown deployer: " + deployer)
 
-    @multimethod(Application, ScanflowEnvironment)
     def create_environment(self, 
                            app: Application,
                            scanflowEnv: ScanflowEnvironment=None):
@@ -101,7 +99,6 @@ class ScanflowDeployerClient:
             result = self.deployerbackend.create_environment(scanflowEnv.namespace, scanflowEnv.secret.__dict__, scanflowEnv.tracker_config.__dict__, scanflowEnv.client_config.__dict__, app.tracker, app.agents)
             return result
 
-    @multimethod(Application)
     def clean_environment(self, 
                           app: Application):
         if self.user_type == "incluster":
@@ -121,7 +118,6 @@ class ScanflowDeployerClient:
             result = self.deployerbackend.clean_environment(namespace)
             return result
 
-    @multimethod(Application)
     def run_workflows(self,
                       app: Application):
         if self.user_type == "incluster":
@@ -130,18 +126,16 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app.app_name}-{app.team_name}"
             self.deployerbackend.run_workflows(namespace, app.workflows)
 
-    @multimethod(List[Workflow])
-    def run_workflows(self,
-                      app_name: str,
-                      team_name: str,
-                      workflows: List[Workflow]):
-        if self.user_type == "incluster":
-            pass
-        else: #local
-            namespace = f"scanflow-{app_name}-{team_name}"
-            self.deployerbackend.run_workflows(nameapce, workflows)
+#    def run_workflows(self,
+#                      app_name: str,
+#                      team_name: str,
+#                      workflows: List[Workflow]):
+#        if self.user_type == "incluster":
+#            pass
+#        else: #local
+#            namespace = f"scanflow-{app_name}-{team_name}"
+#            self.deployerbackend.run_workflows(namespace, workflows)
 
-    @multimethod(Workflow)
     def run_workflow(self,
                      app_name: str,
                      team_name: str,
@@ -152,7 +146,6 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app_name}-{team_name}"
             self.deployerbackend.run_workflow(namespace, workflow)
 
-    @multimethod(Executor)
     def run_executor(self,
                      app_name: str,
                      team_name: str,

@@ -1,7 +1,0 @@
-
-FROM 172.30.0.49:5000/scanflow-executor
-
-COPY modeling_cnn1 /app/modeling_cnn1
-RUN pip install -r /app/modeling_cnn1/req_modeling.txt
-
-CMD ["python", "/app/modeling_cnn1/modeling.py"]

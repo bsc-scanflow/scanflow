@@ -1,0 +1,6 @@
+
+FROM 172.30.0.49:5000/scanflow-executor
+
+COPY load-data /app/load-data
+
+CMD ["python", "/app/load-data/loaddata.py"]
