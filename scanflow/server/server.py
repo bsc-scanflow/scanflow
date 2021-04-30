@@ -62,7 +62,7 @@ async def save_scanflowApplication(app: Application):
     
     try:
         mlflow.set_experiment(app.app_name)
-        with mlflow.start_run(run_name=f"scanflow-{app.team_name}"):
+        with mlflow.start_run(run_name=f"scanflow-app-{app.team_name}"):
             artifact_uri = mlflow.get_artifact_uri()
             logging.info("save app to artifact uri: {}".format(artifact_uri))
             mlflow.log_dict(app.dict(), "{}/{}.json".format(app.team_name, app.app_name))

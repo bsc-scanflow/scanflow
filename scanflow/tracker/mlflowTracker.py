@@ -16,8 +16,24 @@ class MlflowTracker(Tracker):
                  verbose=True):
         super(MlflowTracker, self).__init__(scanflow_tracker_uri,scanflow_tracker_local_uri,verbose)
 
-    def save_app_model(self, app_name, team_name, model_name):
-        pass
+    def save_app_model(self, app_name, team_name, model_name, model_type):
+        #TODO:4.30 Now we only support save pytorch model
+        # 1.load model from local
+        mlflow.set_tracking_uri(get_tracker_uri(True))
+        if model_type == "pytorch":
+            pytorch_model = mlflow.pytorch.load_model(f"models:/{model_name}/Production")
+        else:
+            logging.info("unsupported model_type {model_type}")
+
+        # 2. log the model to scanflow
+        mlflow.set_tracking_uri(get_tracker_uri())
+        mlflow.set_experiment(app_name)
+        if model_type == "pytorch":
+            with mlflow.start_run(run_name=f"scanflow-model-{team_name}"):
+                mlflow.pytorch.log_model(pytorch_model, model_name, registered_model_name=model_name)
+        else:
+            logging.info("unsupported model_type {model_type}")
+
  
     def download_app_model(self, app_name, team_name, model_name, model_version):
         pass

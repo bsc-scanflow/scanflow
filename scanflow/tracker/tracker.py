@@ -55,9 +55,9 @@ class Tracker():
     def download_app_model(self, app_name, team_name, model_name, model_version):
         raise NotImplementedError("tracker: download model")
 
-    def list_artifacts(self):
-        raise NotImplementedError("tracker:list_app")
-
-    def search_artifacts(self):
-        raise NotImplementedError("tracker:search_app")
+#    def list_artifacts(self):
+#        raise NotImplementedError("tracker:list_app")
+#
+#    def search_artifacts(self):
+#        raise NotImplementedError("tracker:search_app")
     
