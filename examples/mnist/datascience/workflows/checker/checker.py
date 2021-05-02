@@ -12,11 +12,14 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+import sys
+sys.path.insert(0, '/scanflow/scanflow')
+
 from scanflow.client import ScanflowTrackerClient
 
 @click.command(help="Train a detector")
 @click.option("--model_name", default='mnist_detector', type=str)
-@click.option("--x_train_path", default='/workflow/load_data/mnist/data/mnist/train_images.npy', type=str)
+@click.option("--x_train_path", default='/workflow/load-data/mnist/data/mnist/train_images.npy', type=str)
 def checker(model_name, x_train_path):
 
     #data

@@ -42,8 +42,6 @@ class ArgoDeployer(deployer.Deployer):
         """
         workflow_name = workflow.name
 
-        #scanflow volume, we have to pack scanflow, now we mount the volume
-
         #output volume - deleted mode
         if workflow.output_dir is not None:
             set_output_dir(workflow.output_dir)
@@ -53,9 +51,20 @@ class ArgoDeployer(deployer.Deployer):
         result = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
         if result:
             logging.info("pvc created")
+
+        #scanflow volume, we have to pack scanflow, now we mount the volume
+        #name pv-scanflow-server "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini"
+        logging.info(f"[TEMPO: Because we dont have scanflow pip install now, we need to mount scanflow]")
+        pv = self.kubeclient.build_persistentvolume("scanflow", "1Gi", "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini")
+        self.kubeclient.create_persistentvolume(body=pv)
+        pvc = self.kubeclient.build_persistentvolumeclaim(namespace, "scanflow", None, "ReadWriteMany","1Gi")
+        result = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
+        if result:
+            logging.info("pvc scanflow created")
         
         #volume
-        self.argoclient.buildVolumes(outputpath=workflow_name)
+        #self.argoclient.buildVolumes(outputpath=workflow_name)
+        self.argoclient.buildVolumes(outputpath=workflow_name, scanflowpath="scanflow")
         #env
         ss = ScanflowSecret()
         scc = ScanflowClientConfig()
@@ -67,7 +76,8 @@ class ArgoDeployer(deployer.Deployer):
         #executor
         argoContainers = {}
         for executor in workflow.executors:
-            volumeMounts = self.argoclient.buildVolumeMounts(outputpath=f"{output_dir}/{executor.name}")
+            #volumeMounts = self.argoclient.buildVolumeMounts(outputpath=f"{output_dir}/{executor.name}")
+            volumeMounts = self.argoclient.buildVolumeMounts(outputpath=f"{output_dir}/{executor.name}", scanflowpath="/scanflow")
             logging.info(f"[+] Building workflow: [{workflow.name}:{executor.name}].")
             argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(executor.name, executor.image, env, volumeMounts)
 

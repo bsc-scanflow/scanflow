@@ -52,11 +52,11 @@ class ScanflowTrackerClient:
         """
         self.tracker.download_app_artifacts(app_name, run_id, team_name, local_dir, fromlocal)
 
-    def save_app_model(self, app_name, team_name, model_name):
+    def save_app_model(self, app_name:str, team_name:str, model_name: str, model_type: str):
         """
            save prepared production model from local env to remote scanflow tracker
         """
-        self.tracker.save_app_model(app_name, team_name, model_name)
+        self.tracker.save_app_model(app_name, team_name, model_name, model_type)
 
     def download_app_model(self, app_name, team_name, model_name, model_version):
         """
