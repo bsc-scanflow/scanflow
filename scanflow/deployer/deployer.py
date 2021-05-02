@@ -50,7 +50,25 @@ class Deployer():
         else:
             step7 = True
 
-        return  step1 and step2 and step3 and step4 and step5 and step6 and step7 
+        #tempo mount scanflow
+            step8 = self.__create_scanflow_volume(namespace)
+
+        return  step1 and step2 and step3 and step4 and step5 and step6 and step7 and step8 
+
+    def __create_scanflow_volume(self,namespace):
+        #scanflow volume, we have to pack scanflow, now we mount the volume
+        #name pv-scanflow-server "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini"
+        logging.info(f"[TEMPO: Because we dont have scanflow pip install now, we need to mount scanflow]")
+        pv = self.kubeclient.build_persistentvolume("scanflow", "1Gi", "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini")
+        step1 = self.kubeclient.create_persistentvolume(body=pv)
+        pvc = self.kubeclient.build_persistentvolumeclaim(namespace, "scanflow", None, "ReadWriteMany","1Gi")
+        step2 = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
+        return step1 and step2
+    
+    def __delete_scanflow_volume(self, namespace):
+        step1 = self.kubeclient.delete_persistentvolumeclaim(namespace, "scanflow")
+        step2 = self.kubeclient.delete_persistentvolume("scanflow")
+        return step1 and step2
 
     def clean_environment(self,
                           namespace: str,
@@ -73,7 +91,10 @@ class Deployer():
         # 4. delete namespace
         step7 = self.__delete_namespace(namespace)
         
-        return step1 and step2 and step3 and step4 and step5 and step6 and step7
+        # tempo
+        step8 = self.__delete_scanflow_volume(namespace)
+
+        return step1 and step2 and step3 and step4 and step5 and step6 and step7 and step8
 
     def __create_namespace(self, namespace):
         logging.info(f'[++]Creating namespace "{namespace}"')

@@ -89,31 +89,31 @@ async def save_scanflowApplication(app: Application):
 
 
 ## save/load/update scanflow model
-@app.post("/submit/scanflowModel",
-          response_model = ResponseMessageBase, 
-          tags = ['ScanflowModel'],
-          summary = "Save scanflow model")
-async def save_scanflowApplication(app: Application):
-    """
-      app: scanflowapplication json 
-    """
-    logging.info(f"call save_scanflowApplication {app.dict()} ")
-    
-    try:
-        mlflow.set_experiment(app.app_name)
-        with mlflow.start_run(run_name=f"scanflow-app-{app.team_name}"):
-            artifact_uri = mlflow.get_artifact_uri()
-            logging.info("save app to artifact uri: {}".format(artifact_uri))
-            mlflow.log_dict(app.dict(), "{}/{}.json".format(app.team_name, app.app_name))
-            if app.workflows is not None:
-                for workflow in app.workflows:
-                    mlflow.log_dict(workflow.dict(), "{}/workflows/{}.json".format(app.team_name, workflow.name))
-            if app.agents is not None:
-                for agent in app.agents:
-                    mlflow.log_dict(agent.dict(), "{}/agents/{}.json".format(app.team_name, agent.name))
-        return ResponseMessageBase(status=0)
-    except:
-        return ResponseMessageBase(status=1)
+#@app.post("/submit/scanflowModel",
+#          response_model = ResponseMessageBase, 
+#          tags = ['ScanflowModel'],
+#          summary = "Save scanflow model")
+#async def save_scanflowApplication(app: Application):
+#    """
+#      app: scanflowapplication json 
+#    """
+#    logging.info(f"call save_scanflowApplication {app.dict()} ")
+#    
+#    try:
+#        mlflow.set_experiment(app.app_name)
+#        with mlflow.start_run(run_name=f"scanflow-app-{app.team_name}"):
+#            artifact_uri = mlflow.get_artifact_uri()
+#            logging.info("save app to artifact uri: {}".format(artifact_uri))
+#            mlflow.log_dict(app.dict(), "{}/{}.json".format(app.team_name, app.app_name))
+#            if app.workflows is not None:
+#                for workflow in app.workflows:
+#                    mlflow.log_dict(workflow.dict(), "{}/workflows/{}.json".format(app.team_name, workflow.name))
+#            if app.agents is not None:
+#                for agent in app.agents:
+#                    mlflow.log_dict(agent.dict(), "{}/agents/{}.json".format(app.team_name, agent.name))
+#        return ResponseMessageBase(status=0)
+#    except:
+#        return ResponseMessageBase(status=1)
 
 
 

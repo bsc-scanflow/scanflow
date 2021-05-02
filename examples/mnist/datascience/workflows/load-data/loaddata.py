@@ -25,7 +25,7 @@ def loaddata(app_name, team_name):
     
     #log
     try:
-        mlflow.set_registry_uri(client.get_tracker_uri(True))
+        mlflow.set_tracking_uri(client.get_tracker_uri(True))
         logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
 
         mlflow.set_experiment("load_data")

@@ -41,27 +41,22 @@ class ArgoDeployer(deployer.Deployer):
         run workflow by argo
         """
         workflow_name = workflow.name
+        self.argoclient.configWorkflow(workflow_name)
 
         #output volume - deleted mode
         if workflow.output_dir is not None:
             set_output_dir(workflow.output_dir)
         output_dir = get_output_dir()
+        logging.info(f"[+] output dir {output_dir}")
+        logging.info(f"[+] Create {workflow_name} output PV")
+        pv = self.kubeclient.build_persistentvolume(workflow_name, "1Gi", f"/gpfs/bsc_home/xpliu/pv/scanflow-output/{workflow_name}-output")
+        step1 = self.kubeclient.create_persistentvolume(body=pv)
         logging.info(f"[+] Create {workflow_name} output PVC")
-        pvc = self.kubeclient.build_persistentvolumeclaim(namespace, workflow_name, "local-path", "ReadWriteOnce", "512Mi")
-        result = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
-        if result:
-            logging.info("pvc created")
+        pvc = self.kubeclient.build_persistentvolumeclaim(namespace, workflow_name, None,"ReadWriteMany", "512Mi")
+        step2 = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
+        if step1 and step2:
+            logging.info("output dir created")
 
-        #scanflow volume, we have to pack scanflow, now we mount the volume
-        #name pv-scanflow-server "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini"
-        logging.info(f"[TEMPO: Because we dont have scanflow pip install now, we need to mount scanflow]")
-        pv = self.kubeclient.build_persistentvolume("scanflow", "1Gi", "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini")
-        self.kubeclient.create_persistentvolume(body=pv)
-        pvc = self.kubeclient.build_persistentvolumeclaim(namespace, "scanflow", None, "ReadWriteMany","1Gi")
-        result = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
-        if result:
-            logging.info("pvc scanflow created")
-        
         #volume
         #self.argoclient.buildVolumes(outputpath=workflow_name)
         self.argoclient.buildVolumes(outputpath=workflow_name, scanflowpath="scanflow")
@@ -76,8 +71,8 @@ class ArgoDeployer(deployer.Deployer):
         #executor
         argoContainers = {}
         for executor in workflow.executors:
-            #volumeMounts = self.argoclient.buildVolumeMounts(outputpath=f"{output_dir}/{executor.name}")
-            volumeMounts = self.argoclient.buildVolumeMounts(outputpath=f"{output_dir}/{executor.name}", scanflowpath="/scanflow")
+            #volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir)
+            volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir, scanflowpath="/scanflow")
             logging.info(f"[+] Building workflow: [{workflow.name}:{executor.name}].")
             argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(executor.name, executor.image, env, volumeMounts)
 
@@ -115,4 +110,9 @@ class ArgoDeployer(deployer.Deployer):
     def delete_workflow(self, 
                         namespace: str,
                         workflow: Workflow):
-        pass
+        
+        workflow_name = workflow.name
+        self.argoclient.deleteWorkflow(namespace, workflow_name)
+        #output dir
+        self.kubeclient.delete_persistentvolumeclaim(namespace, workflow_name)
+        self.kubeclient.delete_persistentvolume(workflow_name)

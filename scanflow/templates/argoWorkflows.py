@@ -52,6 +52,13 @@ class ArgoWorkflows:
     def argoDag(self, dependency_graph):
         couler.dag(dependency_graph)
 
+    def configWorkflow(self, workflow_name):
+        couler.config_workflow(
+            name=workflow_name,
+            timeout=3600,
+            time_to_clean=3600 * 1.5,
+        )
+
     
 
 #    def buildDagTask(self, name, image, env, volumeMounts, dependencies):

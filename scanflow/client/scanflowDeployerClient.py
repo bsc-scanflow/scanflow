@@ -126,6 +126,14 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app.app_name}-{app.team_name}"
             self.deployerbackend.run_workflows(namespace, app.workflows)
 
+    def delete_workflows(self,
+                         app: Application):
+        if self.user_type == "incluster":
+            pass
+        else:
+            namespace = f"scanflow-{app.app_name}-{app.team_name}"
+            self.deployerbackend.delete_workflows(namespace, app.workflows)
+
 #    def run_workflows(self,
 #                      app_name: str,
 #                      team_name: str,

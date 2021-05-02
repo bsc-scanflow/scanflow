@@ -1,6 +1,5 @@
 from typing import List, Dict
 import logging
-import matplotlib.pyplot as plt
 import json
 
 from scanflow.agent import Agent
