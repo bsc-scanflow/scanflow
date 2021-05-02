@@ -1,10 +1,8 @@
-## graph for scanflow local tracker
 
-class ScanflowGraph:
+class AgentsGraph:
     def __init__(self,
-                 tracker):
-    
-        self.tracker = tracker
+                 agents):
+        self.agents = agents
         self.graph = self.generate_graph()
 
     def generate_graph(self):

@@ -8,7 +8,7 @@ from scanflow.app import Executor, Dependency, Workflow, Application, Tracker
 from scanflow.agent import Agent
 
 # scanflow graph
-#from scanflow.graph import ApplicationGraph
+from scanflow.graph import ApplicationGraph
 
 
 from scanflow.tools.scanflowtools import check_verbosity
@@ -72,10 +72,10 @@ class ScanflowClient:
 
 ###   Scanflow graph
 
-#    def draw_ScanflowApplication(self, scanflowapp, verbose=False):
-#        appGraph = ApplicationGraph(scanflowapp, verbose=verbose)
-#        return appGraph.draw_graph()
-#
+    def draw_ScanflowApplication(self, scanflowapp):
+        appGraph = ApplicationGraph(scanflowapp)
+        return appGraph.draw_graph()
+
 
 
 ###   Scanflow app

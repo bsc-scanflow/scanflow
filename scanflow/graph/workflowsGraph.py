@@ -1,13 +1,12 @@
-## graph for scanflow local tracker
 
-class ScanflowGraph:
+class WorkflowsGraph:
     def __init__(self,
-                 tracker):
-    
-        self.tracker = tracker
+                 workflows):
+
+        self.workflows = workflows
         self.graph = self.generate_graph()
 
     def generate_graph(self):
         G = nx.Graph()
         G.add_node("scanflow-tracker")
-        return G
+        return  
