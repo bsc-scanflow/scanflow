@@ -18,7 +18,7 @@ spec:
         app: scanflow-tracker
     spec:
       containers:
-        - image: {{.Values.basic.scanflow_trakcer_image_name}}:{{.Values.basic.image_tag_version}}
+        - image: {{.Values.basic.scanflow_tracker_image_name}}:{{.Values.basic.image_tag_version}}
           imagePullPolicy: Always
           name: {{ .Release.Name }}-tracker
          # env:
