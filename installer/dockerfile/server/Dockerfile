@@ -14,6 +14,10 @@ RUN pip install uvicorn
 RUN pip install aiohttp
 RUN pip install aiodns
 
+#scanflow
+RUN pip install git+https://github.com/peiniliu/couler.git
+RUN pip install kubernetes==12.0.1
+
 #minio
 RUN pip install boto3
 
