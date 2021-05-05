@@ -16,6 +16,12 @@ class MlflowTracker(Tracker):
                  verbose=True):
         super(MlflowTracker, self).__init__(scanflow_tracker_uri,scanflow_tracker_local_uri,verbose)
 
+    def save_app_meta(self, app):
+        pass
+
+    def download_app_meta(self, app_name, team_name):
+        pass
+
     def save_app_model(self, app_name, team_name, model_name, model_type):
         #TODO:4.30 Now we only support save pytorch model
         # 1.load model from local

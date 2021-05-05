@@ -58,15 +58,17 @@ class ScanflowClient:
 
     def submit_ScanflowApplication(self,
                                    app: Application):
-        url = f"{self.scanflow_server_uri}/submit/scanflowApplication" 
+        url = f"{self.scanflow_server_uri}/app/submit" 
         response = requests.post(url=url, 
         data= json.dumps(app.to_dict()),
         headers={"accept": "application/json"})
 
-        if json.loads(response.text)['status'] == 0:
+
+        if response.status_code == 201:
+            logging.info(f"{response.text['detail']}")
             return True
         else:
-            logging.error(f"submit scanflow application error {response.text['status']}")
+            logging.error(f"{response.text['detail']}")
             return False
 
 

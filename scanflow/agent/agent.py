@@ -8,6 +8,10 @@ class Agent():
                  parameters: dict = None,
                  dockerfile: str = None,
                  image: str = None):
+        """
+           we provide several templates. the functions within the templates need to be used together with the agent file.
+           user can also define their own agent and provide the mainfile.
+        """
         
         self.name = name
         self.template = template
