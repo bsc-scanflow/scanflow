@@ -1,5 +1,4 @@
 from scanflow.app import Application, Executor, Workflow
-from scanflow.agent import Agent
 class Builder():
     def __init__(self,
                  registry: str):

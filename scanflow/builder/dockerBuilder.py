@@ -6,8 +6,7 @@ from textwrap import dedent
 
 import scanflow.builder.builder as builder
 
-from scanflow.app import Application, Executor, Workflow, Tracker
-from scanflow.agent import Agent
+from scanflow.app import Application, Executor, Workflow, Tracker, Agent
 
 from typing import List, Dict
 
@@ -146,8 +145,11 @@ class DockerBuilder(builder.Builder):
     def __dockerfile_template_agent(self, agent):
         template = dedent(f'''
                     FROM 172.30.0.49:5000/scanflow-agent
+
+                    ENV AGENT_NAME {agent.name}
+                    ENV AGENT_TYPE {agent.type}
     
-                    COPY {agent.name} /agent/{agent.name}
+                    COPY {agent.name} /$AGENT_HOME/template/{agent.type}/{agent.name}
     
                     CMD uvicorn /agent/{agent.name}/{agent.mainfile}:agent --reload --host 0.0.0.0 --port 8080
         ''')

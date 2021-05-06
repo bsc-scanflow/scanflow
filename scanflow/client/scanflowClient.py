@@ -4,8 +4,7 @@ import os
 from typing import List, Dict
 
 # scanflow app
-from scanflow.app import Executor, Dependency, Workflow, Application, Tracker
-from scanflow.agent import Agent
+from scanflow.app import Executor, Dependency, Workflow, Application, Tracker, Agent
 
 # scanflow graph
 #from scanflow.graph import ApplicationGraph

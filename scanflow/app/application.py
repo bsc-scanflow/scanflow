@@ -2,7 +2,7 @@ from typing import List, Dict
 import logging
 import json
 
-from scanflow.agent import Agent
+from scanflow.app import Agent
 from scanflow.app import Workflow
 from scanflow.app import Tracker
 

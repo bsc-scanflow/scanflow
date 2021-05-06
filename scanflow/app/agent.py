@@ -1,5 +1,3 @@
-from scanflow.tools.scanflowtools import get_scanflow_paths, check_verbosity
-
 class Agent():
     def __init__(self,
                  name: str,

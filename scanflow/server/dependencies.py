@@ -1,6 +1,5 @@
 #fastapi
 from fastapi import Depends
-
 #scanflow
 from scanflow.client import ScanflowTrackerClient
 

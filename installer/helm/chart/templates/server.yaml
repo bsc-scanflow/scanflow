@@ -70,7 +70,7 @@ spec:
               - configMapRef:
                   name: scanflow-server-env
             volumeMounts:
-              - mountPath: /app
+              - mountPath: /scanflow
                 name: pvc-scanflow-server
       restartPolicy: Always
 

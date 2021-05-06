@@ -4,8 +4,7 @@ abstract deployer class
 import logging
 
 from typing import List
-from scanflow.app import Application, Tracker, Workflow
-from scanflow.agent import Agent
+from scanflow.app import Application, Tracker, Workflow, Agent
 
 from scanflow.templates import Kubernetes
 
