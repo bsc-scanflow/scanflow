@@ -1,5 +1,9 @@
-from pydantic import AnyHttpUrl, BaseSettings, PyObject
-from typing import List
+from pydantic import AnyHttpUrl, BaseSettings, PyObject, BaseModel
+from typing import List, Dict
+
+class FunctionModel(BaseModel):
+    name: str
+    path: PyObject
 
 class Settings(BaseSettings):
     AGENT_NAME: str
@@ -9,8 +13,9 @@ class Settings(BaseSettings):
     SCANFLOW_TRACKER_LOCAL_URI : AnyHttpUrl
     SCANFLOW_SERVER_URI : AnyHttpUrl
 
+    sensors : 
 
-    special_function: List[PyObject] = ['scanflow.agent.template.monitor.custom_sensors.sensor_root','math.cos']
+    functions : List[FunctionModel] = [{'name':'sensor_root', 'path':'scanflow.agent.template.monitor.custom_sensors.sensor_root'},{"name": "tock","path":"scanflow.agent.template.monitor.custom_sensors.tock"}]
 
     class Config:
         case_sensitive = True
