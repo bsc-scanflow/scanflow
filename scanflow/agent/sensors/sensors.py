@@ -16,6 +16,6 @@ elif settings.AGENT_TYPE == "executor":
     from scanflow.agent.template.executor import sensors
     sensors_router.include_router(sensors.executor_sensors_router)
 else:
-    @router.get("/")
-    def sensors_root():
-       return {"Hello sensors": "unknown agent type"}
+    #custom agent sensor
+    from scanflow.agent.sensors import custom_sensors
+    sensors_router.include_router(sensors.custom_sensors_router)

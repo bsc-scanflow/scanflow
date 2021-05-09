@@ -1,9 +1,8 @@
 from typing import List, Dict
 import logging
-import json
 
-from scanflow.app import Agent
-from scanflow.app import Workflow
+from scanflow.app.agent.agent import Agent
+from scanflow.app.workflow.workflow import Workflow
 from scanflow.app import Tracker
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',

@@ -27,6 +27,7 @@ schedule = AsyncIOScheduler(
     #}
 )
 from datetime import datetime
+import time
 
 #scanflow
 from scanflow.agent.config.settings import settings
@@ -46,15 +47,13 @@ try:
 except:
     logging.info("custom_sensors function does not provide a router.")
 
-async def tick():
-    print('Tick! The time is: %s' %  time.strftime("'%Y-%m-%d %H:%M:%S'"))
 
 @monitor_sensors_router.on_event("startup")
 async def sensors_startup():
     logging.info(f"{settings.AGENT_NAME} monitor sensors startup")
     schedule.start()
-    print(settings.functions[1].path())
-    schedule.add_job(settings.functions[1].path, 'interval', seconds=30, next_run_time=datetime.fromtimestamp(time.time()))
+    #print(settings.sensors['tock'].func())
+    #schedule.add_job(settings.functions[1].path, 'interval', seconds=30, next_run_time=datetime.fromtimestamp(time.time()))
 
 @monitor_sensors_router.on_event("shutdown")
 async def sensors_shutdown():
@@ -64,11 +63,11 @@ async def sensors_shutdown():
 @monitor_sensors_router.get("/",
                             status_code= status.HTTP_200_OK)
 async def sensors_root():
-    try:
-        for function in settings.functions:
-            if function.name == "sensor_root":
-                return function.path()
-    except:
+#    try:
+#        for function in settings.functions:
+#            if function.name == "sensor_root":
+#                return function.path()
+#    except:
         return {"Hello": "monitor sensors"}
 
 @monitor_sensors_router.get("/get/all", 
@@ -84,7 +83,7 @@ async def get_all_sensors():
     for job in schedule.get_jobs():
         jobs.append( 
             SensorOutput(
-                id=job.id, name=job.name, func_name=job.func_ref, trigger=str(job.trigger), next_run_time=str(job.next_run_time)
+                id=job.id, name=job.name, func_name=job.func_ref, trigger_str=str(job.trigger), next_run_time=str(job.next_run_time)
             )
         )
     return jobs
@@ -98,64 +97,86 @@ async def get_sensor(sensor_id: str):
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sensor is not found")
     return  SensorOutput(
-                id=job.id, name=job.name, func_name=job.func_ref, trigger=str(job.trigger), next_run_time=str(job.next_run_time)
+                id=job.id, name=job.name, func_name=job.func_ref, trigger_str=str(job.trigger), next_run_time=str(job.next_run_time)
             )
 
 # interval 固定间隔时间调度
 @monitor_sensors_router.post("/add/interval",
                              summary="start an interval sensor: sensor will run at every interval seconds",
                              status_code = status.HTTP_200_OK)
-async def add_sensor_interval( sensor: Sensor, intervalTrigger: IntervalTrigger ):
-    schedule_job = schedule.add_job(sensor.func,
+async def add_sensor_interval( sensor_name: str ):
+    sensor = settings.sensors[f"{sensor_name}"]
+    print(sensor.dict())
+
+    if sensor.next_run_time is None:
+        #default start right now
+        next_run_time = datetime.fromtimestamp(time.time())
+    else:
+        next_run_time = sensor.next_run_time
+
+    if isinstance(sensor.trigger, IntervalTrigger): 
+        schedule_job = schedule.add_job(sensor.func,
                                     'interval',
-                                    weeks = intervalTrigger.weeks,
-                                    days = intervalTrigger.days,
-                                    hours = intervalTrigger.hours,
-                                    minutes = intervalTrigger.minutes,
-                                    seconds = intervalTrigger.seconds,
-                                    start_date = intervalTrigger.start_date,
-                                    end_date = intervalTrigger.end_date,
-                                    timezone = intervalTrigger.timezone,
-                                    jitter = intervalTrigger.jitter,
+                                    weeks = sensor.trigger.weeks,
+                                    days = sensor.trigger.days,
+                                    hours = sensor.trigger.hours,
+                                    minutes = sensor.trigger.minutes,
+                                    seconds = sensor.trigger.seconds,
+                                    start_date = sensor.trigger.start_date,
+                                    end_date = sensor.trigger.end_date,
+                                    timezone = sensor.trigger.timezone,
+                                    jitter = sensor.trigger.jitter,
 
                                     args=sensor.args,
                                     kwargs=sensor.kwargs,
                                     name=sensor.name,
-                                    next_run_time=datetime.fromtimestamp(sensor.next_run_time)
+                                    next_run_time=next_run_time
                                     )
-    return {"detail": f"{sensor.name} has been added. first run will start at {sensor.next_run_time}"}
+        return {"detail": f"{sensor.name} has been added. first run will start at {sensor.next_run_time}"}
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="trigger is not allowed")
 
 
 # date 某个特定时间点只运行一次
 @monitor_sensors_router.post("/add/date", 
                              summary="start a date sensor: sensor only run once at the specific date time",
                              status_code = status.HTTP_200_OK)
-async def add_sensor_date(sensor: Sensor, dataTrigger: DateTrigger):
-    schedule_job = schedule.add_job(sensor.func,
+async def add_sensor_date(sensor_name: str):
+    sensor = settings.sensors[f"{sensor_name}"]
+
+    if isinstance(sensor.trigger, DateTrigger): 
+        schedule_job = schedule.add_job(sensor.func,
                                     'date',
-                                    run_date = dataTrigger.run_date,
-                                    timezone = dataTrigger.timezone,
+                                    run_date = sensor.trigger.run_date,
+                                    timezone = sensor.trigger.timezone,
 
                                     args=sensor.args,
                                     kwargs=sensor.kwargs,
                                     name=sensor.name
                                     )
-    return {"detail": f"{sensor.name} has been added. sensor will run start at {sensor.run_date}"}
+        return {"detail": f"{sensor.name} has been added. sensor will run start at {sensor.run_date}"}
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="trigger is not allowed")
 
 
 # cron 更灵活的定时任务 可以使用crontab表达式
 @monitor_sensors_router.post("/add/cron",  
                              summary="start a flexible sensor with crontab expression",
                              status_code = status.HTTP_200_OK)
-async def add_sensor_cron(sensor: Sensor, cronTrigger: CronTrigger):
-    schedule_job = schedule.add_job(sensor.func,
-                                    CronTrigger.from_crontab(cronTrigger.crontab),
+async def add_sensor_cron(sensor_name: str):
+    sensor = settings.sensors[f"{sensor_name}"]
+
+    if isinstance(sensor.trigger, CronTrigger):
+        schedule_job = schedule.add_job(sensor.func,
+                                    CronTrigger.from_crontab(sensor.trigger.crontab),
 
                                     args=sensor.args,
                                     kwargs=sensor.kwargs,
                                     name=sensor.name
                                     )
-    return {"detail": f"{sensor.name} has been added. sensor will run at {cronTrigger.crontab}"}
+        return {"detail": f"{sensor.name} has been added. sensor will run at {cronTrigger.crontab}"}
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="trigger is not allowed")
 
 @monitor_sensors_router.delete("/remove", 
                               summary="delete a sensor",
