@@ -18,7 +18,7 @@ class Settings(BaseSettings):
         'tock': {'name': 'tock', 
                  'func': 'scanflow.agent.template.monitor.custom_sensors.tock',
                  'trigger': {
-                     'base': 'test',
+                     'type': 'interval',
                      'seconds': 15
                  }}}
     rules: Dict[str, Rule] = None

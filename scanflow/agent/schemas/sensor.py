@@ -2,10 +2,9 @@ from pydantic import BaseModel, Field, PyObject
 from typing import Optional, List, Dict
 from datetime import datetime
 
-class BaseTrigger(BaseModel):
-    base: str = None
-
-class IntervalTrigger(BaseTrigger):
+class Trigger(BaseModel):
+    type: str = None
+    #1.interval
     weeks: int = 0
     days: int = 0
     hours: int = 0
@@ -15,17 +14,15 @@ class IntervalTrigger(BaseTrigger):
     end_date: str = None
     timezone: str = None
     jitter: int = None
-    
-class DateTrigger(BaseTrigger):
+    #2.date
     run_date: str = None
     timezone: str = None
-
-class CronTrigger(BaseTrigger):
+    #3.crontab
     crontab: str = None
 
 class Sensor(BaseModel):
     name: str
-    trigger: BaseTrigger = None
+    trigger: Trigger = None
     args: tuple = None
     kwargs: tuple = None
     next_run_time: datetime = None
@@ -33,7 +30,9 @@ class Sensor(BaseModel):
 class SensorCallable(Sensor):
     func: PyObject
 
-class SensorOutput(Sensor):
+class SensorOutput(BaseModel):
     id: str 
+    name: str
     func_name: str
     trigger_str: str
+    next_run_time: datetime = None

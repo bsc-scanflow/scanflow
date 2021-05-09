@@ -32,7 +32,7 @@ import time
 #scanflow
 from scanflow.agent.config.settings import settings
 from scanflow.agent.template.monitor import custom_sensors
-from scanflow.agent.schemas.sensor import Sensor, SensorOutput, CronTrigger, IntervalTrigger, DateTrigger
+from scanflow.agent.schemas.sensor import Sensor, SensorOutput, Trigger
 
 from scanflow.client import ScanflowTrackerClient
 import mlflow
@@ -51,24 +51,27 @@ except:
 @monitor_sensors_router.on_event("startup")
 async def sensors_startup():
     logging.info(f"{settings.AGENT_NAME} monitor sensors startup")
+    await sensors_root()
     schedule.start()
-    #print(settings.sensors['tock'].func())
-    #schedule.add_job(settings.functions[1].path, 'interval', seconds=30, next_run_time=datetime.fromtimestamp(time.time()))
+    for k,v in settings.sensors.items():
+        if v.trigger.type == 'interval':
+            await add_sensor_interval(v.name)
+        elif v.trigger.type == 'date':
+            await add_sensor_date(v.name)
+        elif v.trigger.type == 'cron':
+            await add_sensor_cron(v.name)
 
 @monitor_sensors_router.on_event("shutdown")
 async def sensors_shutdown():
     logging.info(f"{settings.AGENT_NAME} monitor sensors shutdown")
+    await remove_all_sensors()
     scheduler.shutdown()
 
 @monitor_sensors_router.get("/",
                             status_code= status.HTTP_200_OK)
 async def sensors_root():
-#    try:
-#        for function in settings.functions:
-#            if function.name == "sensor_root":
-#                return function.path()
-#    except:
-        return {"Hello": "monitor sensors"}
+    print(f"Hello! monitor sensors")
+    return {"Hello": "monitor sensors"}
 
 @monitor_sensors_router.get("/get/all", 
                             summary="get all sensors' information",
@@ -114,7 +117,7 @@ async def add_sensor_interval( sensor_name: str ):
     else:
         next_run_time = sensor.next_run_time
 
-    if isinstance(sensor.trigger, IntervalTrigger): 
+    if sensor.trigger.type == 'interval': 
         schedule_job = schedule.add_job(sensor.func,
                                     'interval',
                                     weeks = sensor.trigger.weeks,
@@ -132,7 +135,8 @@ async def add_sensor_interval( sensor_name: str ):
                                     name=sensor.name,
                                     next_run_time=next_run_time
                                     )
-        return {"detail": f"{sensor.name} has been added. first run will start at {sensor.next_run_time}"}
+        logging.info(f"{sensor.name} has been added. first run will start at {next_run_time}")
+        return {"detail": f"{sensor.name} has been added. first run will start at {next_run_time}"}
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="trigger is not allowed")
 
@@ -144,7 +148,7 @@ async def add_sensor_interval( sensor_name: str ):
 async def add_sensor_date(sensor_name: str):
     sensor = settings.sensors[f"{sensor_name}"]
 
-    if isinstance(sensor.trigger, DateTrigger): 
+    if sensor.trigger.type == 'date': 
         schedule_job = schedule.add_job(sensor.func,
                                     'date',
                                     run_date = sensor.trigger.run_date,
@@ -154,6 +158,7 @@ async def add_sensor_date(sensor_name: str):
                                     kwargs=sensor.kwargs,
                                     name=sensor.name
                                     )
+        logging.info(f"{sensor.name} has been added. sensor will run start at {sensor.run_date}")
         return {"detail": f"{sensor.name} has been added. sensor will run start at {sensor.run_date}"}
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="trigger is not allowed")
@@ -166,7 +171,7 @@ async def add_sensor_date(sensor_name: str):
 async def add_sensor_cron(sensor_name: str):
     sensor = settings.sensors[f"{sensor_name}"]
 
-    if isinstance(sensor.trigger, CronTrigger):
+    if sensor.trigger.type == 'cron': 
         schedule_job = schedule.add_job(sensor.func,
                                     CronTrigger.from_crontab(sensor.trigger.crontab),
 
@@ -174,6 +179,7 @@ async def add_sensor_cron(sensor_name: str):
                                     kwargs=sensor.kwargs,
                                     name=sensor.name
                                     )
+        logging.info(f"{sensor.name} has been added. sensor will run at {cronTrigger.crontab}")
         return {"detail": f"{sensor.name} has been added. sensor will run at {cronTrigger.crontab}"}
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="trigger is not allowed")
@@ -187,6 +193,14 @@ async def remove_sensor(sensor_id: str):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sensor is not found")
     schedule.remove_job(job_id)
     return {"detail": f"{sensor_id} has been removed."}
+
+@monitor_sensors_router.delete("/remove/all", 
+                              summary="delete all sensors",
+                              status_code = status.HTTP_200_OK)
+async def remove_all_sensors():
+    schedule.remove_all_jobs()
+    logging.info("all jobs has been removed.")
+    return {"detail": f"all jobs has been removed."}
 
 
 
