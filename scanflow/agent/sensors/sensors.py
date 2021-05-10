@@ -1,7 +1,11 @@
 from fastapi import FastAPI, APIRouter
 from scanflow.agent.config.settings import settings
 
-sensors_router = APIRouter()
+sensors_router = APIRouter(prefix="/sensors")
+
+from scanflow.agent.sensors import sensors_trigger
+sensors_router.include_router(sensors_trigger.sensors_trigger_router, prefix="/triggers", tags=["auto-triggered sensors"])
+
 
 if settings.AGENT_TYPE == "monitor":
     from scanflow.agent.template.monitor import sensors
@@ -18,4 +22,4 @@ elif settings.AGENT_TYPE == "executor":
 else:
     #custom agent sensor
     from scanflow.agent.sensors import custom_sensors
-    sensors_router.include_router(sensors.custom_sensors_router)
+    sensors_router.include_router(sensors.custom_sensors_router, tags=["custom sensors"])

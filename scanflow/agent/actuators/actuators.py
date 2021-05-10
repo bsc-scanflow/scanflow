@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from scanflow.agent.config.settings import settings
 
-actuators_router = APIRouter()
+actuators_router = APIRouter(prefix="/actuators")
 
 if settings.AGENT_TYPE == "monitor":
     from scanflow.agent.template.monitor import actuators

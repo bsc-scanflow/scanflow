@@ -42,13 +42,15 @@ class CronTrigger(BaseTrigger):
 class Sensor():
     def __init__(self,
                  name: str,
+                 isCustom : bool,
                  func_name: str,
                  trigger: BaseTrigger = None,
                  args: tuple = None,
                  kwargs: tuple = None,
                  next_run_time: datetime = None):
         self.name = name
-        self.func_name = name
+        self.isCustom = isCustom
+        self.func_name = func_name
         self.trigger = trigger
         self.args = args
         self.kwargs = kwargs

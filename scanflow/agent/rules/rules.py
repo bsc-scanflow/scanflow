@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from scanflow.agent.config.settings import settings
 
-rules_router = APIRouter()
+rules_router = APIRouter(prefix="/rules")
 
 if settings.AGENT_TYPE == "monitor":
     from scanflow.agent.template.monitor import rules

@@ -2,10 +2,10 @@
 from fastapi import FastAPI, APIRouter
 from fastapi import Response, status, HTTPException
 
-monitor_actuators_router = APIRouter(tags=['monitor actuators'])
+planner_actuators_router = APIRouter(tags=['planner actuators'])
 
-@monitor_actuators_router.get("/",
+@planner_actuators_router.get("/",
                             status_code= status.HTTP_200_OK)
 async def actuators_root():
-    print(f"Hello! monitor actuators")
-    return {"Hello": "monitor actuators"}
+    print(f"Hello! planner actuators")
+    return {"Hello": "planner actuators"}
