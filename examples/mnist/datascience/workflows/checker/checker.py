@@ -302,8 +302,8 @@ def checker(model_name, x_train_path):
         detector, ddae_history = train(x_train, 
                                         epochs=3, 
                                         batch_size=128,
-                                           model_path='detector.hdf5')
-        mlflow.tensorflow.log_model(detector, artifact_path=model_name, 
+                                        model_path='detector.hdf5')
+        mlflow.keras.log_model(detector, artifact_path=model_name, 
                                    registered_model_name=model_name)
         
         mlflow.log_param(key='val_loss', value=ddae_history.history['val_loss'])

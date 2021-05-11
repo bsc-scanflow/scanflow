@@ -12,9 +12,9 @@ elif settings.AGENT_TYPE == "analyzer":
 elif settings.AGENT_TYPE == "planner":
     from scanflow.agent.template.planner import rules
     rules_router.include_router(rules.planner_rules_router)
-elif settings.AGENT_TYPE == "executor":
-    from scanflow.agent.template.executor import rules
-    rules_router.include_router(rules.executor_rules_router)
+#elif settings.AGENT_TYPE == "executor":
+#    from scanflow.agent.template.executor import rules
+#    rules_router.include_router(rules.executor_rules_router)
 else:
     #custom agent rules
     from scanflow.agent.rules import custom_rules

@@ -28,6 +28,8 @@ class MlflowTracker(Tracker):
         mlflow.set_tracking_uri(get_tracker_uri(True))
         if model_type == "pytorch":
             pytorch_model = mlflow.pytorch.load_model(f"models:/{model_name}/Production")
+        elif model_type == "keras":
+            keras_model = mlflow.keras.load_model(f"models:/{model_name}/Production")
         else:
             logging.info("unsupported model_type {model_type}")
 
@@ -37,6 +39,9 @@ class MlflowTracker(Tracker):
         if model_type == "pytorch":
             with mlflow.start_run(run_name=f"scanflow-model-{team_name}"):
                 mlflow.pytorch.log_model(pytorch_model, model_name, registered_model_name=model_name)
+        if model_type == "keras":
+            with mlflow.start_run(run_name=f"scanflow-model-{team_name}"):
+                mlflow.keras.log_model(keras_model, model_name, registered_model_name=model_name)
         else:
             logging.info("unsupported model_type {model_type}")
 

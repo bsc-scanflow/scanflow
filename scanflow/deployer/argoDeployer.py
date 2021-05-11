@@ -112,7 +112,11 @@ class ArgoDeployer(deployer.Deployer):
                         workflow: Workflow):
         
         workflow_name = workflow.name
-        self.argoclient.deleteWorkflow(namespace, workflow_name)
-        #output dir
-        self.kubeclient.delete_persistentvolumeclaim(namespace, workflow_name)
-        self.kubeclient.delete_persistentvolume(workflow_name)
+        try:
+            self.argoclient.deleteWorkflow(namespace, workflow_name)
+        except:
+            logging.info(f"cannot find workflows")
+        finally:
+            #output dir
+            self.kubeclient.delete_persistentvolumeclaim(namespace, workflow_name)
+            self.kubeclient.delete_persistentvolume(workflow_name)

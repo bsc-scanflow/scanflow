@@ -1,0 +1,8 @@
+
+FROM 172.30.0.49:5000/scanflow-executor
+
+COPY predictor-batch /app/predictor-batch
+
+RUN pip install -r /app/predictor-batch/req_predictor.txt
+
+CMD ["python", "/app/predictor-batch/predictor.py"]

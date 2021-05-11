@@ -10,10 +10,6 @@ logging.getLogger().setLevel(logging.INFO)
 from fastapi import FastAPI, APIRouter
 from fastapi import Response, status, HTTPException
 
-
-#scanflow
-from scanflow.agent.config.settings import settings
-
 from scanflow.client import ScanflowTrackerClient
 import mlflow
 client = ScanflowTrackerClient(verbose=True)
@@ -39,10 +35,11 @@ except:
 
 
 #scanflow monitor sensor
-from scanflow.agent.template.monitor import sensors
+from scanflow.agent.template.monitor.rules import rule_number_of_pictures
 
 #example 1: count number of pictures in last 1 hour 
 @monitor_sensors_router.get("/count_number_of_pictures",
                             status_code= status.HTTP_200_OK)
 def count_number_of_pictures(executor:str):
-    rule_number_of_picture(21)
+    print(executor)
+    rule_number_of_pictures(21)

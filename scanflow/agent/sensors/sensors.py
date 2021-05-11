@@ -4,7 +4,7 @@ from scanflow.agent.config.settings import settings
 sensors_router = APIRouter(prefix="/sensors")
 
 from scanflow.agent.sensors import sensors_trigger
-sensors_router.include_router(sensors_trigger.sensors_trigger_router, prefix="/triggers", tags=["auto-triggered sensors"])
+sensors_router.include_router(sensors_trigger.sensors_trigger_router, prefix="/event", tags=["auto-triggered sensors"])
 
 
 if settings.AGENT_TYPE == "monitor":
@@ -16,9 +16,9 @@ elif settings.AGENT_TYPE == "analyzer":
 elif settings.AGENT_TYPE == "planner":
     from scanflow.agent.template.planner import sensors
     sensors_router.include_router(sensors.planner_sensors_router)
-elif settings.AGENT_TYPE == "executor":
-    from scanflow.agent.template.executor import sensors
-    sensors_router.include_router(sensors.executor_sensors_router)
+#elif settings.AGENT_TYPE == "executor":
+#    from scanflow.agent.template.executor import sensors
+#    sensors_router.include_router(sensors.executor_sensors_router)
 else:
     #custom agent sensor
     from scanflow.agent.sensors import custom_sensors

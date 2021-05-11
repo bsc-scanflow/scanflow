@@ -20,7 +20,18 @@ class Settings(BaseSettings):
                  'trigger': {
                      'type': 'interval',
                      'seconds': 15
-                 }}}
+                    }
+                },
+        'count_number_of_pictures': {
+                  'name': 'count_number_of_pictures',
+                  'func': 'scanflow.agent.template.monitor.sensors.count_number_of_pictures',
+                  'trigger':{
+                      'type': 'interval',
+                      'seconds': 30
+                  },
+                  'args':['mnist']
+                }
+        }
     rules: Dict[str, Rule] = None
     actuators: Dict[str, Actuator] = None
 

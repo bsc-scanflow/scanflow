@@ -7,7 +7,7 @@ class Builder():
         """
         self.registry = registry
 
-    def build_ScanflowApplication(self, app: Application):
+    def build_ScanflowApplication(self, app: Application, trackerPort: int):
         """
         # 1. build scanflow agent
         # 2. build scanflow workflows - executors

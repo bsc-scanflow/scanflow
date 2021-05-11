@@ -55,8 +55,8 @@ async def sensors_shutdown():
 @sensors_trigger_router.get("/",
                             status_code= status.HTTP_200_OK)
 async def sensors_root():
-    print(f"Hello! monitor sensors")
-    return {"Hello": "monitor sensors"}
+    print(f"Hello! monitor trigger sensors")
+    return {"Hello": "monitor trigger sensors"}
 
 @sensors_trigger_router.get("/get/all", 
                             summary="get all sensors' information",
