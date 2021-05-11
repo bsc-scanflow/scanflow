@@ -125,20 +125,45 @@ class DockerBuilder(builder.Builder):
 
     def __dockerfile_template_executor(self, executor):
         template = dedent(f'''
+        ''')
+
+        #baseimage
+        if executor.base_image is not None:
+            image_name = f"{self.registry}/{executor.base_image}"
+            try:
+                image = self.client.images.get(image_name)    
+            except docker.api.client.DockerException as e:
+                raise EnvironmentError(f"[+] Base Image [{image_name}] not found in repository.")
+            base_image_template = dedent(f'''
+                    FROM {image.tags[0]}
+            ''')
+            template += base_image_template
+        else:
+            base_image_template = dedent(f'''
                     FROM 172.30.0.49:5000/scanflow-executor
-    
+            ''')
+            template += base_image_template
+
+        #code
+        code_template = dedent(f'''
                     COPY {executor.name} /app/{executor.name}
         ''')
+        template += code_template
+
+        #requirements
         if executor.requirements is not None:
             req_template = dedent(f'''
                     RUN pip install -r /app/{executor.name}/{executor.requirements}
             ''')
             template  += req_template
+        
+        #mainfile
         if executor.mainfile is not None:
             exec_template = dedent(f''' 
                     CMD ["python", "/app/{executor.name}/{executor.mainfile}"]
             ''')
             template += exec_template
+
         logging.info(f"{executor.name} 's Dockerfile {template}")
         return template
  

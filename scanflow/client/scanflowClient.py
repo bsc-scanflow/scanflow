@@ -86,8 +86,9 @@ class ScanflowClient:
                          parameters: dict = None,
                          requirements: str = None,
                          dockerfile: str = None,
+                         base_image: str = None,
                          env: str = None):
-        return Executor(name, mainfile, parameters, requirements, dockerfile, env)
+        return Executor(name, mainfile, parameters, requirements, dockerfile, base_image, env)
 
     def ScanflowDependency(self,
                          dependee: str,

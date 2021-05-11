@@ -19,6 +19,7 @@ class Executor(Node):
                  parameters: dict = None,
                  requirements: str = None,
                  dockerfile: str = None,
+                 base_image: str = None,
                  env: dict = None,
                  image: str = None):
 
@@ -27,6 +28,7 @@ class Executor(Node):
         self.parameters = parameters
         self.requirements = requirements
         self.dockerfile = dockerfile
+        self.base_image = base_image
         self.env = env
         self.image = image
 

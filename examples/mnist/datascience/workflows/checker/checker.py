@@ -281,8 +281,9 @@ def picker(E_test, x_inference, y_inference, n_critical_points=5):
 
 @click.command(help="Train a detector")
 @click.option("--model_name", default='mnist_detector', type=str)
+@click.option("--epochs", default=1, type=int)
 @click.option("--x_train_path", default='/workflow/load-data/mnist/data/mnist/train_images.npy', type=str)
-def checker(model_name, x_train_path):
+def checker(model_name, epochs, x_train_path):
 
     #data
     img_rows, img_cols = 28, 28
@@ -300,7 +301,7 @@ def checker(model_name, x_train_path):
     with mlflow.start_run():
         #modeling
         detector, ddae_history = train(x_train, 
-                                        epochs=3, 
+                                        epochs=epochs, 
                                         batch_size=128,
                                         model_path='detector.hdf5')
         mlflow.keras.log_model(detector, artifact_path=model_name, 

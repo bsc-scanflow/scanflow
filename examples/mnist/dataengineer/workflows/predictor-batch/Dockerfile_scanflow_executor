@@ -1,5 +1,6 @@
 
-FROM 172.30.0.49:5000/scanflow-executor
+
+FROM 172.30.0.49:5000/modeling-cnn1:latest
 
 COPY predictor-batch /app/predictor-batch
 
