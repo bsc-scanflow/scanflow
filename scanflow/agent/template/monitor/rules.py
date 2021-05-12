@@ -10,8 +10,3 @@ async def rules_root():
     print(f"Hello! monitor rules")
     return {"Hello": "monitor rules"}
 
-from scanflow.agent.template.monitor.actuators import analyze_number_of_pictures
-
-def rule_number_of_pictures(number_of_pictures: int):
-    if number_of_pictures > 20:
-        analyze_number_of_pictures(number_of_pictures)

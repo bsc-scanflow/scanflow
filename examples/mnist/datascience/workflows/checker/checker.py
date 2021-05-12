@@ -307,8 +307,12 @@ def checker(model_name, epochs, x_train_path):
         mlflow.keras.log_model(detector, artifact_path=model_name, 
                                    registered_model_name=model_name)
         
-        mlflow.log_param(key='val_loss', value=ddae_history.history['val_loss'])
-
-
+        epoch = 1
+        for val in ddae_history.history['val_loss']:
+            mlflow.log_metric(key='history_val_loss', value=val, step=epoch)
+            epoch = epoch + 1
+        
+        mlflow.log_metric(key='val_loss', value=ddae_history.history['val_loss'][-1])
+        
 if __name__ == '__main__':
     checker()

@@ -137,6 +137,7 @@ class MlflowTracker(Tracker):
         logging.info(f"get latest run within the experiment:{experiment_ids}")
         runs = mlflow.search_runs(experiment_ids,filter_string=filter_string,order_by=order_by, output_format='list')
         logging.info(runs[0].to_dictionary())
+        #{'info': {'artifact_uri': 's3://scanflow/1/c9d4785c2dc240bdb59d859d91f4bfa7/artifacts', 'end_time': 1620023637267, 'experiment_id': '1', 'lifecycle_stage': 'active', 'run_id': 'c9d4785c2dc240bdb59d859d91f4bfa7', 'run_uuid': 'c9d4785c2dc240bdb59d859d91f4bfa7', 'start_time': 1620023623985, 'status': 'FINISHED', 'user_id': 'xpliu'}, 'data': {'metrics': {}, 'params': {}, 'tags': {'mlflow.user': 'xpliu', 'mlflow.source.name': '/gpfs/bsc_home/xpliu/anaconda3/lib/python3.8/site-packages/ipykernel_launcher.py', 'mlflow.source.type': 'LOCAL', 'mlflow.runName': 'data'}}}
         return runs[0].info.run_id
     
     

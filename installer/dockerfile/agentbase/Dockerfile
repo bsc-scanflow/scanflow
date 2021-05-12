@@ -22,4 +22,4 @@ RUN pip install aiodns
 
 WORKDIR $AGENT_HOME
 
-CMD uvicorn main:agent --reload --host 0.0.0.0 --port 8080
+ENTRYPOINT ["uvicorn main:agent --reload --host 0.0.0.0 --port 8080"]

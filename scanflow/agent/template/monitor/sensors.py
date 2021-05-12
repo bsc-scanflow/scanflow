@@ -13,7 +13,7 @@ from fastapi import Response, status, HTTPException
 from scanflow.client import ScanflowTrackerClient
 import mlflow
 client = ScanflowTrackerClient(verbose=True)
-mlflow.set_tracking_uri(client.get_tracker_uri(False))
+mlflow.set_tracking_uri(client.get_tracker_uri(True))
 
 
 monitor_sensors_router = APIRouter(tags=['monitor sensors'])
@@ -32,14 +32,3 @@ try:
 except:
     logging.info("custom_sensors function does not provide a router.")
 
-
-
-#scanflow monitor sensor
-from scanflow.agent.template.monitor.rules import rule_number_of_pictures
-
-#example 1: count number of pictures in last 1 hour 
-@monitor_sensors_router.get("/count_number_of_pictures",
-                            status_code= status.HTTP_200_OK)
-def count_number_of_pictures(executor:str):
-    print(executor)
-    rule_number_of_pictures(21)

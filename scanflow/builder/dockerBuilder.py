@@ -160,7 +160,7 @@ class DockerBuilder(builder.Builder):
         #mainfile
         if executor.mainfile is not None:
             exec_template = dedent(f''' 
-                    CMD ["python", "/app/{executor.name}/{executor.mainfile}"]
+                    ENTRYPOINT ["python", "/app/{executor.name}/{executor.mainfile}"]
             ''')
             template += exec_template
 

@@ -22,14 +22,14 @@ class Settings(BaseSettings):
                      'seconds': 15
                     }
                 },
-        'count_number_of_pictures': {
-                  'name': 'count_number_of_pictures',
-                  'func': 'scanflow.agent.template.monitor.sensors.count_number_of_pictures',
+        'count_number_of_predictions': {
+                  'name': 'count_number_of_predictions',
+                  'func': 'scanflow.agent.template.monitor.custom_sensors.count_number_of_predictions',
                   'trigger':{
                       'type': 'interval',
                       'seconds': 30
                   },
-                  'args':['mnist']
+                  'args':['predictor']
                 }
         }
     rules: Dict[str, Rule] = None

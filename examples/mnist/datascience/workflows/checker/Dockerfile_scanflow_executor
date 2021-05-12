@@ -6,4 +6,4 @@ COPY checker /app/checker
 
 RUN pip install -r /app/checker/req_checker.txt
 
-CMD ["python", "/app/checker/checker.py"]
+ENTRYPOINT ["python", "/app/checker/checker.py"]

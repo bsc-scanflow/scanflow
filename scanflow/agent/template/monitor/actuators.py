@@ -21,8 +21,3 @@ try:
     monitor_actuators_router.include_router(custom_actuators.custom_actuators_router, tags=["custom actuators"])
 except:
     logging.info("custom_actuators function does not provide a router.")
-
-#scanflow monitor actuator
-def analyze_number_of_pictures(number_of_pictures: int):
-    if number_of_pictures > 20:
-        print("yes")

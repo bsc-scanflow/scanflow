@@ -83,8 +83,8 @@ def modeling(model_name, epochs, x_train_path, y_train_path, x_test_path, y_test
                                  registered_model_name=model_name)
 #                                  input_example=x_test[:2])
         
-        mlflow.log_param(key='accuracy', value=round(score, 2))
-        mlflow.log_param(key='training_dataset_len', value=x_train.shape[0])
+        mlflow.log_metric(key='accuracy', value=round(score, 2))
+        mlflow.log_metric(key='training_dataset_len', value=x_train.shape[0])
 
 
 class MNIST(pl.LightningModule):

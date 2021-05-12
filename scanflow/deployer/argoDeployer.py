@@ -7,6 +7,7 @@ from scanflow.app import Workflow, Executor
 import scanflow.deployer.deployer as deployer
 from scanflow.templates import ArgoWorkflows
 from scanflow.deployer.env import ScanflowSecret, ScanflowClientConfig
+from scanflow.tools.param import format_parameters
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -74,7 +75,12 @@ class ArgoDeployer(deployer.Deployer):
             #volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir)
             volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir, scanflowpath="/scanflow")
             logging.info(f"[+] Building workflow: [{workflow.name}:{executor.name}].")
-            argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(executor.name, executor.image, env, volumeMounts)
+            logging.info(f"{format_parameters(executor.parameters)}")
+            argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
+                         image = executor.image,
+                         args = format_parameters(executor.parameters),
+                         env = env, 
+                         volumeMounts = volumeMounts)
 
         #dependencies
         logging.info(f"[+] Building workflow: [{workflow_name}- dependencies]")

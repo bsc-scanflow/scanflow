@@ -1,7 +1,23 @@
 from fastapi import FastAPI, APIRouter
 from scanflow.agent.config.settings import settings
+from scanflow.agent.config.httpClient import http_client
+
+import logging
+logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
+logging.getLogger().setLevel(logging.INFO)
 
 actuators_router = APIRouter(prefix="/actuators")
+
+@actuators_router.on_event("startup")
+async def actuators_startup():
+    logging.info(f"{settings.AGENT_NAME} actuators startup")
+    http_client.start()
+    
+@actuators_router.on_event("shutdown")
+async def actuators_shutdown():
+    logging.info(f"{settings.AGENT_NAME} actuators shutdown")
+    http_client.stop()
 
 if settings.AGENT_TYPE == "monitor":
     from scanflow.agent.template.monitor import actuators

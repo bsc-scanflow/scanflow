@@ -15,4 +15,4 @@ RUN pip install mlflow==1.14.1
 #minio
 RUN pip install boto3
 
-CMD ["python", "/app/main.py"]
+ENTRYPOINT ["python", "/app/main.py"]

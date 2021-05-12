@@ -60,7 +60,7 @@ def inference(model_name, model_version, model_stage, input_data):
         with open('labels.npy', 'wb') as f:
             np.save(f, predictions)
 
-        mlflow.log_param(key='n_predictions', value=len(df_preds))
+        mlflow.log_metric(key='n_predictions', value=len(df_preds))
 
         print(df_preds.head(10))
 
