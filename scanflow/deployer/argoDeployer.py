@@ -60,7 +60,7 @@ class ArgoDeployer(deployer.Deployer):
 
         #volume
         #self.argoclient.buildVolumes(outputpath=workflow_name)
-        self.argoclient.buildVolumes(outputpath=workflow_name, scanflowpath="scanflow")
+        self.argoclient.buildVolumes(outputpath=workflow_name, scanflowpath=f"scanflow-{namespace}")
         #env
         ss = ScanflowSecret()
         scc = ScanflowClientConfig()

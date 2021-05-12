@@ -6,4 +6,4 @@ COPY predictor-batch /app/predictor-batch
 
 RUN pip install -r /app/predictor-batch/req_predictor.txt
 
-CMD ["python", "/app/predictor-batch/predictor.py"]
+ENTRYPOINT ["python", "/app/predictor-batch/predictor.py"]
