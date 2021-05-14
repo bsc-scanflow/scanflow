@@ -35,3 +35,8 @@ except:
 async def sensors_root():
     print(f"Hello! analyzer sensors")
     return {"Hello": "analyzer sensors"}
+
+@analyzer_sensors_router.get("/detail",
+                            status_code= status.HTTP_200_OK)
+async def sensors_detail():
+    return {"detail": "analyzer sensors"}

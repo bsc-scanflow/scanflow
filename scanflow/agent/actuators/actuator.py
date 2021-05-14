@@ -1,31 +1,55 @@
 import requests
 from functools import wraps
 from scanflow.agent.config.httpClient import http_client
+from scanflow.agent.schemas.message import ActuatorMessage
+from scanflow.tools.env import get_env
+
+
+import logging
+logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
+logging.getLogger().setLevel(logging.INFO)
+
+from scanflow.client import ScanflowTrackerClient
+import mlflow
+client = ScanflowTrackerClient(verbose=True)
 
 class actuator:
     def __init__(self,
                  path:str,
-                 depender:str):
+                 depender:str,
+                 namespace: str = get_env("NAMESPACE")):
         self.path = path
         self.depender = depender
+        self.namespace = namespace
 
     def __call__(self, func):
         @wraps(func)
         async def make_call(run_ids, *args, **kwargs):
-            print(run_ids)
-            i = 0
-            for x in args:
-                print(f"{i}"+x)
-                i = i+1
-            print(f"{self.path} -- {self.depender}")
-            url = f"http://172.30.0.49:4004/{self.path}" 
-            async with http_client.session.get(url) as response:
-                result = await response.json()
+            logging.info(f"run_ids: {run_ids}")
 
-            print(result['Hello'])
-            #response = requests.get(url=url, 
-            #headers={"accept": "application/json"})
-            #print(f"{self.path} -- {response.status} -- {response.json()} -- {response.text}")
-            #func(response.text)
-            print(func.__name__)
+            func(run_ids, *args, **kwargs)
+
+            #url = f"http://{self.depender}.{self.default}.svc.cluster.local"
+            url = f"http://172.30.0.49:4005{self.path}"
+            logging.info(f"sending request to {url}") 
+            async with http_client.session.get(url) as response:
+                status = response.status
+                text = await response.json()
+ 
+            await self.save_message(
+                ActuatorMessage(type="actuator",
+                                function=f"{func.__name__}",
+                                depender=self.depender,
+                                url=url,
+                                status=status,
+                                detail=text['detail'])
+            )
+
         return make_call
+
+    async def save_message(self, actuatorMessage: ActuatorMessage):
+        agent_name = get_env("AGENT_NAME")
+        mlflow.set_experiment(f"{agent_name}-agent")
+        with mlflow.start_run(run_name=f"{actuatorMessage.type} - {actuatorMessage.function}"):
+            mlflow.log_dict(actuatorMessage.dict(), "log.json")

@@ -38,13 +38,14 @@ async def sensors_startup():
     logging.info(f"{settings.AGENT_NAME} monitor sensors startup")
     await sensors_root()
     schedule.start()
-    for k,v in settings.sensors.items():
-        if v.trigger.type == 'interval':
-            await add_sensor_interval(v.name)
-        elif v.trigger.type == 'date':
-            await add_sensor_date(v.name)
-        elif v.trigger.type == 'cron':
-            await add_sensor_cron(v.name)
+    if settings.sensors is not None:
+        for k,v in settings.sensors.items():
+            if v.trigger.type == 'interval':
+                await add_sensor_interval(v.name)
+            elif v.trigger.type == 'date':
+                await add_sensor_date(v.name)
+            elif v.trigger.type == 'cron':
+                await add_sensor_cron(v.name)
 
 @sensors_trigger_router.on_event("shutdown")
 async def sensors_shutdown():

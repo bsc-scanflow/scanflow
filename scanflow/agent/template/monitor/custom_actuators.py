@@ -8,7 +8,7 @@ import mlflow
 #def analyze_number_of_pictures(runs: List(mlflow.entities.Run)):
 #    pass
 
-@actuator(path="sensors", depender="checker")
-def analyze_predictions(response):
+@actuator(path="/sensors/detail", depender="checker")
+def analyze_predictions(run_ids):
     print("analyze_predictions")
     pass
