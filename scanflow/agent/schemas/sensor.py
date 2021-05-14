@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, PyObject
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 class Trigger(BaseModel):
@@ -24,7 +24,7 @@ class Sensor(BaseModel):
     name: str
     trigger: Trigger = None
     args: tuple = None
-    kwargs: tuple = None
+    kwargs: Dict[str, Any] = None
     next_run_time: datetime = None
 
 class SensorCallable(Sensor):

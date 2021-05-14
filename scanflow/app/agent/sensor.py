@@ -46,7 +46,7 @@ class Sensor():
                  func_name: str,
                  trigger: BaseTrigger = None,
                  args: tuple = None,
-                 kwargs: tuple = None,
+                 kwargs: dict = None,
                  next_run_time: datetime = None):
         self.name = name
         self.isCustom = isCustom

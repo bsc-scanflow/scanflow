@@ -2,8 +2,9 @@ import requests
 from functools import wraps
 from scanflow.agent.config.httpClient import http_client
 from scanflow.agent.schemas.message import ActuatorMessage
+from scanflow.agent.schemas.request import Request
 from scanflow.tools.env import get_env
-
+import json
 
 import logging
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
@@ -27,13 +28,23 @@ class actuator:
         @wraps(func)
         async def make_call(run_ids, *args, **kwargs):
             logging.info(f"run_ids: {run_ids}")
+            print(type(args))
+            print(type(kwargs))
+            print(args)
+            print(kwargs)
 
-            func(run_ids, *args, **kwargs)
+            func(run_ids, args, kwargs)
+
+            #print(type(*args))
 
             #url = f"http://{self.depender}.{self.default}.svc.cluster.local"
             url = f"http://172.30.0.49:4005{self.path}"
             logging.info(f"sending request to {url}") 
-            async with http_client.session.get(url) as response:
+            request = Request(run_ids = run_ids,
+                              args = args,
+                              kwargs = kwargs)
+            #print(json.dumps(request.dict()))
+            async with http_client.session.post(url, data=json.dumps(request.dict())) as response:
                 status = response.status
                 text = await response.json()
  
