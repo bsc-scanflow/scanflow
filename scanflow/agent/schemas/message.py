@@ -8,7 +8,9 @@ class Message(BaseModel):
 class SensorMessage(Message):
     #sensor: f"{type}: call {function} from {executors} -- the result is {value}"
     executors: List[str] 
-    value: str
+    value: str = None
+    client: tuple = None
+    server: tuple = None
 
 class ActuatorMessage(Message):
     #actuator: f"{type}: call {function} -- make call to {depender}:{url}, {status}"

@@ -7,7 +7,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 #fastapi
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends
 from fastapi import Response, status, HTTPException
 
 
@@ -15,6 +15,7 @@ from fastapi import Response, status, HTTPException
 from scanflow.agent.config.settings import settings
 from scanflow.agent.template.monitor import custom_sensors
 from scanflow.agent.schemas.sensor import Sensor, SensorOutput, Trigger
+from scanflow.agent.sensors.sensor_dependency import sensor
 
 from scanflow.client import ScanflowTrackerClient
 import mlflow
@@ -40,3 +41,16 @@ async def sensors_root():
                             status_code= status.HTTP_200_OK)
 async def sensors_detail():
     return {"detail": "analyzer sensors"}
+
+
+
+@analyzer_sensors_router.post("/analyze_predictions",
+                            status_code= status.HTTP_200_OK)
+async def sensors_analyze_predictions(runs: str = Depends(sensor)):
+    #print(request.run_ids)
+    #print(request.args)
+    #print(request.kwargs)
+    print(runs[0])
+
+
+    return {"detail": "analyzed predictions"}

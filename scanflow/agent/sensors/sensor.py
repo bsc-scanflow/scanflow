@@ -14,7 +14,7 @@ client = ScanflowTrackerClient(verbose=True)
 
 class sensor:
     def __init__(self,
-                 executors: List[str],
+                 executors: List[str] = None,
                  filter_string: str = '', 
                  order_by: Optional[List[str]] = None,
                  islocal: Optional[bool] = True):
@@ -27,28 +27,29 @@ class sensor:
     def __call__(self, func):
         @wraps(func)
         async def search_runs(*args, **kwargs):
-           # print(args)
-           # print(type(args))
-           # print(kwargs)
-           # print(type(kwargs))
-            mlflow.set_tracking_uri(client.get_tracker_uri(self.islocal))
-            logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
+            print(args)
+            print(type(args))
+            print(kwargs)
+            print(type(kwargs))
+            if self.executors is not None:
+                mlflow.set_tracking_uri(client.get_tracker_uri(self.islocal))
+                logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
 
-            experiment_ids = self.get_experiment_ids()
-            logging.info(f"sensor get runs from experiment_ids: {experiment_ids}")
-            
-            runs = mlflow.search_runs(experiment_ids=experiment_ids,
-                filter_string=self.filter_string,
-                order_by=self.order_by, output_format='list')
+                experiment_ids = self.get_experiment_ids()
+                logging.info(f"sensor get runs from experiment_ids: {experiment_ids}")
+                
+                runs = mlflow.search_runs(experiment_ids=experiment_ids,
+                    filter_string=self.filter_string,
+                    order_by=self.order_by, output_format='list')
 
-            metric_value = await func(runs, args, kwargs)
+                metric_value = await func(runs, args, kwargs)
 
-            await self.save_message(
-                SensorMessage(type="sensor",
-                              function=f"{func.__name__}",
-                              executors=self.executors,
-                              value=metric_value)
-            )
+                await self.save_message(
+                    SensorMessage(type="sensor",
+                                  function=f"{func.__name__}",
+                                  executors=self.executors,
+                                  value=metric_value)
+                )
         return search_runs
 
     def get_experiment_ids(self):
@@ -56,8 +57,13 @@ class sensor:
         experiment_ids = list(map(lambda experiment: experiment.experiment_id, experiments))
         return experiment_ids
 
-    async def save_message(self):
-        mlflow.set_experiment(get_env("AGENT_NAME"))
+    async def save_message(self, sensorMessage: SensorMessage):
+        #mlflow.set_tracking_uri(client.get_tracker_uri(self.islocal))
+        #logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
+        agent_name = get_env("AGENT_NAME")
+        mlflow.set_experiment(f"{agent_name}-agent")
+        with mlflow.start_run(run_name=f"{sensorMessage.type} - {sensorMessage.function}"):
+            mlflow.log_dict(sensorMessage.dict(), "log.json")
             
     
     

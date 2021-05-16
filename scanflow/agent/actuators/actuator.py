@@ -2,7 +2,7 @@ import requests
 from functools import wraps
 from scanflow.agent.config.httpClient import http_client
 from scanflow.agent.schemas.message import ActuatorMessage
-from scanflow.agent.schemas.request import Request
+from scanflow.agent.schemas.requestData import RequestData
 from scanflow.tools.env import get_env
 import json
 
@@ -35,16 +35,14 @@ class actuator:
 
             func(run_ids, args, kwargs)
 
-            #print(type(*args))
-
             #url = f"http://{self.depender}.{self.default}.svc.cluster.local"
             url = f"http://172.30.0.49:4005{self.path}"
             logging.info(f"sending request to {url}") 
-            request = Request(run_ids = run_ids,
+            requestData = RequestData(run_ids = run_ids,
                               args = args,
                               kwargs = kwargs)
             #print(json.dumps(request.dict()))
-            async with http_client.session.post(url, data=json.dumps(request.dict())) as response:
+            async with http_client.session.post(url, data=json.dumps(requestData.dict())) as response:
                 status = response.status
                 text = await response.json()
  
