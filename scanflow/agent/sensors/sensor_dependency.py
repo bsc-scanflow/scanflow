@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from scanflow.agent.schemas.requestData import RequestData
 from starlette.requests import Request
 from scanflow.tools.env import get_env
@@ -29,11 +29,11 @@ class SensorDependency:
 
         runs = list(map(mlflow.get_run, data.run_ids))
 
-        await self.save_message(function=request.get('endpoint').__name__ , executors=data.run_ids, client=request.get('client'), server=request.get('server')+(request.url.path,))
+        active_run = self.save_message(function=request.get('endpoint').__name__ , executors=data.run_ids, client=request.get('client'), server=request.get('server')+(request.url.path,))
 
-        return runs
+        return (runs, data.args, data.kwargs, active_run)
 
-    async def save_message(self, function:str, executors:List[str], client: tuple, server: tuple):
+    def save_message(self, function:str, executors:List[str], client: tuple, server: tuple):
         sensorMessage = SensorMessage(type="sensor",
                                   function=function,
                                   executors=executors,
@@ -43,5 +43,6 @@ class SensorDependency:
         mlflow.set_experiment(f"{agent_name}-agent")
         with mlflow.start_run(run_name=f"{sensorMessage.type} - {sensorMessage.function}"):
             mlflow.log_dict(sensorMessage.dict(), "log.json")
+            return mlflow.active_run()
 
-sensor = SensorDependency()
+sensor_dependency = SensorDependency()

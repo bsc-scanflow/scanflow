@@ -13,15 +13,9 @@ from fastapi import Response, status, HTTPException
 
 #scanflow
 from scanflow.agent.config.settings import settings
-from scanflow.agent.template.monitor import custom_sensors
+from scanflow.agent.template.analyzer import custom_sensors
 from scanflow.agent.schemas.sensor import Sensor, SensorOutput, Trigger
-from scanflow.agent.sensors.sensor_dependency import sensor
-
-from scanflow.client import ScanflowTrackerClient
-import mlflow
-client = ScanflowTrackerClient(verbose=True)
-mlflow.set_tracking_uri(client.get_tracker_uri(False))
-
+from scanflow.agent.sensors.sensor_dependency import sensor_dependency
 
 analyzer_sensors_router = APIRouter(tags=['analyzer sensors'])
 
@@ -37,20 +31,5 @@ async def sensors_root():
     print(f"Hello! analyzer sensors")
     return {"Hello": "analyzer sensors"}
 
-@analyzer_sensors_router.get("/detail",
-                            status_code= status.HTTP_200_OK)
-async def sensors_detail():
-    return {"detail": "analyzer sensors"}
 
 
-
-@analyzer_sensors_router.post("/analyze_predictions",
-                            status_code= status.HTTP_200_OK)
-async def sensors_analyze_predictions(runs: str = Depends(sensor)):
-    #print(request.run_ids)
-    #print(request.args)
-    #print(request.kwargs)
-    print(runs[0])
-
-
-    return {"detail": "analyzed predictions"}
