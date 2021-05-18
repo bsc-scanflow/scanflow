@@ -16,7 +16,7 @@ from scanflow.client import ScanflowTrackerClient
 
 @click.command(help="batch predictions")
 @click.option("--model_name", default='mnist_cnn', type=str)
-@click.option("--model_version",  default=1, type=int)
+@click.option("--model_version",  default=None, type=int)
 @click.option("--model_stage",  default='Production', type=str)
 @click.option("--input_data", help="New data",
               default='/workflow/load-data/mnist/data/mnist_c/brightness/test_images.npy', type=str)
@@ -37,16 +37,16 @@ def inference(model_name, model_version, model_stage, input_data):
     with mlflow.start_run(run_name='predictor-batch'):
 
         #load model        
-        if model_stage:
-            model = mlflow.pytorch.load_model(
-                model_uri=f"models:/{model_name}/{model_stage}"
-            )
-            print(f"Loading model: {model_name}:{model_stage}")
-        else:
+        if model_version is not None:
             model = mlflow.pytorch.load_model(
                 model_uri=f"models:/{model_name}/{model_version}"
             )
             print(f"Loading model: {model_name}:{model_version}")
+        else:
+            model = mlflow.pytorch.load_model(
+                model_uri=f"models:/{model_name}/{model_stage}"
+            )
+            print(f"Loading model: {model_name}:{model_stage}")
         
         predictions = predict(model, x_test)
 

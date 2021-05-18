@@ -11,7 +11,7 @@ from scanflow.client import ScanflowTrackerClient
 
 @click.command(help="load predicted data set")
 @click.option("--run_id", default='be066cefe8784a248aa3f6e89f70d4f6', type=str)
-@click.option("--agent_name", default='checker-agent', type=str)
+@click.option("--agent_name", default='checker', type=str)
 def loaddata(run_id, agent_name):
 
     client = ScanflowTrackerClient(verbose=True)
@@ -19,7 +19,7 @@ def loaddata(run_id, agent_name):
     logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
 
     #data will be download into shared /workflow folder
-    client.download_app_artifacts(app_name = agent_name, 
+    client.download_app_artifacts(app_name = f"{agent_name}-agent", 
                                   run_id = run_id,
                                   local_dir = "/workflow/load-predicted-data") 
     

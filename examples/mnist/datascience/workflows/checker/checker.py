@@ -78,7 +78,7 @@ def get_loss(model, x, change_score=False):
 
     return E
 
-def decide_threshold(ddae_model, x_train, wanted_anomalies=10):
+def decide_threshold(ddae_model, x_train):
 
     width = 0.1
     quantile_high = 0.95
@@ -143,10 +143,8 @@ def checker(model_name, epochs, x_train_path):
                                         model_path='detector.hdf5')
 
         #decide threshold
-        wanted_anomalies = int(x_train.shape[0]*0.4)
         THRESHOLD_HIGH, THRESHOLD_LOW  = decide_threshold(detector,
-                                                    x_train, 
-                                                    wanted_anomalies)
+                                                    x_train)
 
         #log run
         mlflow.keras.log_model(detector, artifact_path=model_name, 
