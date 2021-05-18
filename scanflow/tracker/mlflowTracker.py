@@ -22,63 +22,59 @@ class MlflowTracker(Tracker):
     def download_app_meta(self, app_name, team_name):
         pass
 
-    def save_app_model(self, app_name, team_name, model_name, model_type, model_version):
-        #TODO:4.30 Now we only support save pytorch,keras model
-        # 1.load model from local
+    def save_app_model(self, app_name, team_name, model_name, model_version):
+        #load
         mlflow.set_tracking_uri(get_tracker_uri(True))
-        if model_type == "pytorch":
-            if model_version:
-                pytorch_model = mlflow.pytorch.load_model(f"models:/{model_name}/{model_version}")
-            else:
-                pytorch_model = mlflow.pytorch.load_model(f"models:/{model_name}/Production")
-        elif model_type == "keras":
-            if model_version:
-                keras_model = mlflow.keras.load_model(f"models:/{model_name}/{model_version}")
-            else:
-                keras_model = mlflow.keras.load_model(f"models:/{model_name}/Production")
+        client = MlflowClient(get_tracker_uri(True))
+        if model_version is not None:
+            mv = client.get_model_version(model_name, model_version)
         else:
-            logging.info("unsupported model_type {model_type}")
-
-        # 2. log the model to scanflow
-        mlflow.set_tracking_uri(get_tracker_uri())
+            mv = client.get_latest_versions(model_name, stages=["Production"])
+        if not os.path.exists("/tmp/model"):
+            os.makedirs("/tmp/model")
+        local_path = client.download_artifacts(mv[0].run_id, path=model_name, dst_path="/tmp/model")
+        #logging.info("Artifacts downloaded in: {}".format(local_path))
+        #logging.info("Artifacts: {}".format(os.listdir(local_path)))
+        
+        #save
+        mlflow.set_tracking_uri(get_tracker_uri(False))
         mlflow.set_experiment(app_name)
-        if model_type == "pytorch":
-            with mlflow.start_run(run_name=f"scanflow-model-{team_name}"):
-                mlflow.pytorch.log_model(pytorch_model, model_name, registered_model_name=model_name)
-        if model_type == "keras":
-            with mlflow.start_run(run_name=f"scanflow-model-{team_name}"):
-                mlflow.keras.log_model(keras_model, model_name, registered_model_name=model_name)
+        with mlflow.start_run(run_name=f"scanflow-model-{team_name}") as run:
+            #model
+            mlflow.log_artifacts("/tmp/model")
+            client = MlflowClient(get_tracker_uri(False))
+            if client.search_registered_models(f"name = '{model_name}'") is None:
+                client.create_registered_model(model_name)
+            model_uri = "runs:/{}/{}".format(run.info.run_id, model_name)
+            mv_new = client.create_model_version(model_name, model_uri, run.info.run_id, mv[0].tags)
+            client.transition_model_version_stage(model_name, mv_new.version, "Production",  archive_existing_versions=True)
+        
+    def download_app_model(self, model_name, model_version):
+        #load
+        mlflow.set_tracking_uri(get_tracker_uri(False))
+        client = MlflowClient(get_tracker_uri(False))
+        if model_version is not None:
+            mv = client.get_model_version(model_name, model_version)
         else:
-            logging.info("unsupported model_type {model_type}")
-
- 
-    def download_app_model(self, model_name, model_type, model_version):
-        #1. load model from scanflow
-        mlflow.set_tracking_uri(get_tracker_uri())
-        if model_type == "pytorch":
-            if model_version:
-                pytorch_model = mlflow.pytorch.load_model(f"models:/{model_name}/{model_version}")
-            else:
-                pytorch_model = mlflow.pytorch.load_model(f"models:/{model_name}/Production")
-        elif model_type == "keras":
-            if model_version:
-                keras_model = mlflow.keras.load_model(f"models:/{model_name}/{model_version}")
-            else:
-                keras_model = mlflow.keras.load_model(f"models:/{model_name}/Production")
-        else:
-            logging.info("unsupported model_type {model_type}")
-
-        # 2. log the model to local env
+            mv = client.get_latest_versions(model_name, stages=["Production"])
+        if not os.path.exists("/tmp/model"):
+            os.makedirs("/tmp/model")
+        local_path = client.download_artifacts(mv[0].run_id, path=model_name, dst_path="/tmp/model")
+        #logging.info("Artifacts downloaded in: {}".format(local_path))
+        #logging.info("Artifacts: {}".format(os.listdir(local_path)))
+        
+        #save
         mlflow.set_tracking_uri(get_tracker_uri(True))
         mlflow.set_experiment("Scanflow")
-        if model_type == "pytorch":
-            with mlflow.start_run(run_name=f"scanflow-model"):
-                mlflow.pytorch.log_model(pytorch_model, model_name, registered_model_name=model_name)
-        if model_type == "keras":
-            with mlflow.start_run(run_name=f"scanflow-model"):
-                mlflow.keras.log_model(keras_model, model_name, registered_model_name=model_name)
-        else:
-            logging.info("unsupported model_type {model_type}")
+        with mlflow.start_run(run_name=f"scanflow-model") as run:
+            #model
+            mlflow.log_artifacts("/tmp/model")
+            client = MlflowClient(get_tracker_uri(True))
+            if client.search_registered_models(f"name = '{model_name}'") is None:
+                client.create_registered_model(model_name)
+            model_uri = "runs:/{}/{}".format(run.info.run_id, model_name)
+            mv_new = client.create_model_version(model_name, model_uri, run.info.run_id, mv[0].tags)
+            client.transition_model_version_stage(model_name, mv_new.version, "Production",  archive_existing_versions=True)
 
     def save_app_artifacts(self, app_name, team_name, app_dir="/worklfow", tolocal=False):
         mlflow.set_tracking_uri(get_tracker_uri(tolocal))
