@@ -4,11 +4,10 @@ from typing import List
 
 import mlflow
 
-#@actuator(path="/sensors/analyze_number_of_pictures", depender="checker")
-#def analyze_number_of_pictures(runs: List(mlflow.entities.Run)):
-#    pass
+@actuator(path="/deployer/run_workflow", depender="scanflow")
+def call_run_analyze_workflow(args, kwargs):
+    return args, kwargs
 
-@actuator(path="sensors", depender="checker")
-def analyze_predictions(response):
-    print("analyze_predictions")
-    pass
+@actuator(path="/sensors/plan_retain_model", depender="retainer")
+def call_plan_retrain_model(args, kwargs):
+    return args, kwargs

@@ -1,4 +1,2 @@
-
-
-def rule_number_of_predictions(number_of_predictions: int):
-    return number_of_predictions > 9999
+def number_of_newdata_threshold(number_of_newdata: int):
+    return number_of_newdata > 50

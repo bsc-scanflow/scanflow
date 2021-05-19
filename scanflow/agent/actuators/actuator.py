@@ -26,19 +26,22 @@ class actuator:
 
     def __call__(self, func):
         @wraps(func)
-        async def make_call(run_ids, *args, **kwargs):
-            logging.info(f"run_ids: {run_ids}")
+        async def make_call(*args, **kwargs):
             print(type(args))
             print(type(kwargs))
             print(args)
             print(kwargs)
 
-            func(run_ids, args, kwargs)
+            args, kwargs = func(args=args, kwargs=kwargs)
 
-            #url = f"http://{self.depender}.{self.default}.svc.cluster.local"
-            url = f"http://172.30.0.49:4005{self.path}"
+            if self.depender == "scanflow":
+                #url = f"http://scanflow-server-service.scanflow-system.svc.cluster.local{self.path}"
+                url = f"http://172.30.0.50:46666{self.path}"
+            else:
+                #url = f"http://{self.depender}.{self.namespace}.svc.cluster.local{self.path}"
+                url = f"http://172.30.0.49:4005{self.path}"
             logging.info(f"sending request to {url}") 
-            requestData = RequestData(run_ids = run_ids,
+            requestData = RequestData(
                               args = args,
                               kwargs = kwargs)
             #print(json.dumps(request.dict()))
