@@ -70,6 +70,17 @@ class ScanflowClient:
             logging.error(f"{response.text['detail']}")
             return False
 
+    def download_ScanflowApplication(self,
+                                     app_name: str,
+                                     team_name: str):
+        pass
+
+    def download_ScanflowWorkflow(self,
+                                  app_name: str,
+                                  team_name: str,
+                                  ):
+        pass
+
 
 ###   Scanflow graph
 

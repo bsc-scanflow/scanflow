@@ -52,10 +52,10 @@ class ScanflowDeployerClient:
             self.scanflow_server_uri = get_server_uri()
         else: 
             #user_type == "local"
-            self.deployerbackend = self.get_deployer(deployer, k8s_config_file)
+            self.deployerbackend = self._get_deployer(deployer, k8s_config_file)
 
 ### Scanflow local deploy backend
-    def get_deployer(self, deployer, k8s_config_file):
+    def _get_deployer(self, deployer, k8s_config_file):
         if deployer == "argo":
             from scanflow.deployer.argoDeployer import ArgoDeployer
             return ArgoDeployer(k8s_config_file)
@@ -118,31 +118,37 @@ class ScanflowDeployerClient:
             result = self.deployerbackend.clean_environment(namespace)
             return result
 
-    def run_workflows(self,
-                      app: Application):
+    def run_app(self,
+                app: Application):
         if self.user_type == "incluster":
             pass
         else: #local
             namespace = f"scanflow-{app.app_name}-{app.team_name}"
             self.deployerbackend.run_workflows(namespace, app.workflows)
 
-    def delete_workflows(self,
-                         app: Application):
+    def delete_app(self,
+                   app: Application):
         if self.user_type == "incluster":
             pass
         else:
             namespace = f"scanflow-{app.app_name}-{app.team_name}"
             self.deployerbackend.delete_workflows(namespace, app.workflows)
 
-#    def run_workflows(self,
-#                      app_name: str,
-#                      team_name: str,
-#                      workflows: List[Workflow]):
-#        if self.user_type == "incluster":
-#            pass
-#        else: #local
-#            namespace = f"scanflow-{app_name}-{team_name}"
-#            self.deployerbackend.run_workflows(namespace, workflows)
+    def run_workflows(self,
+                      app_name: str,
+                      team_name: str,
+                      workflows: List[Workflow]):
+        if self.user_type == "incluster":
+            pass
+        else: #local
+            namespace = f"scanflow-{app_name}-{team_name}"
+            self.deployerbackend.run_workflows(namespace, workflows)
+
+    def delete_workflows(self,
+                         app_name: str,
+                         team_name: str,
+                         workflows: List[Workflow]):
+        pass
 
     def run_workflow(self,
                      app_name: str,
@@ -154,6 +160,12 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app_name}-{team_name}"
             self.deployerbackend.run_workflow(namespace, workflow)
 
+    def delete_workflow(self,
+                        app_name: str,
+                        team_name: str,
+                        workflow: Workflow):
+        pass
+
     def run_executor(self,
                      app_name: str,
                      team_name: str,
@@ -164,3 +176,10 @@ class ScanflowDeployerClient:
         else: #local
             namespace = f"scanflow-{app_name}-{team_name}"
             self.deployerbackend.run_executor(namespace, executor)
+
+    def delete_executor(self,
+                        app_name: str,
+                        team_name: str,
+                        workflow_name: str,
+                        executor: Executor):
+        pass

@@ -34,12 +34,8 @@ class actuator:
 
             args, kwargs = func(args=args, kwargs=kwargs)
 
-            if self.depender == "scanflow":
-                #url = f"http://scanflow-server-service.scanflow-system.svc.cluster.local{self.path}"
-                url = f"http://172.30.0.50:46666{self.path}"
-            else:
-                #url = f"http://{self.depender}.{self.namespace}.svc.cluster.local{self.path}"
-                url = f"http://172.30.0.49:4005{self.path}"
+            #url = f"http://{self.depender}.{self.namespace}.svc.cluster.local{self.path}"
+            url = f"http://172.30.0.49:4005{self.path}"
             logging.info(f"sending request to {url}") 
             requestData = RequestData(
                               args = args,

@@ -12,7 +12,7 @@ from fastapi import FastAPI
 # routers
 from scanflow.server.routers import scanflowApplication
 from scanflow.server.routers import scanflowModel
-#from scanflow.server.routers import scanflowDeployer
+from scanflow.server.routers import scanflowDeployer
 
 #dependencies
 from scanflow.server.dependencies import get_tracker
@@ -38,12 +38,12 @@ app.include_router(
     prefix="/model"
 )
 
-#app.include_router(
-#    scanflowDeployer.router,
-#    tags=['scanflowDeployer'],
-#    prefix="/deployer"
-#)
-#
+app.include_router(
+    scanflowDeployer.router,
+    tags=['scanflowDeployer'],
+    prefix="/deployer"
+)
+
 
 @app.on_event("startup")
 async def startup_event():

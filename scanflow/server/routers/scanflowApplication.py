@@ -15,12 +15,12 @@ logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
 
-## scanflow app meta
-## save/load/update scanflow application
-@router.post("/submit",
+## scanflow app metadata and artifacts
+## save/download scanflow application metadata and artifacts
+@router.post("/save/metadata",
           summary = "Save scanflow application metadata",
           status_code = status.HTTP_201_CREATED)
-async def save_scanflowApplication(app: Application, response: Response):
+async def save_scanflowApplicationMetadata(app: Application, response: Response):
     """
       app: scanflowapplication json 
     """
@@ -43,12 +43,31 @@ async def save_scanflowApplication(app: Application, response: Response):
     except:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="mlflow exception")
 
-#@app.post("/list/scanflowApplications",
-#          tags=['ScanflowApplication'],
-#          summary="List all scanflow application")
-#async def list_scanflowApplication(app_name, team_name):
-#    """
-#    """
-#    response = ""
-#    return response
-#
+@router.post("/download/application_metadata",
+          summary = "Download scanflow application metadata",
+          status_code = status.HTTP_200_OK)
+async def download_scanflowApplicationMetadata(app: Application, response: Response):
+    pass
+
+@router.post("/download/workflow_metadata",
+          summary = "Download scanflow application workflow metadata",
+          status_code = status.HTTP_200_OK)
+async def download_scanflowApplicationWorkflowMetadata(app: Application, response: Response):
+    pass
+
+
+
+
+
+#artifacts now we could use tracker client
+@router.post("/save/artifacts",
+          summary = "Save scanflow application artifacts",
+          status_code = status.HTTP_201_CREATED)
+async def save_scanflowApplicationArtifacts(app: Application, response: Response):
+    pass
+
+@router.post("/download/artifacts",
+          summary = "Download scanflow application artifacts",
+          status_code = status.HTTP_200_OK)
+async def download_scanflowApplicationArtifacts(app: Application, response: Response):
+    pass
