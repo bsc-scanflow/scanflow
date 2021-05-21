@@ -9,6 +9,7 @@ class Executor(BaseModel):
     parameter: Optional[dict] = None
     requirements: Optional[str] = None
     dockerfile: Optional[str] = None
+    base_image: Optional[str] = None
     env: Optional[str] = None
 
 class Dependency(BaseModel):

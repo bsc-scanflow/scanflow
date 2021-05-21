@@ -12,6 +12,11 @@ import sys
 import os
 sys.path.insert(0,'../../..')
 
+import logging
+logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
+logging.getLogger().setLevel(logging.INFO)
+
 #scanflow
 import mlflow
 from scanflow.client import ScanflowTrackerClient
@@ -28,6 +33,8 @@ from scanflow.deployer.deployer import Deployer
            status_code = status.HTTP_200_OK)
 async def create_environment(app: Application,
                              scanflowEnv : Optional[ScanflowEnvironment] = None):
+    logging.info(f"app {app.dict()}")
+
     if scanflowEnv is None:
         scanflowEnv = ScanflowEnvironment()
         namespace = f"scanflow-{app.app_name}-{app.team_name}" 
@@ -37,7 +44,7 @@ async def create_environment(app: Application,
         scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker.{namespace}.svc.cluster.local"
 
     deployer = Deployer()
-    result = deployer.create_environment(scanflowEnv.namespace, scanflowEnv.secret, scanflowEnv.tracker_config, scanflowEnv.client_config, app.tracker, app.agents)
+    result = deployer.create_environment(scanflowEnv.namespace, scanflowEnv.secret.dict(), scanflowEnv.tracker_config.dict(), scanflowEnv.client_config.dict(), app.tracker, app.agents)
 
     if result:
         return {'detail': "environment created"}
@@ -49,6 +56,8 @@ async def create_environment(app: Application,
            summary="clean environment for scanflow app",
            status_code = status.HTTP_200_OK)
 async def clean_environment(app: Application):
+    logging.info(f"app {app.dict()}")
+
     namespace = f"scanflow-{app.app_name}-{app.team_name}"
     deployer = Deployer()
     result = deployer.clean_environment(namespace)
@@ -117,15 +126,15 @@ async def delete_executor():
 
 
 
-def _get_deployer(self, deployer):
-        if deployer == "argo":
-            from scanflow.deployer.argoDeployer import ArgoDeployer
-            return ArgoDeployer()
-        elif deployer == "volcano":
-            from scanflow.deployer.volcanoDeployer import VolcanoDeployer
-            return VolcanoDeployer(self.verbose)
-        elif deployer == "seldon":
-            from scanflow.deployer.seldonDeployer import SeldonDeployer
-            return SeldonDeployer(self.verbose)
-        else:
-            raise ValueError("unknown deployer: " + deployer)
+def get_deployer(deployer):
+    if deployer == "argo":
+        from scanflow.deployer.argoDeployer import ArgoDeployer
+        return ArgoDeployer()
+    elif deployer == "volcano":
+        from scanflow.deployer.volcanoDeployer import VolcanoDeployer
+        return VolcanoDeployer(self.verbose)
+    elif deployer == "seldon":
+        from scanflow.deployer.seldonDeployer import SeldonDeployer
+        return SeldonDeployer(self.verbose)
+    else:
+        raise ValueError("unknown deployer: " + deployer)

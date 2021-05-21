@@ -30,7 +30,8 @@ class Kubernetes:
         )
         api_instance = client.CoreV1Api()
         try:
-            api_instance.create_namespace(namespacebody)
+            back = api_instance.create_namespace(namespacebody)
+            logging.info(f"create_namespace true {back}")
             return True
         except: 
             logging.error(f"create_namespace error") 
@@ -41,6 +42,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespace(name=name)
+            logging.info(f"delete_namespace true")
             return True
         except: 
             logging.error(f"delete_namespace error")
@@ -117,6 +119,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.create_namespaced_service(namespace=namespace, body=body)
+            logging.info(f"create_service true")
             return True
         except:
             logging.error(f"create_service error") 
@@ -126,6 +129,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespaced_service(name=name, namespace=namespace)
+            logging.info(f"delete_service true")
             return True
         except:
             logging.error(f"delete_service error") 
@@ -164,18 +168,22 @@ class Kubernetes:
 
     def create_secret(self, namespace, body):
         api_instance = client.CoreV1Api()
-        try:
-            api_instance.create_namespaced_secret(namespace=namespace, body=body)
-            return True
-        except:
-            return False
+        #try:
+        back = api_instance.create_namespaced_secret(namespace=namespace, body=body)
+        logging.info(f"create_secret true {back}")
+        return True
+        #except:
+        #    logging.error(f"create_secret error")
+        #    return False
 
     def delete_secret(self, namespace, name):
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespaced_secret(name=name, namespace=namespace)
+            logging.info(f"delete_secret true")
             return True
         except:
+            logging.error(f"delete_secret error")
             return False
 
     def build_configmap(self, name, namespace, data):
@@ -190,17 +198,21 @@ class Kubernetes:
     def create_configmap(self, namespace, body):
         api_instance = client.CoreV1Api()
         try: 
-            api_instance.create_namespaced_config_map(namespace=namespace,body=body)
+            back = api_instance.create_namespaced_config_map(namespace=namespace,body=body)
+            logging.info(f"create_configmap true {back}")
             return True
         except:
+            logging.error(f"create_configmap error")
             return False
 
     def delete_configmap(self, namespace, name):
         api_instance = client.CoreV1Api()
         try: 
             api_instance.delete_namespaced_config_map(namespace=namespace, name=name)
+            logging.info(f"delete_configmap true")
             return True
         except:
+            logging.error(f"delete_configmap error")
             return False
 
 
@@ -395,6 +407,7 @@ class Kubernetes:
         api_instance = client.AppsV1Api()
         try:
             api_instance.create_namespaced_deployment(namespace=namespace, body=body)
+            logging.info(f"create_deployment true")
             return True
         except:
             logging.error(f"create_deployment error") 
@@ -409,6 +422,7 @@ class Kubernetes:
         api_instance = client.AppsV1Api()
         try:
             api_instance.delete_namespaced_deployment(name=name, namespace=namespace, body=client.V1DeleteOptions(propagation_policy="Foreground", grace_period_seconds=5))
+            logging.info(f"delete_deployment true")
             return True
         except:
             logging.error(f"delete_deployment error") 
@@ -467,6 +481,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.create_namespaced_persistent_volume_claim(namespace=namespace, body=body)
+            logging.info(f"create_pvc true")
             return True
         except:
             logging.error(f"create_pvc error") 
@@ -476,6 +491,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_namespaced_persistent_volume_claim(namespace=namespace, name=name)
+            logging.info(f"delete_pvc true")
             return True
         except:
             logging.error(f"delete_pvc error") 
@@ -569,6 +585,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.create_persistent_volume(body=body)
+            logging.info(f"create_pv true")
             return True
         except:
             logging.error(f"create_pv error")
@@ -578,6 +595,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             api_instance.delete_persistent_volume(name=name)
+            logging.info(f"delete_pv true")
             return True
         except:
             logging.error(f"delete_pv error")
@@ -612,6 +630,7 @@ class Kubernetes:
         api_instance = client.RbacAuthorizationV1Api()
         try:
             api_instance.create_namespaced_role_binding(namespace, body)
+            logging.info(f"create_rolebinding info")
             return True
         except:
             logging.error(f"create_rolebinding error")
@@ -621,6 +640,7 @@ class Kubernetes:
         api_instance = client.RbacAuthorizationV1Api()
         try:
             api_instance.delete_namespaced_role_binding(name=name, namespace=namespace)
+            logging.info(f"delete_rolebinding info")
             return True
         except:
             logging.error(f"delete_rolebinding error")

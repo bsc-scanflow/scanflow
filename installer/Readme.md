@@ -45,10 +45,10 @@ kubectl create namespace scanflow-system
 ```
 
 ```bash
-helm install helm/chart --namespace <namespace> --name <specified-name>
+helm install <specified-name> helm/chart --namespace <namespace> 
 
 e.g :
-helm install helm/chart --namespace scanflow-system --name scanflow-release
+helm install scanflow helm/chart --namespace scanflow-system
 ```
 
 This command deploys scanflow in kubernetes cluster with default configuration.  The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -57,7 +57,7 @@ This command deploys scanflow in kubernetes cluster with default configuration. 
 ## Uninstalling the Chart
 
 ```bash
-$ helm delete --namespace scanflow-system scanflow-release --purge
+$ helm delete --namespace scanflow-system scanflow
 ```
 
 ## Configuration

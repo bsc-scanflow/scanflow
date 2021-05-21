@@ -55,6 +55,10 @@ spec:
           - name: {{ .Release.Name }}-server
             image: {{.Values.basic.scanflow_server_image_name}}:{{.Values.basic.image_tag_version}}
             imagePullPolicy: Always
+            #temp
+            #command: ["/bin/sh"]
+            #args: ["-c", "pip install --pre --upgrade kubernetes && uvicorn server:app --reload --host 0.0.0.0 --port 8080"]
+
             #env:
             #  - name: SCANFLOW_TRACKER_URI
             #    value: http://{{ .Release.Name }}-tracker-service.{{ .Release.Namespace }}.svc.cluster.local

@@ -18,7 +18,7 @@ import json
 from scanflow.tools.scanflowtools import check_verbosity
 from scanflow.deployer.env import ScanflowClientConfig, ScanflowTrackerConfig, ScanflowSecret, ScanflowEnvironment
 from scanflow.app import Application, Workflow, Executor
-from scanflow.client import httpClient
+from .httpClient import http_client
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -51,9 +51,14 @@ class ScanflowDeployerClient:
             if not is_server_uri_set():
                 raise ValueError("Scanflow_server_uri is not provided")
             self.scanflow_server_uri = get_server_uri()
+            http_client.start()
         else: 
             #user_type == "local"
             self.deployerbackend = self._get_deployer(deployer, k8s_config_file)
+    
+    def __del__(self):
+        logging.info("scanflowdeployerclient del")
+        http_client.stop()
 
 ### Scanflow local deploy backend
     def _get_deployer(self, deployer, k8s_config_file):
@@ -74,11 +79,18 @@ class ScanflowDeployerClient:
                            scanflowEnv: ScanflowEnvironment=None):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/create_environment"
-            json_data = {
-                'app': app.to_dict(),
-                'scanflowEnv': scanflowEnv.__dict__
-            }
-            async with httpClient.session.post(url, data= json.dumps(json_data)) as response:
+            if scanflowEnv is not None:
+                json_data = {
+                    'app': app.to_dict(),
+                    'scanflowEnv': scanflowEnv.__dict__
+                }
+            else:
+                json_data = {
+                    'app': app.to_dict()
+                }
+
+            print(json.dumps(json_data))
+            async with http_client.session.post(url, data=json.dumps(json_data)) as response:
                 status = response.status
                 text = await response.json()
 
@@ -104,7 +116,7 @@ class ScanflowDeployerClient:
                           app: Application):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/clean_environment"
-            async with httpClient.session.post(url, data = json.dumps(app.to_dict())) as response:
+            async with http_client.session.post(url, data = json.dumps(app.to_dict())) as response:
                 status = response.status
                 text = await response.json()
 
@@ -121,7 +133,7 @@ class ScanflowDeployerClient:
                 app: Application):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/run_app"
-            async with httpClient.session.post(url,
+            async with http_client.session.post(url,
                 data= json.dumps(app.to_dict())) as response:
                 status = response.status
                 text = response.json()
@@ -134,7 +146,7 @@ class ScanflowDeployerClient:
                    app: Application):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/delete_app"
-            async with httpClient.session.post(url,
+            async with http_client.session.post(url,
                 data= json.dumps(app.to_dict())) as response:
                 status = response.status
                 text = response.json()
@@ -149,7 +161,7 @@ class ScanflowDeployerClient:
                       workflows: List[Workflow]):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/run_workflows"
-            async with httpClient.session.post(url,
+            async with http_client.session.post(url,
                 data= json.dumps(app.to_dict())) as response:
                 status = response.status
                 text = response.json()
@@ -170,7 +182,7 @@ class ScanflowDeployerClient:
                      workflow: Workflow):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/run_workflow"
-            async with httpClient.session.post(url,
+            async with http_client.session.post(url,
                 data= json.dumps(app.to_dict())) as response:
                 status = response.status
                 text = response.json()
@@ -192,7 +204,7 @@ class ScanflowDeployerClient:
                      executor: Executor):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/run_executor"
-            async with httpClient.session.post(url,
+            async with http_client.session.post(url,
                 data= json.dumps(app.to_dict())) as response:
                 status = response.status
                 text = response.json()
