@@ -64,10 +64,68 @@ async def build_workflows():
     response = ""
     return response
 
-async def run_workflows():
+@router.post("/run_app",
+           summary="run all workflows within the application",
+           status_code = status.HTTP_200_OK)
+async def run_app(app: Application):
+    namespace = f"scanflow-{app.app_name}-{app.team_name}"
+    deployer = Deployer()
+    return response
+
+@router.post("/delete_app",
+           summary="delete all workflows within the application",
+           status_code = status.HTTP_200_OK)
+async def delete_app():
     response = ""
     return response
 
+@router.post("/run_workflows",
+           summary="run workflows",
+           status_code = status.HTTP_200_OK)
+async def run_workflows():
+    pass
+
+@router.post("/delete_workflows",
+           summary="delete workflows",
+           status_code = status.HTTP_200_OK)
 async def delete_workflows():
-    response = ""
-    return response
+    pass
+
+@router.post("/run_workflow",
+           summary="run workflow",
+           status_code = status.HTTP_200_OK)
+async def run_workflow():
+    pass
+
+@router.post("/delete_workflow",
+           summary="delete workflow",
+           status_code = status.HTTP_200_OK)
+async def delete_workflow():
+    pass
+
+@router.post("/run_executor",
+           summary="run executor",
+           status_code = status.HTTP_200_OK)
+async def run_executor():
+    pass
+
+@router.post("/delete_executor",
+           summary="delete executor",
+           status_code = status.HTTP_200_OK)
+async def delete_executor():
+    pass
+
+
+
+def _get_deployer(self, deployer):
+        if deployer == "argo":
+            from scanflow.deployer.argoDeployer import ArgoDeployer
+            return ArgoDeployer()
+        elif deployer == "volcano":
+            from scanflow.deployer.volcanoDeployer import VolcanoDeployer
+            return VolcanoDeployer(self.verbose)
+        elif deployer == "seldon":
+            from scanflow.deployer.seldonDeployer import SeldonDeployer
+            return SeldonDeployer(self.verbose)
+        else:
+            raise ValueError("unknown deployer: " + deployer)

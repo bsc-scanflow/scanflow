@@ -11,9 +11,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 class ArgoWorkflows:
     def __init__(self,
-                 k8s_config_file=None,
-                 verbose=True):
-        self.verbose = verbose
+                 k8s_config_file=None):
         # if not provide config_file, couler internally uses in_cluster_config
         self.k8s_config_file = k8s_config_file
 

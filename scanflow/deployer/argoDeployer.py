@@ -24,7 +24,7 @@ class ArgoDeployer(deployer.Deployer):
                  k8s_config_file=None):
         super(ArgoDeployer, self).__init__(k8s_config_file)
 
-        self.argoclient = ArgoWorkflows()
+        self.argoclient = ArgoWorkflows(k8s_config_file=k8s_config_file)
 
     def run_workflows(self, 
                       namespace : str,
