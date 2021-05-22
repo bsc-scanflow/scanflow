@@ -67,29 +67,30 @@ class ScanflowDeployerClient:
             return ArgoDeployer(k8s_config_file)
         elif deployer == "volcano":
             from scanflow.deployer.volcanoDeployer import VolcanoDeployer
-            return VolcanoDeployer(self.verbose)
+            return VolcanoDeployer()
         elif deployer == "seldon":
             from scanflow.deployer.seldonDeployer import SeldonDeployer
-            return SeldonDeployer(self.verbose)
+            return SeldonDeployer()
         else:
             raise ValueError("unknown deployer: " + deployer)
 
     async def create_environment(self, 
                            app: Application,
                            scanflowEnv: ScanflowEnvironment=None):
+        if scanflowEnv is None:
+            scanflowEnv = ScanflowEnvironment()
+            namespace = f"scanflow-{app.app_name}-{app.team_name}" 
+            scanflowEnv.namespace = namespace
+            scanflowEnv.tracker_config.TRACKER_STORAGE = f"postgresql://scanflow:scanflow123@postgresql-service.postgresql.svc.cluster.local/{namespace}"
+            scanflowEnv.tracker_config.TRACKER_ARTIFACT = f"s3://scanflow/{namespace}"
+            scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker.{namespace}.svc.cluster.local"
+
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/create_environment"
-            if scanflowEnv is not None:
-                json_data = {
-                    'app': app.to_dict(),
-                    'scanflowEnv': scanflowEnv.__dict__
-                }
-            else:
-                json_data = {
-                    'app': app.to_dict()
-                }
-
-            print(json.dumps(json_data))
+            json_data = {
+                'app': app.to_dict(),
+                'scanflowEnv': scanflowEnv.to_dict()
+            }
             async with http_client.session.post(url, data=json.dumps(json_data)) as response:
                 status = response.status
                 text = await response.json()
@@ -101,14 +102,6 @@ class ScanflowDeployerClient:
                 return False
 
         else: #local
-            if scanflowEnv is None:
-                scanflowEnv = ScanflowEnvironment()
-                namespace = f"scanflow-{app.app_name}-{app.team_name}" 
-                scanflowEnv.namespace = namespace
-                scanflowEnv.tracker_config.TRACKER_STORAGE = f"postgresql://scanflow:scanflow123@postgresql-service.postgresql.svc.cluster.local/{namespace}"
-                scanflowEnv.tracker_config.TRACKER_ARTIFACT = f"s3://scanflow/{namespace}"
-                scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker.{namespace}.svc.cluster.local"
-
             result = self.deployerbackend.create_environment(scanflowEnv.namespace, scanflowEnv.secret.__dict__, scanflowEnv.tracker_config.__dict__, scanflowEnv.client_config.__dict__, app.tracker, app.agents)
             return result
 
@@ -130,72 +123,115 @@ class ScanflowDeployerClient:
             return self.deployerbackend.clean_environment(namespace)
 
     async def run_app(self,
-                app: Application):
+                      app: Application):
         if self.user_type == "incluster":
-            url = f"{self.scanflow_server_uri}/deployer/run_app"
+            url = f"{self.scanflow_server_uri}/deployer/run_app/?deployer={self.deployer}"
             async with http_client.session.post(url,
                 data= json.dumps(app.to_dict())) as response:
                 status = response.status
-                text = response.json()
+                text = await response.json()
             logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
         else: #local
             namespace = f"scanflow-{app.app_name}-{app.team_name}"
-            self.deployerbackend.run_workflows(namespace, app.workflows)
+            return self.deployerbackend.run_workflows(namespace, app.workflows)
 
     async def delete_app(self,
-                   app: Application):
+                         app: Application):
         if self.user_type == "incluster":
-            url = f"{self.scanflow_server_uri}/deployer/delete_app"
+            url = f"{self.scanflow_server_uri}/deployer/delete_app/?deployer={self.deployer}"
             async with http_client.session.post(url,
                 data= json.dumps(app.to_dict())) as response:
                 status = response.status
-                text = response.json()
+                text = await response.json()
             logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
         else:
             namespace = f"scanflow-{app.app_name}-{app.team_name}"
-            self.deployerbackend.delete_workflows(namespace, app.workflows)
+            return self.deployerbackend.delete_workflows(namespace, app.workflows)
 
     async def run_workflows(self,
                       app_name: str,
                       team_name: str,
                       workflows: List[Workflow]):
         if self.user_type == "incluster":
-            url = f"{self.scanflow_server_uri}/deployer/run_workflows"
+            url = f"{self.scanflow_server_uri}/deployer/run_workflows/{app_name}/{team_name}/?deployer={self.deployer}"
             async with http_client.session.post(url,
-                data= json.dumps(app.to_dict())) as response:
+                data= json.dumps(workflows.to_dict())) as response:
                 status = response.status
-                text = response.json()
+                text = await response.json()
             logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
         else: #local
             namespace = f"scanflow-{app_name}-{team_name}"
-            self.deployerbackend.run_workflows(namespace, workflows)
+            return self.deployerbackend.run_workflows(namespace, workflows)
 
     async def delete_workflows(self,
                          app_name: str,
                          team_name: str,
                          workflows: List[Workflow]):
-        pass
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/delete_workflows/{app_name}/{team_name}/?deployer={self.deployer}"
+            async with http_client.session.post(url,
+                data= json.dumps(workflows.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+            logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
+        else:
+            namespace = f"scanflow-{app.app_name}-{app.team_name}"
+            return self.deployerbackend.delete_workflows(namespace, app.workflows)
 
     async def run_workflow(self,
                      app_name: str,
                      team_name: str,
                      workflow: Workflow):
         if self.user_type == "incluster":
-            url = f"{self.scanflow_server_uri}/deployer/run_workflow"
+            url = f"{self.scanflow_server_uri}/deployer/run_workflow/{app_name}/{team_name}/?deployer={self.deployer}"
             async with http_client.session.post(url,
-                data= json.dumps(app.to_dict())) as response:
+                data= json.dumps(workflow.to_dict())) as response:
                 status = response.status
-                text = response.json()
+                text = await response.json()
             logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
         else: #local
             namespace = f"scanflow-{app_name}-{team_name}"
-            self.deployerbackend.run_workflow(namespace, workflow)
+            return self.deployerbackend.run_workflow(namespace, workflow)
 
     async def delete_workflow(self,
                         app_name: str,
                         team_name: str,
                         workflow: Workflow):
-        pass
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/delete_workflow/{app_name}/{team_name}/?deployer={self.deployer}"
+            async with http_client.session.post(url,
+                data= json.dumps(workflow.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+            logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
+        else: #local
+            namespace = f"scanflow-{app_name}-{team_name}"
+            return self.deployerbackend.delete_workflow(namespace, workflow)
+
 
     async def run_executor(self,
                      app_name: str,
@@ -203,19 +239,36 @@ class ScanflowDeployerClient:
                      workflow_name: str,
                      executor: Executor):
         if self.user_type == "incluster":
-            url = f"{self.scanflow_server_uri}/deployer/run_executor"
+            url = f"{self.scanflow_server_uri}/deployer/run_executor/{app_name}/{team_name}/{workflow_name}/?deployer={self.deployer}"
             async with http_client.session.post(url,
-                data= json.dumps(app.to_dict())) as response:
+                data= json.dumps(executor.to_dict())) as response:
                 status = response.status
-                text = response.json()
+                text = await response.json()
             logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
         else: #local
             namespace = f"scanflow-{app_name}-{team_name}"
-            self.deployerbackend.run_executor(namespace, executor)
+            return self.deployerbackend.run_executor(namespace, executor)
 
     async def delete_executor(self,
                         app_name: str,
                         team_name: str,
                         workflow_name: str,
                         executor: Executor):
-        pass
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/delete_executor/{app_name}/{team_name}/{workflow_name}/?deployer={self.deployer}"
+            async with http_client.session.post(url,
+                data= json.dumps(executor.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+            logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
+        else: #local
+            namespace = f"scanflow-{app_name}-{team_name}"
+            return self.deployerbackend.run_executor(namespace, executor)

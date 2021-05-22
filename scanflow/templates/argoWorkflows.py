@@ -24,9 +24,9 @@ class ArgoWorkflows:
 
     def deleteWorkflow(self, namespace=None, name=None):
         if self.k8s_config_file is not None:
-            couler.delete(name=name, namespace=namespace, config_file=self.k8s_config_file)
+            return couler.delete(name=name, namespace=namespace, config_file=self.k8s_config_file)
         else:
-            couler.delete(name=name, namespace=namespace)
+            return couler.delete(name=name, namespace=namespace)
 
     def buildVolumes(self, **kwargs):
         for k, v in kwargs.items():

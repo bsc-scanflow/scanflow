@@ -6,7 +6,7 @@ class Executor(BaseModel):
     name: str 
     image: str
     mainfile: Optional[str] = None
-    parameter: Optional[dict] = None
+    parameters: Optional[dict] = None
     requirements: Optional[str] = None
     dockerfile: Optional[str] = None
     base_image: Optional[str] = None

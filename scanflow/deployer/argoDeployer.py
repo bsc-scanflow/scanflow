@@ -29,11 +29,12 @@ class ArgoDeployer(deployer.Deployer):
     def run_workflows(self, 
                       namespace : str,
                       workflows : List[Workflow]):
-
+        submitted = True
         for workflow in workflows:
             logging.info(f"[++] Running workflow: [{workflow.name}].")
-            self.run_workflow(namespace, workflow)
+            submitted = submitted and self.run_workflow(namespace, workflow)
             logging.info(f"[+] Workflow: [{workflow.name}] was run successfully.")
+        return submitted
 
     def run_workflow(self, 
                      namespace : str,
@@ -98,10 +99,10 @@ class ArgoDeployer(deployer.Deployer):
         argoWorkflow = self.argoclient.submitWorkflow(namespace)
         logging.info(f"[+++] Workflow: [{workflow_name}] has been submitted to argo {argoWorkflow}")
 
-    def run_executor(self,
-                     namespace: str,
-                     executor: Executor):
-        pass
+        if argoWorkflow is not None:
+            return True
+        else:
+            return False
 
 
     def delete_workflows(self,
@@ -110,19 +111,35 @@ class ArgoDeployer(deployer.Deployer):
         """
         delete argo workflows
         """
+        deleted = True
         for workflow in workflows:
-            self.delete_workflow(namespace, workflow)
+            deleted = deleted and self.delete_workflow(namespace, workflow)
+        return deleted
 
     def delete_workflow(self, 
                         namespace: str,
                         workflow: Workflow):
         
         workflow_name = workflow.name
+        deleted = False
         try:
-            self.argoclient.deleteWorkflow(namespace, workflow_name)
+            result = self.argoclient.deleteWorkflow(namespace, workflow_name)
+            if result is not None:
+                deleted = True
         except:
             logging.info(f"cannot find workflows")
         finally:
             #output dir
             self.kubeclient.delete_persistentvolumeclaim(namespace, workflow_name)
             self.kubeclient.delete_persistentvolume(workflow_name)
+            return deleted
+
+    def run_executor(self,
+                 namespace: str,
+                 executor: Executor):
+        pass
+
+    def delete_executor(self,
+                        namespace: str,
+                        executor: Executor):
+        pass

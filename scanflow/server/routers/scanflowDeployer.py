@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 from fastapi import FastAPI, Response, status, HTTPException
 
-from ..schemas.app import Application
+from ..schemas.app import Application, Workflow, Executor
 from ..schemas.deploy_env import ScanflowEnvironment
 
-from typing import Optional
+from typing import Optional, List
 
 router = APIRouter()
 
@@ -76,53 +76,128 @@ async def build_workflows():
 @router.post("/run_app",
            summary="run all workflows within the application",
            status_code = status.HTTP_200_OK)
-async def run_app(app: Application):
+async def run_app(app: Application, deployer: Optional[str]="argo"):
+    logging.info(f"app {app.dict()}")
+
     namespace = f"scanflow-{app.app_name}-{app.team_name}"
-    deployer = Deployer()
-    return response
+    deployerbackend = get_deployer(deployer)
+    result = deployerbackend.run_workflows(namespace, app.workflows)
+
+    if result:
+        return {'detail': "all workflows within the application have been submitted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run app error")
 
 @router.post("/delete_app",
            summary="delete all workflows within the application",
            status_code = status.HTTP_200_OK)
-async def delete_app():
-    response = ""
-    return response
+async def delete_app(app: Application, deployer: Optional[str]="argo"):
+    namespace = f"scanflow-{app.app_name}-{app.team_name}"
+    deployerbackend = get_deployer(deployer)
+    result = deployerbackend.delete_workflows(namespace, app.workflows)
+    
+    if result:
+        return {'detail': "all workflows within the application have been deleted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="delete app error")
 
-@router.post("/run_workflows",
+@router.post("/run_workflows/{app_name}/{team_name}",
            summary="run workflows",
            status_code = status.HTTP_200_OK)
-async def run_workflows():
-    pass
+async def run_workflows(app_name: str,
+                        team_name: str,
+                        workflows: List[Workflow],
+                        deployer: Optional[str]="argo"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = get_deployer(deployer)
+    result = deployerbackend.run_workflows(namespace, workflows)
 
-@router.post("/delete_workflows",
+    if result:
+        return {'detail': "all workflows have been submitted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run workflows error")
+
+@router.post("/delete_workflows/{app_name}/{team_name}",
            summary="delete workflows",
            status_code = status.HTTP_200_OK)
-async def delete_workflows():
-    pass
+async def delete_workflows(app_name: str,
+                        team_name: str,
+                        workflows: List[Workflow],
+                        deployer: Optional[str]="argo"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = get_deployer(deployer)
+    result = deployerbackend.delete_workflows(namespace, workflows)
 
-@router.post("/run_workflow",
+    if result:
+        return {'detail': "all workflows have been deleted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="delete workflows error")
+
+@router.post("/run_workflow/{app_name}/{team_name}",
            summary="run workflow",
            status_code = status.HTTP_200_OK)
-async def run_workflow():
-    pass
+async def run_workflow(app_name: str,
+                       team_name: str,
+                       workflow: Workflow,
+                       deployer: Optional[str]="argo"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = get_deployer(deployer)
+    result = deployerbackend.run_workflow(namespace, workflow)
 
-@router.post("/delete_workflow",
+    if result:
+        return {'detail': f"workflow {workflow.name} has been submitted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run workflow error")
+
+@router.post("/delete_workflow/{app_name}/{team_name}",
            summary="delete workflow",
            status_code = status.HTTP_200_OK)
-async def delete_workflow():
-    pass
+async def delete_workflow(app_name: str,
+                          team_name: str,
+                          workflow: Workflow,
+                          deployer: Optional[str]="argo"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = get_deployer(deployer)
+    result = deployerbackend.delete_workflow(namespace, workflow)
 
-@router.post("/run_executor",
+    if result:
+        return {'detail': f"workflow {workflow.name} has been deleted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="delete workflow error")
+
+@router.post("/run_executor/{app_name}/{team_name}/{workflow_name}",
            summary="run executor",
            status_code = status.HTTP_200_OK)
-async def run_executor():
-    pass
+async def run_executor(app_name: str,
+                     team_name: str,
+                     workflow_name: str,
+                     executor: Executor,
+                     deployer: Optional[str]="argo"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = get_deployer(deployer)
+    result = deployerbackend.run_executor(namespace, executor)
 
-@router.post("/delete_executor",
+    if result:
+        return {'detail': f"executor {workflow_name}-{executor.name} has been submitted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run executor error")
+
+@router.post("/delete_executor/{app_name}/{team_name}/{workflow_name}",
            summary="delete executor",
            status_code = status.HTTP_200_OK)
-async def delete_executor():
-    pass
+async def delete_executor(app_name: str,
+                        team_name: str,
+                        workflow_name: str,
+                        executor: Executor,
+                        deployer: Optional[str]="argo"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = get_deployer(deployer)
+    result = deployerbackend.delete_executor(namespace, executor)
+
+    if result:
+        return {'detail': f"executor {workflow_name}-{executor.name} has been deleted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="delete executor error")
 
 
 
@@ -132,9 +207,9 @@ def get_deployer(deployer):
         return ArgoDeployer()
     elif deployer == "volcano":
         from scanflow.deployer.volcanoDeployer import VolcanoDeployer
-        return VolcanoDeployer(self.verbose)
+        return VolcanoDeployer()
     elif deployer == "seldon":
         from scanflow.deployer.seldonDeployer import SeldonDeployer
-        return SeldonDeployer(self.verbose)
+        return SeldonDeployer()
     else:
         raise ValueError("unknown deployer: " + deployer)
