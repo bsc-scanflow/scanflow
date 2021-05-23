@@ -1,0 +1,7 @@
+
+
+FROM 172.30.0.49:5000/checker:latest
+
+COPY pick-data /app/pick-data
+
+ENTRYPOINT ["python", "/app/pick-data/pick-data.py"]

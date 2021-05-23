@@ -104,7 +104,6 @@ class ArgoDeployer(deployer.Deployer):
         else:
             return False
 
-
     def delete_workflows(self,
                          namespace: str,
                          workflows: List[Workflow]):

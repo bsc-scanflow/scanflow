@@ -8,6 +8,8 @@ from multiprocessing import Pool
 import requests
 import json
 
+from scanflow.app import Application
+
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
@@ -42,7 +44,7 @@ class ScanflowTrackerClient:
         """
         self.tracker.save_app_artifacts(app_name, team_name, app_dir, tolocal)
 
-    def download_app_artifacts(self, app_name, run_id=None, team_name=None, local_dir="/workflow", fromlocal=False):
+    def download_app_artifacts(self, app_name, team_name, run_id=None, local_dir="/workflow", fromlocal=False):
         """
            download remote app to local app_dir
            app_name: project name (e.g., mnist)
@@ -50,7 +52,7 @@ class ScanflowTrackerClient:
            team_name: who stored this artifact (e.g., datascienceteam)
            local_dir: local dir to save the project
         """
-        self.tracker.download_app_artifacts(app_name, run_id, team_name, local_dir, fromlocal)
+        return self.tracker.download_app_artifacts(app_name, team_name, run_id, local_dir, fromlocal)
 
     def save_app_model(self, app_name:str, team_name:str, model_name: str, model_version:int = None):
         """
@@ -63,3 +65,27 @@ class ScanflowTrackerClient:
             download  prepared model from remote scanflow tracker to local env 
         """
         self.tracker.download_app_model(model_name, model_version)
+
+    def save_app_meta(self, app: Application, tolocal=False):
+        """
+          save app metadata
+        """
+        self.tracker.save_app_meta(app, tolocal)
+
+    def download_app_meta(self, app_name: str, team_name:str,run_id=None, local_dir="/workflow", fromlocal=False):
+        """
+          download app metadata
+        """
+        return self.tracker.download_app_meta(app_name, team_name,  run_id, local_dir, fromlocal)
+
+    def download_workflow_meta(self, app_name: str, team_name:str, workflow_name:str, run_id=None, local_dir="/workflow", fromlocal=False):
+        """
+          download workflow metadata
+        """
+        return self.tracker.download_workflow_meta(app_name, team_name, workflow_name, run_id, local_dir, fromlocal)
+
+    def download_agent_meta(self, app_name: str, team_name:str, agent_name:str, run_id=None, local_dir="/workflow", fromlocal=False):
+        """
+          download agent metadata
+        """
+        return self.tracker.download_app_meta(app_name, team_name, agent_name, run_id, local_dir, fromlocal)

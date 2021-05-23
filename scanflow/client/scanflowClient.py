@@ -55,40 +55,11 @@ class ScanflowClient:
         #build scanflowapp
         return self.builderbackend.build_ScanflowApplication(app, trackerPort)
 
-    def submit_ScanflowApplication(self,
-                                   app: Application):
-        url = f"{self.scanflow_server_uri}/app/submit" 
-        response = requests.post(url=url, 
-        data= json.dumps(app.to_dict()),
-        headers={"accept": "application/json"})
-
-
-        if response.status_code == 201:
-            logging.info(f"{response.text['detail']}")
-            return True
-        else:
-            logging.error(f"{response.text['detail']}")
-            return False
-
-    def download_ScanflowApplication(self,
-                                     app_name: str,
-                                     team_name: str):
-        pass
-
-    def download_ScanflowWorkflow(self,
-                                  app_name: str,
-                                  team_name: str,
-                                  ):
-        pass
-
-
 ###   Scanflow graph
 
 #    def draw_ScanflowApplication(self, scanflowapp):
 #        appGraph = ApplicationGraph(scanflowapp)
 #        return appGraph.draw_graph()
-
-
 
 ###   Scanflow app
     def ScanflowExecutor(self,

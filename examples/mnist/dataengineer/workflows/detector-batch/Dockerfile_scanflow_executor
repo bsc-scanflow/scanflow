@@ -1,0 +1,7 @@
+
+
+FROM 172.30.0.49:5000/checker:latest
+
+COPY detector-batch /app/detector-batch
+
+ENTRYPOINT ["python", "/app/detector-batch/checker.py"]
