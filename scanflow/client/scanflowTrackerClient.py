@@ -89,3 +89,21 @@ class ScanflowTrackerClient:
           download agent metadata
         """
         return self.tracker.download_app_meta(app_name, team_name, agent_name, run_id, local_dir, fromlocal)
+
+    def download_app(self, app_name: str, team_name:str,run_id=None, local_dir="/workflow", fromlocal=False):
+        """
+          download app : return app
+        """
+        return self.tracker.download_app(app_name, team_name,  run_id, local_dir, fromlocal)
+
+    def download_workflow(self, app_name: str, team_name:str, workflow_name:str, run_id=None, local_dir="/workflow", fromlocal=False):
+        """
+          download workflow : return workflow
+        """
+        return self.tracker.download_workflow(app_name, team_name, workflow_name, run_id, local_dir, fromlocal)
+
+    def download_agent(self, app_name: str, team_name:str, agent_name:str, run_id=None, local_dir="/workflow", fromlocal=False):
+        """
+          download agent : return agent
+        """
+        return self.tracker.download_app(app_name, team_name, agent_name, run_id, local_dir, fromlocal)

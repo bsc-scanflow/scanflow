@@ -8,11 +8,11 @@ import mlflow
 
 
 async def call_run_analyze_workflow(run_id: str):
-    #get workflow
+    #get workflow meta
     trackerClient = ScanflowTrackerClient(verbose=True)
-    workflow = trackerClient.download_workflow("mnist", "dataengineer", "detector-inference", local_dir="/tmp")
-    workflow.executors[0].parameters['run_id'] = run_id
-    
+    #workflow = trackerClient.download_workflow("mnist", "dataengineer", "detector-inference", local_dir="/tmp")
+    workflow = trackerClient.download_workflow("mnist", "datascience", "mnist-wf", local_dir="/tmp")
+
     #platform executor
     deployerClient = ScanflowDeployerClient(user_type="incluster",
                                         deployer="argo")

@@ -2,12 +2,13 @@ import mlflow
 from mlflow.tracking import MlflowClient
 import logging
 import os
+import json
 
 from scanflow.tracker.tracker import Tracker
 from scanflow.tracker.utils import (
     get_tracker_uri,
 )
-from scanflow.app import Application
+from scanflow.app import Application, dict_to_app, dict_to_workflow, dict_to_agent, dict_to_executor
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -49,6 +50,13 @@ class MlflowTracker(Tracker):
         else:
             logging.info(f"[download_app_meta] by 'run_name'. {team_name}. Get the latest submission by {team_name}")
             return self.download_meta_by_run_name(team_name, app_name, local_dir)
+    
+    def download_app(self, app_name, team_name, run_id=None, local_dir="/workflow", fromlocal=False):
+        app_dir = self.download_app_meta(app_name, team_name, run_id=run_id, local_dir=local_dir, fromlocal=fromlocal)
+        with open(app_dir,'r') as load_file:
+            app_dict = json.load(load_file)
+        logging.info(f"app_dict: {app_dict}")
+        return dict_to_app(app_dict)
 
     #tested
     def download_workflow_meta(self, app_name, team_name, workflow_name, run_id=None, local_dir="/workflow", fromlocal=False):
@@ -62,6 +70,13 @@ class MlflowTracker(Tracker):
             logging.info(f"[download_workflow_meta] by 'run_name'. {team_name}. Get the latest submission by {team_name}")
             return self.download_meta_by_run_name(team_name, app_name, local_dir, workflow_name=workflow_name)
 
+    def download_workflow(self, app_name, team_name, workflow_name, run_id=None, local_dir="/workflow", fromlocal=False):
+        workflow_dir = self.download_workflow_meta(app_name, team_name, workflow_name, run_id=run_id, local_dir=local_dir, fromlocal=fromlocal)
+        with open(workflow_dir,'r') as load_file:
+            workflow_dict = json.load(load_file)
+        logging.info(f"workflow_dict: {workflow_dict}")
+        return dict_to_workflow(workflow_dict) 
+
     def download_agent_meta(self, app_name, team_name, agent_name, run_id=None, local_dir="/workflow", fromlocal=False):
         mlflow.set_tracking_uri(get_tracker_uri(fromlocal))
         logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
@@ -72,6 +87,13 @@ class MlflowTracker(Tracker):
         else:
             logging.info(f"[download_workflow_meta] by 'run_name'. {team_name}. Get the latest submission by {team_name}")
             return self.download_meta_by_run_name(team_name, app_name, local_dir, agent_name=agent_name)
+
+    def download_agent(self, app_name, team_name, agent_name, run_id=None, local_dir="/workflow", fromlocal=False):
+        agent_dir = self.download_workflow_meta(app_name, team_name, agent_name, run_id=run_id, local_dir=local_dir, fromlocal=fromlocal)
+        with open(agent_dir,'r') as load_file:
+            agent_dict = json.load(load_file)
+        logging.info(f"agent_dict: {agent_dict}")
+        return dict_to_agent(agent_dict) 
 
     #tested
     def save_app_model(self, app_name, team_name, model_name, model_version):
@@ -88,10 +110,18 @@ class MlflowTracker(Tracker):
         #logging.info("Artifacts downloaded in: {}".format(local_path))
         #logging.info("Artifacts: {}".format(os.listdir(local_path)))
 
+        #get run
+        run = mlflow.get_run(mv[0].run_id)
+        metrics = run.data.metrics
+        params = run.data.params
+        logging.info(f"{metrics}--{params}")
+
         #save
         mlflow.set_tracking_uri(get_tracker_uri(False))
         mlflow.set_experiment(app_name)
         with mlflow.start_run(run_name=f"scanflow-model-{team_name}") as run:
+            mlflow.log_metrics(metrics)
+            mlflow.log_params(params)
             #model
             mlflow.log_artifacts(f"/tmp/model/{model_name}")
             client = MlflowClient(get_tracker_uri(False))

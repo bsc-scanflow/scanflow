@@ -15,7 +15,7 @@ class Executor(Node):
     """
     def __init__(self,
                  name: str,
-                 mainfile: str = None,
+                 mainfile: str,
                  parameters: dict = None,
                  requirements: str = None,
                  dockerfile: str = None,
