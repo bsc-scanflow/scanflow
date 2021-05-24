@@ -32,12 +32,22 @@ from scanflow.client import ScanflowTrackerClient
 @click.option("--y_train_path", default='/workflow/load-data/mnist/data/mnist/train_labels.npy', type=str)
 @click.option("--x_test_path", default='/workflow/load-data/mnist/data/mnist/test_images.npy', type=str)
 @click.option("--y_test_path", default='/workflow/load-data/mnist/data/mnist/test_labels.npy', type=str)
-def modeling(model_name, epochs, x_train_path, y_train_path, x_test_path, y_test_path):
+@click.option("--x_newdata_path", default=None, type=str)
+@click.option("--y_newdata_path", default=None, type=str)
+def modeling(model_name, epochs, x_train_path, y_train_path, x_test_path, y_test_path, x_newdata_path, y_newdata_path):
     
     # data
     img_rows, img_cols = 28, 28
-    x_train = np.load(x_train_path)
-    y_train = np.load(y_train_path)
+    if x_newdata_path is not None and y_newdata_path is not None:
+        x_original_train = np.load(x_train_path)
+        y_original_train = np.load(y_train_path)
+        x_new_train = np.load(x_newdata_path)
+        y_new_train = np.load(y_newdata_path)
+        x_train = np.concatenate((x_original_train, x_new_train), axis=0)
+        y_train = np.concatenate((y_original_train, y_new_train), axis=0)
+    else:
+        x_train = np.load(x_train_path)
+        y_train = np.load(y_train_path)
 
     x_test = np.load(x_test_path)
     y_test = np.load(y_test_path)

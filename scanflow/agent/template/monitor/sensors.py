@@ -10,12 +10,6 @@ logging.getLogger().setLevel(logging.INFO)
 from fastapi import FastAPI, APIRouter
 from fastapi import Response, status, HTTPException
 
-from scanflow.client import ScanflowTrackerClient
-import mlflow
-client = ScanflowTrackerClient(verbose=True)
-mlflow.set_tracking_uri(client.get_tracker_uri(True))
-
-
 monitor_sensors_router = APIRouter(tags=['monitor sensors'])
 
 @monitor_sensors_router.get("/",

@@ -31,3 +31,17 @@ async def count_number_of_predictions(runs: List[mlflow.entities.Run], args, kwa
 
     return number_of_predictions
 
+@sensor(executors=["modeling_cnn1","modeling_cnn2"], filter_string="metrics.accuracy > 0")
+async def check_model_accuracy(runs: List[mlflow.entities.Run], args, kwargs):
+    print(args)
+    print(kwargs)
+
+    n_newdata = list(map(lambda run: run.data.metrics['n_critical_data'], runs))
+    number_of_newdata = reduce(lambda x,y : x+y, n_newdata)
+    logging.info(f"count_number_of_newdata - {number_of_newdata}")
+
+    if number_of_newdata_threshold(number_of_newdata):
+           await call_plan_retrain_model(list(map(lambda run: run.info.run_id, runs)), args[0], a=kwargs['a'])
+
+    return number_of_newdata
+

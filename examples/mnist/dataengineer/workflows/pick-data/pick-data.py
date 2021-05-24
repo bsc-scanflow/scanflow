@@ -91,8 +91,8 @@ def picker(E_inference, x_inference, y_inference, n_critical_points=5):
 
 @click.command(help="Pick critical points")
 @click.option("--E_inference", default='/workflow/detector-batch/E_inference.csv', type=str)
-@click.option("--x_inference_artifact", default='/workflow/load-predicted-data/x_inference.npy', type=str)
-@click.option("--y_inference_artifact", default='/workflow/load-predicted-data/y_inference.npy', type=str)
+@click.option("--x_inference_artifact", default='/workflow/load-data/x_inference.npy', type=str)
+@click.option("--y_inference_artifact", default='/workflow/load-data/y_inference.npy', type=str)
 def pick(E_inference, x_inference_artifact, y_inference_artifact):
     
     #log
@@ -114,8 +114,8 @@ def pick(E_inference, x_inference_artifact, y_inference_artifact):
             np.save(f, y_inference_chosen)
             
         mlflow.log_metric(key='n_critical_data', value=n_critical_points)
-        mlflow.log_artifact('x_inference_chosen.npy')
-        mlflow.log_artifact('y_inference_chosen.npy')          
+        mlflow.log_artifact('x_inference_chosen.npy',artifact_path="data")
+        mlflow.log_artifact('y_inference_chosen.npy',artifact_path="data")          
 
 if __name__ == '__main__':
     pick()

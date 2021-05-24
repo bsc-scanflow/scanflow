@@ -37,40 +37,27 @@ async def sensors_plan_retain_model(info: tuple = Depends(sensor_dependency)):
         labels = []
         mlflowClient = MlflowClient(client.get_tracker_uri(True))
         for run_id in info[2]['run_ids']:
-            mlflowClient.download_artifacts(run_id, path="x_inference_chosen.npy", dst_path="/tmp")
-            mlflowClient.download_artifacts(run_id, path="y_inference_chosen.npy", dst_path="/tmp")
-            images.append(np.load("/tmp/x_inference_chosen.npy"))
-            labels.append(np.load("/tmp/y_inference_chosen.npy"))
+            mlflowClient.download_artifacts(run_id, path="data", dst_path="/tmp")
+            images.append(np.load("/tmp/data/x_inference_chosen.npy"))
+            labels.append(np.load("/tmp/data/y_inference_chosen.npy"))
             
-        x_inference = []
-        x_inference = np.concatenate((images), axis=0)
-        y_inference = []
-        y_inference = np.concatenate((labels), axis=0)
+        x_newdata = []
+        x_newdata = np.concatenate((images), axis=0)
+        y_newdata = []
+        y_newdata = np.concatenate((labels), axis=0)
 
-        with open('x_inference.npy', 'wb') as f:
-            np.save(f, x_inference)
-        with open('y_inference.npy', 'wb') as f:
-            np.save(f, y_inference)
+        with open('x_newdata.npy', 'wb') as f:
+            np.save(f, x_newdata)
+        with open('y_newdata.npy', 'wb') as f:
+            np.save(f, y_newdata)
             
-        mlflow.log_artifact('x_inference.npy')
-        mlflow.log_artifact('y_inference.npy') 
+        mlflow.log_artifact('x_newdata.npy', artifact_path="data")
+        mlflow.log_artifact('y_newdata.npy', artifact_path="data") 
 
-    await call_run_retrain_workflow(run_id = run.info.run_id)
+    await call_run_retrain_workflow(run_id = run.info.run_id, artifact_path="data")
 
     return {"detail": "sensors_plan_retain_model received"}
 
 
-@sensor(executors=["pick-data"], filter_string="metrics.n_critical_data > 0")
-async def count_number_of_newdata(runs: List[mlflow.entities.Run], args, kwargs):
-    print(args)
-    print(kwargs)
 
-    n_newdata = list(map(lambda run: run.data.metrics['n_critical_data'], runs))
-    number_of_newdata = reduce(lambda x,y : x+y, n_newdata)
-    logging.info(f"count_number_of_newdata - {number_of_newdata}")
-
-    if number_of_newdata_threshold(number_of_newdata):
-           await call_plan_retrain_model(list(map(lambda run: run.info.run_id, runs)), args[0], a=kwargs['a'])
-
-    return number_of_newdata
 

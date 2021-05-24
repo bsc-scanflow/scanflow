@@ -37,10 +37,9 @@ async def sensors_analyze_predictions(info: tuple = Depends(sensor_dependency)):
         labels = []
         mlflowClient = MlflowClient(client.get_tracker_uri(True))
         for run_id in info[2]['run_ids']:
-            mlflowClient.download_artifacts(run_id, path="images.npy", dst_path="/tmp")
-            mlflowClient.download_artifacts(run_id, path="labels.npy", dst_path="/tmp")
-            images.append(np.load("/tmp/images.npy"))
-            labels.append(np.load("/tmp/labels.npy"))
+            mlflowClient.download_artifacts(run_id, path="data", dst_path="/tmp")
+            images.append(np.load("/tmp/data/images.npy"))
+            labels.append(np.load("/tmp/data/labels.npy"))
             
         x_inference = []
         x_inference = np.concatenate((images), axis=0)
@@ -52,10 +51,10 @@ async def sensors_analyze_predictions(info: tuple = Depends(sensor_dependency)):
         with open('y_inference.npy', 'wb') as f:
             np.save(f, y_inference)
             
-        mlflow.log_artifact('x_inference.npy')
-        mlflow.log_artifact('y_inference.npy') 
+        mlflow.log_artifact('x_inference.npy',artifact_path="data")
+        mlflow.log_artifact('y_inference.npy', artifact_path="data") 
 
-    await call_run_analyze_workflow(run_id = run.info.run_id)
+    await call_run_analyze_workflow(run_id = run.info.run_id, artifact_path="data")
 
     return {"detail": "sensors_analyze_predictions received"}
 

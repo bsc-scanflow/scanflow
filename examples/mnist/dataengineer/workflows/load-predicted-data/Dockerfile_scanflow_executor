@@ -1,7 +1,0 @@
-
-
-FROM 172.30.0.49:5000/load-data:latest
-
-COPY load-predicted-data /app/load-predicted-data
-
-ENTRYPOINT ["python", "/app/load-predicted-data/load-predicted-data.py"]

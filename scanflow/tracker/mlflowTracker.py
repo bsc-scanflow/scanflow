@@ -31,13 +31,13 @@ class MlflowTracker(Tracker):
         with mlflow.start_run(run_name=f"scanflow-app-{app.team_name}"):
             artifact_uri = mlflow.get_artifact_uri()
             logging.info("save app to artifact uri: {}".format(artifact_uri))
-            mlflow.log_dict(app.to_dict(), "{}/{}.json".format(app.team_name, app.app_name))
+            mlflow.log_dict(app.to_dict(), "{}/{}/{}.json".format(app.app_name, app.team_name, app.app_name))
             if app.workflows is not None:
                 for workflow in app.workflows:
-                    mlflow.log_dict(workflow.to_dict(), "{}/workflows/{}.json".format(app.team_name, workflow.name))
+                    mlflow.log_dict(workflow.to_dict(), "{}/{}/workflows/{}.json".format(app.app_name, app.team_name, workflow.name))
             if app.agents is not None:
                 for agent in app.agents:
-                    mlflow.log_dict(agent.to_dict(), "{}/agents/{}.json".format(app.team_name, agent.name))
+                    mlflow.log_dict(agent.to_dict(), "{}/{}/agents/{}.json".format(app.app_name, app.team_name, agent.name))
     
     #tested
     def download_app_meta(self, app_name, team_name, run_id=None, local_dir="/workflow", fromlocal=False):
@@ -46,10 +46,10 @@ class MlflowTracker(Tracker):
         self.client = MlflowClient()
         if run_id is not None:
             logging.info(f"[download_app_meta] by 'run_id'. {run_id}")
-            return self.download_artifacts_by_run_id(run_id, f"{team_name}/{app_name}.json", local_dir)
+            return self.download_artifacts_by_run_id(run_id, f"{app_name}/{team_name}/{app_name}.json", local_dir)
         else:
             logging.info(f"[download_app_meta] by 'run_name'. {team_name}. Get the latest submission by {team_name}")
-            return self.download_meta_by_run_name(team_name, app_name, local_dir)
+            return self.download_artifacts_by_run_name(app_name, team_name, f"{app_name}/{team_name}/{app_name}.json", local_dir)
     
     def download_app(self, app_name, team_name, run_id=None, local_dir="/workflow", fromlocal=False):
         app_dir = self.download_app_meta(app_name, team_name, run_id=run_id, local_dir=local_dir, fromlocal=fromlocal)
@@ -65,10 +65,10 @@ class MlflowTracker(Tracker):
         self.client = MlflowClient()
         if run_id is not None:
             logging.info(f"[download_workflow_meta] by 'run_id'. {run_id}")
-            return self.download_artifacts_by_run_id(run_id, f"{team_name}/workflows/{workflow_name}.json", local_dir)
+            return self.download_artifacts_by_run_id(run_id, f"{app_name}/{team_name}/workflows/{workflow_name}.json", local_dir)
         else:
             logging.info(f"[download_workflow_meta] by 'run_name'. {team_name}. Get the latest submission by {team_name}")
-            return self.download_meta_by_run_name(team_name, app_name, local_dir, workflow_name=workflow_name)
+            return self.download_artifacts_by_run_name(app_name, team_name, f"{app_name}/{team_name}/workflows/{workflow_name}.json", local_dir)
 
     def download_workflow(self, app_name, team_name, workflow_name, run_id=None, local_dir="/workflow", fromlocal=False):
         workflow_dir = self.download_workflow_meta(app_name, team_name, workflow_name, run_id=run_id, local_dir=local_dir, fromlocal=fromlocal)
@@ -83,10 +83,10 @@ class MlflowTracker(Tracker):
         self.client = MlflowClient()
         if run_id is not None:
             logging.info(f"[download_workflow_meta] by 'run_id'. {run_id}")
-            return self.download_artifacts_by_run_id(run_id, f"{team_name}/agents/{agent_name}.json", local_dir)
+            return self.download_artifacts_by_run_id(run_id, f"{app_name}/{team_name}/agents/{agent_name}.json", local_dir)
         else:
             logging.info(f"[download_workflow_meta] by 'run_name'. {team_name}. Get the latest submission by {team_name}")
-            return self.download_meta_by_run_name(team_name, app_name, local_dir, agent_name=agent_name)
+            return self.download_artifacts_by_run_name(app_name, team_name, f"{app_name}/{team_name}/agents/{agent_name}.json", local_dir)
 
     def download_agent(self, app_name, team_name, agent_name, run_id=None, local_dir="/workflow", fromlocal=False):
         agent_dir = self.download_workflow_meta(app_name, team_name, agent_name, run_id=run_id, local_dir=local_dir, fromlocal=fromlocal)
@@ -167,7 +167,7 @@ class MlflowTracker(Tracker):
             client.transition_model_version_stage(model_name, mv_new.version, "Production",  archive_existing_versions=True)
 
     #tested
-    def save_app_artifacts(self, app_name, team_name, app_dir="/worklfow", tolocal=False):
+    def save_app_artifacts(self, app_name, team_name, app_dir="/tmp", tolocal=False):
         mlflow.set_tracking_uri(get_tracker_uri(tolocal))
         logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
         mlflow.set_experiment(app_name)
@@ -179,16 +179,27 @@ class MlflowTracker(Tracker):
                    artifact_path=f"{app_name}/{team_name}")
 
     #tested
-    def download_app_artifacts(self, app_name, team_name, run_id=None, local_dir="/workflow", fromlocal=False):
+    def download_app_artifacts(self, app_name, team_name, run_id=None, local_dir="/tmp", fromlocal=False):
         mlflow.set_tracking_uri(get_tracker_uri(fromlocal))
         logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
         self.client = MlflowClient()
         if run_id is not None:
             logging.info(f"[download_app] by 'run_id'. {run_id}")
-            return self.download_artifacts_by_run_id(run_id, app_name,local_dir)
+            return self.download_artifacts_by_run_id(run_id, f"{app_name}/{team_name}", local_dir)
         else:
             logging.info(f"[download_app] by 'run_name'. {team_name}. Get the latest submission by {team_name}")
-            return self.download_artifacts_by_run_name(team_name, app_name, local_dir)
+            return self.download_artifacts_by_run_name(app_name, team_name, f"{app_name}/{team_name}", local_dir)
+
+    def download_artifacts(self, path, experiment_name=None, run_name=None, run_id=None, local_dir="/workflow", fromlocal=False):
+        mlflow.set_tracking_uri(get_tracker_uri(fromlocal))
+        logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
+        self.client = MlflowClient()
+        if run_id is not None:
+            logging.info(f"[download_app] by 'run_id'. {run_id}")
+            return self.download_artifacts_by_run_id(run_id, f"{app_name}/{team_name}", local_dir)
+        else:
+            logging.info(f"[download_app] by 'run_name'. {team_name}. Get the latest submission by {team_name}")
+            return self.download_artifacts_by_run_name(app_name, team_name, f"{app_name}/{team_name}", local_dir)
 
     def download_artifacts_by_run_id(self, run_id, path, local_dir):
         if not os.path.exists(local_dir):
@@ -198,41 +209,25 @@ class MlflowTracker(Tracker):
         #logging.info("Artifacts downloaded in: {}".format(local_path))
         #logging.info("Artifacts: {}".format(os.listdir(local_path)))
     
-    def download_artifacts_by_run_name(self, run_name, app_name, local_dir):
-        experiment = mlflow.get_experiment_by_name(app_name)
+    def download_artifacts_by_run_name(self, experiment_name, run_name, path, local_dir):
+        experiment = mlflow.get_experiment_by_name(experiment_name)
         if experiment is not None:
             experiment_id = experiment.experiment_id
         else:
-            logging.info(f"no app {app_name}") 
+            logging.info(f"no experiment {experiment_name}") 
         filter_string = f"tag.mlflow.runName = '{run_name}'"
         logging.info(f"search_run by {filter_string}")
         run_id = self.get_latest_run_id([experiment_id], filter_string) 
-        return self.download_artifacts_by_run_id(run_id, app_name, local_dir)
-
-    def download_meta_by_run_name(self, run_name, app_name, local_dir, workflow_name=None, agent_name=None):
-        experiment = mlflow.get_experiment_by_name(app_name)
-        if experiment is not None:
-            experiment_id = experiment.experiment_id
-        else:
-            logging.info(f"no app {app_name}") 
-        filter_string = f"tag.mlflow.runName = 'scanflow-app-{run_name}'"
-        logging.info(f"search_run by {filter_string}")
-        run_id = self.get_latest_run_id([experiment_id], filter_string)
-        if workflow_name is not None:
-            return self.download_artifacts_by_run_id(run_id, f"{run_name}/workflows/{workflow_name}.json", local_dir)
-        elif agent_name is not None:
-            return self.download_artifacts_by_run_id(run_id, f"{run_name}/agents/{agent_name}.json", local_dir) 
-        else:
-            return self.download_artifacts_by_run_id(run_id, f"{run_name}/{app_name}.json", local_dir)
+        return self.download_artifacts_by_run_id(run_id, path, local_dir)
     
-    def download_artifacts_by_experiment_name(self, app_name, local_dir):
-        experiment = mlflow.get_experiment_by_name(app_name)
-        if experiment is not None:
-            experiment_id = experiment.experiment_id
-        else:
-            logging.info(f"no app {app_name}")
-        run_id = self.get_latest_run_id([experiment_id])
-        return self.download_artifacts_by_run_id(run_id, app_name, local_dir) 
+#    def download_artifacts_by_experiment_name(self, app_name, local_dir):
+#        experiment = mlflow.get_experiment_by_name(app_name)
+#        if experiment is not None:
+#            experiment_id = experiment.experiment_id
+#        else:
+#            logging.info(f"no app {app_name}")
+#        run_id = self.get_latest_run_id([experiment_id])
+#        return self.download_artifacts_by_run_id(run_id, app_name, local_dir) 
     
     def get_latest_run_id(self, experiment_ids, filter_string='', order_by=None):
         logging.info(f"get latest run within the experiment:{experiment_ids}")

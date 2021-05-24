@@ -108,7 +108,7 @@ def inference(model_name, model_version, model_stage, input_data):
         E_inference.to_csv("/workflow/detector-batch/E_inference.csv", index=True)
         
         mlflow.log_metric(key='n_anomalies', value=n_anomalies)
-        mlflow.log_artifact('/workflow/detector-batch/E_inference.csv')
+        mlflow.log_artifact('/workflow/detector-batch/E_inference.csv',artifact_path="data")
 
 
 if __name__ == '__main__':

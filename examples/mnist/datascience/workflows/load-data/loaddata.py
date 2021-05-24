@@ -11,17 +11,36 @@ sys.path.insert(0, '/scanflow/scanflow')
 from scanflow.client import ScanflowTrackerClient
 
 @click.command(help="load input data set")
-@click.option("--app_name", default='mnist', type=str)
-@click.option("--team_name", default='data', type=str)
-def loaddata(app_name, team_name):
+# from main scanflow
+@click.option("--app_name", default=None, type=str)
+@click.option("--team_name", default=None, type=str)
+# from local scanflow
+@click.option("--experiment_name", default=None, type=str)
+@click.option("--run_name", default=None, type=str)
+@click.option("--path", default=None, type=str)
+@click.option("--run_id", default=None, type=str)
+@click.option("--fromlocal", default=False, type=bool)
+def loaddata(app_name, team_name, experiment_name, run_name, path, run_id, fromlocal):
 
-    client = ScanflowTrackerClient(verbose=True)
-
-    #load the latest mnist data from remote tracker
-    #data will be download into shared /workflow folder
-    client.download_app_artifacts(app_name = app_name, 
+    client = ScanflowTrackerClient()
+    
+    if app_name is not None and team_name is not None:
+        #load the latest mnist data from remote tracker
+        #data will be download into shared /workflow folder
+        artifacts_dir = client.download_app_artifacts(
+                                  app_name = app_name, 
                                   team_name = team_name,
-                                  local_dir = "/workflow/load-data") 
+                                  local_dir = "/workflow/load-data",
+                                  fromlocal=False) 
+
+    if path is not None:
+        artifacts_dir = client.download_artifacts(
+                                  path = path,
+                                  experiment_name = experiment_name,
+                                  run_name=run_name,
+                                  run_id=run_id,
+                                  local_dir="/workflow/load-data",
+                                  fromlocal=fromlocal)
     
     #log
     try:
@@ -30,7 +49,7 @@ def loaddata(app_name, team_name):
 
         mlflow.set_experiment("load_data")
         with mlflow.start_run():
-            mlflow.log_artifacts(local_dir= f"/workflow/load-data/{app_name}/{team_name}",
+            mlflow.log_artifacts(local_dir= artifacts_dir,
                                  artifact_path= "data")
     except:
         logging.info("mlflow logging fail")

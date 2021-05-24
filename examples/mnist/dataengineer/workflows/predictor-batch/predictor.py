@@ -64,9 +64,9 @@ def inference(model_name, model_version, model_stage, input_data):
 
         print(df_preds.head(10))
 
-        mlflow.log_artifact('images.npy')
-        mlflow.log_artifact('labels.npy')
-        mlflow.log_artifact('labels.csv')
+        mlflow.log_artifact('images.npy', artifact_path="data")
+        mlflow.log_artifact('labels.npy', artifact_path="data")
+        mlflow.log_artifact('labels.csv', artifact_path="data")
 
 def predict(model, x_test):
     x_test_tensor = torch.Tensor(x_test)

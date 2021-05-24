@@ -10,20 +10,10 @@ logging.getLogger().setLevel(logging.INFO)
 from fastapi import FastAPI, APIRouter
 from fastapi import Response, status, HTTPException
 
-
-#scanflow
-from scanflow.agent.config.settings import settings
-from scanflow.agent.template.monitor import custom_sensors
-from scanflow.agent.schemas.sensor import Sensor, SensorOutput, Trigger
-
-from scanflow.client import ScanflowTrackerClient
-import mlflow
-client = ScanflowTrackerClient(verbose=True)
-mlflow.set_tracking_uri(client.get_tracker_uri(False))
-
-
 planner_sensors_router = APIRouter(tags=['planner sensors'])
 
+#custom
+from scanflow.agent.template.planner import custom_sensors
 try:
     planner_sensors_router.include_router(custom_sensors.custom_sensor_router, tags=["custom sensors"])
 except:
