@@ -31,7 +31,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try:
             back = api_instance.create_namespace(namespacebody)
-            logging.info(f"create_namespace true {back}")
+            logging.info(f"create_namespace true")
             return True
         except: 
             logging.error(f"create_namespace error") 
@@ -170,7 +170,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         #try:
         back = api_instance.create_namespaced_secret(namespace=namespace, body=body)
-        logging.info(f"create_secret true {back}")
+        logging.info(f"create_secret true")
         return True
         #except:
         #    logging.error(f"create_secret error")
@@ -199,7 +199,7 @@ class Kubernetes:
         api_instance = client.CoreV1Api()
         try: 
             back = api_instance.create_namespaced_config_map(namespace=namespace,body=body)
-            logging.info(f"create_configmap true {back}")
+            logging.info(f"create_configmap true")
             return True
         except:
             logging.error(f"create_configmap error")

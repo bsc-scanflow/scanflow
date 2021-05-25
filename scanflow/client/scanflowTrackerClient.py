@@ -109,4 +109,4 @@ class ScanflowTrackerClient:
         return self.tracker.download_app(app_name, team_name, agent_name, run_id, local_dir, fromlocal)
 
     def download_artifacts(self, path:str, experiment_name=None, run_name=None, run_id=None, local_dir="/workflow", fromlocal=False):
-        return self.tracker.download_artifacts(path, experiment_name,run_name, run_id, local_dir, fromlocal)
+        return self.tracker.download_artifacts(path, experiment_name, run_name, run_id, local_dir, fromlocal)

@@ -56,9 +56,9 @@ class ScanflowDeployerClient:
             #user_type == "local"
             self.deployerbackend = self._get_deployer(deployer, k8s_config_file)
     
-    def __del__(self):
-        logging.info("scanflowdeployerclient del")
-        http_client.stop()
+#    async def __del__(self):
+#        logging.info("scanflowdeployerclient del")
+#        await http_client.stop()
 
 ### Scanflow local deploy backend
     def _get_deployer(self, deployer, k8s_config_file):
