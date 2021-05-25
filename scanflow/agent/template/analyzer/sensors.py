@@ -13,8 +13,8 @@ from fastapi import Response, status, HTTPException
 analyzer_sensors_router = APIRouter(tags=['analyzer sensors'])
 
 #custom
-from scanflow.agent.template.analyzer import custom_sensors
 try:
+    from scanflow.agent.template.analyzer import custom_sensors
     analyzer_sensors_router.include_router(custom_sensors.custom_sensor_router, tags=["custom sensors"])
 except:
     logging.info("custom_sensors function does not provide a router.")

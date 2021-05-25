@@ -28,8 +28,9 @@ class SensorDependency:
         if "run_ids" in data.kwargs:
             runs = list(map(mlflow.get_run, data.kwargs['run_ids']))
             data.kwargs['runs'] = runs
-
-        active_run = self.save_message(function=request.get('endpoint').__name__ , executors=data.kwargs['run_ids'], client=request.get('client'), server=request.get('server')+(request.url.path,))
+            active_run = self.save_message(function=request.get('endpoint').__name__ , executors=data.kwargs['run_ids'], client=request.get('client'), server=request.get('server')+(request.url.path,))
+        else:
+            active_run = self.save_message(function=request.get('endpoint').__name__ , executors=None, client=request.get('client'), server=request.get('server')+(request.url.path,))
 
         return (active_run, data.args, data.kwargs)
 

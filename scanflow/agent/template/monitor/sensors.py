@@ -20,8 +20,8 @@ async def sensors_root():
 
 
 #custom
-from scanflow.agent.template.monitor import custom_sensors
 try:
+    from scanflow.agent.template.monitor import custom_sensors
     monitor_sensors_router.include_router(custom_sensors.custom_sensor_router, tags=["custom sensors"])
 except:
     logging.info("custom_sensors function does not provide a router.")

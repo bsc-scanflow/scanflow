@@ -28,9 +28,9 @@ elif settings.AGENT_TYPE == "analyzer":
 elif settings.AGENT_TYPE == "planner":
     from scanflow.agent.template.planner import actuators
     actuators_router.include_router(actuators.planner_actuators_router)
-#elif settings.AGENT_TYPE == "executor":
-#    from scanflow.agent.template.executor import actuators
-#    actuators_router.include_router(actuators.executor_actuators_router)
+elif settings.AGENT_TYPE == "executor":
+    from scanflow.agent.template.executor import actuators
+    actuators_router.include_router(actuators.executor_actuators_router)
 else:
     #custom agent actuators
     from scanflow.agent.actuators import custom_actuators

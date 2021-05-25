@@ -66,7 +66,7 @@ async def check_model_accuracy(runs: List[mlflow.entities.Run], args, kwargs):
 
     if better_model(runs[0]):
         await call_executor_transit_model(run_id = runs[0].info.run_id)
-        await call_update_workflow(run_id = runs[0].info.run_id, artifact_path="data")
+        #await call_update_workflow(run_id = runs[0].info.run_id, artifact_path="data")
 
-    return number_of_newdata
+    return f"new model run {runs[0].info.run_id}"
 

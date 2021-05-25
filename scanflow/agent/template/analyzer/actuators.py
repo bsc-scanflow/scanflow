@@ -16,8 +16,8 @@ async def actuators_root():
     return {"Hello": "analyzer actuators"}
 
 #custom
-from scanflow.agent.template.analyzer import custom_actuators
 try:
+    from scanflow.agent.template.analyzer import custom_actuators
     analyzer_actuators_router.include_router(custom_actuators.custom_actuators_router, tags=["custom actuators"])
 except:
     logging.info("custom_actuators function does not provide a router.")
