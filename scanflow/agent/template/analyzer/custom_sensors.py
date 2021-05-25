@@ -69,7 +69,7 @@ async def count_number_of_newdata(runs: List[mlflow.entities.Run], args, kwargs)
     logging.info(f"count_number_of_newdata - {number_of_newdata}")
 
     if number_of_newdata_threshold(number_of_newdata):
-           await call_plan_retrain_model(list(map(lambda run: run.info.run_id, runs)), args[0], a=kwargs['a'])
+           await call_plan_retrain_model(run_ids = list(map(lambda run: run.info.run_id, runs)))
 
     return number_of_newdata
 

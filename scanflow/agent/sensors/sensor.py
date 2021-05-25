@@ -17,12 +17,14 @@ class sensor:
                  executors: List[str] = None,
                  filter_string: str = '', 
                  order_by: Optional[List[str]] = None,
+                 max_results: int = 100,
                  islocal: Optional[bool] = True):
         self.islocal = islocal
         self.executors = executors
         # default search all runs
         self.filter_string = filter_string
         self.order_by = order_by
+        self.max_results = max_results
 
     def __call__(self, func):
         @wraps(func)
@@ -40,6 +42,7 @@ class sensor:
                 
                 runs = mlflow.search_runs(experiment_ids=experiment_ids,
                     filter_string=self.filter_string,
+                    max_results=self.max_results,
                     order_by=self.order_by, output_format='list')
 
                 metric_value = await func(runs, args, kwargs)

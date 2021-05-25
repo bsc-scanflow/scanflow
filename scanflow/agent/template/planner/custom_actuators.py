@@ -20,3 +20,19 @@ async def call_run_retrain_workflow(run_id: str, artifact_path="data"):
                                         deployer="argo")
     #run workflow
     await deployerClient.run_workflow("mnist", "dataengineer", workflow)
+
+@actuator(path="/sensors/executor_transit_model", depender="executor")
+def call_executor_transit_model(args, kwargs):
+    return args, kwargs
+
+async def call_update_workflow(run_id: str, artifact_path="data"):
+    #get workflow meta
+    trackerClient = ScanflowTrackerClient(verbose=True)
+    workflow = trackerClient.download_workflow("mnist", "dataengineer", "online-inference", local_dir="/tmp")
+    workflow.executors[0].parameters.update({"run_id": run_id, "path": artifact_path, "fromlocal": True})
+
+    #platform executor
+    deployerClient = ScanflowDeployerClient(user_type="incluster",
+                                        deployer="seldon")
+    #update workflow
+    await deployerClient.update_workflow("mnist", "dataengineer", workflow)
