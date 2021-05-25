@@ -1,0 +1,12 @@
+DELETE FROM alembic_version;
+DELETE FROM model_version_tags;
+DELETE FROM model_versions;
+DELETE FROM registered_models;
+DELETE FROM registered_model_tags;
+DELETE FROM tags;
+DELETE FROM params;
+DELETE FROM latest_metrics;
+DELETE FROM metrics;
+DELETE FROM runs;
+DELETE FROM experiment_tags;
+DELETE FROM experiments;

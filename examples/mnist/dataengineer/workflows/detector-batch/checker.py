@@ -63,49 +63,51 @@ def detect_anomalies(model, THRESHOLD_LOW, THRESHOLD_HIGH, x_inference):
     return n_anomalies, E_inference
 
 @click.command(help="Detect anomalies")
-@click.option("--model_name", default='mnist-detector', type=str)
+@click.option("--model_name", default='mnist_detector', type=str)
 @click.option("--model_version",  default=None, type=int)
 @click.option("--model_stage",  default='Production', type=str)
-@click.option("--input_data", default='/workflow/load-predicted-data/x_inference.npy', type=str)
+@click.option("--input_data", default='/workflow/load-data/x_inference.npy', type=str)
 def inference(model_name, model_version, model_stage, input_data):
-    
+
+    #data
+    img_rows, img_cols = 28, 28
+    x_inference = np.load(input_data)
+    x_inference = x_inference.reshape(x_inference.shape[0], img_rows, img_cols)
+
     #client
     client = ScanflowTrackerClient(verbose=True)
     mlflow.set_tracking_uri(client.get_tracker_uri(True))
     logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
+    mlflowClient = MlflowClient(client.get_tracker_uri(True))
  
     #log
     mlflow.set_experiment("detector")
     with mlflow.start_run(run_name='detector-batch'):
-        
-        img_rows, img_cols = 28, 28
-        x_inference = np.load(input_data)
-        
-        x_inference = x_inference.reshape(x_inference.shape[0], img_rows, img_cols)
 
         #load model 
-        mlflowClient = MlflowClient(client.get_tracker_uri(True))       
         if model_version is not None:
             model = mlflow.keras.load_model(
                 model_uri=f"models:/{model_name}/{model_version}"
             )
             print(f"Loading model: {model_name}:{model_version}")
-            mv = mlflowClient.search_model_versions("version='{}'".format(model_version))
-            THRESHOLD_LOW = mv[0].tags['THRESHOLD_LOW']
-            THRESHOLD_HIGH = mv[0].tags['THRESHOLD_HIGH']
+            mv = mlflowClient.get_model_version(model_name, model_version)
+            THRESHOLD_LOW = mv.tags['THRESHOLD_LOW']
+            THRESHOLD_HIGH = mv.tags['THRESHOLD_HIGH']
         else:
             model = mlflow.keras.load_model(
                 model_uri=f"models:/{model_name}/{model_stage}"
             )
             print(f"Loading model: {model_name}:{model_stage}")
-            mv = mlflowClient.search_model_versions("current_stage='{}'".format(model_stage))
+            mv = mlflowClient.get_latest_versions(model_name, stages=[model_stage])
             THRESHOLD_LOW = mv[0].tags['THRESHOLD_LOW']
             THRESHOLD_HIGH = mv[0].tags['THRESHOLD_HIGH']
         
         
-        n_anomalies, E_inference= detect_anomalies(model, THRESHOLD_LOW, THRESHOLD_HIGH, x_inference)
+        n_anomalies, E_inference= detect_anomalies(model, float(THRESHOLD_LOW), float(THRESHOLD_HIGH), x_inference)
         
-        E_inference.to_csv("/workflow/detector-batch/E_inference.csv", index=True)
+        if not os.path.exists("/workflow/detector-batch"):
+            os.mkdir("/workflow/detector-batch")
+        E_inference.to_csv('/workflow/detector-batch/E_inference.csv', index=True)
         
         mlflow.log_metric(key='n_anomalies', value=n_anomalies)
         mlflow.log_artifact('/workflow/detector-batch/E_inference.csv',artifact_path="data")

@@ -47,22 +47,19 @@ def choice_from_anomalous(anomalous_loss, default=True):
 
     return random_from_kde
 
-def picker(E_inference, x_inference, y_inference, n_critical_points=5):
+def picker(E_inference, x_inference, y_inference, n_critical_points):
     np.random.seed(RANDOM_STATE_SEED)
-#     n_critical_points = 5
     request_list = list()
 
     for x_new, loss_mae, anomaly, preds in zip(x_inference,
                                     E_inference['Loss_mae'].values,
                                     E_inference['Anomaly'].values,
-#                                     y_new_c_,
                                     y_inference):
 
         data = dict()
         data['x_new'] = x_new
         data['loss_mae'] = loss_mae
         data['anomaly'] = anomaly
-    #     data['y_new'] = y_new
         data['preds'] = preds
 
         request_list.append(data)
@@ -90,22 +87,30 @@ def picker(E_inference, x_inference, y_inference, n_critical_points=5):
 
 
 @click.command(help="Pick critical points")
-@click.option("--E_inference", default='/workflow/detector-batch/E_inference.csv', type=str)
+@click.option("--e_inference", default='/workflow/detector-batch/E_inference.csv', type=str)
 @click.option("--x_inference_artifact", default='/workflow/load-data/x_inference.npy', type=str)
 @click.option("--y_inference_artifact", default='/workflow/load-data/y_inference.npy', type=str)
-def pick(E_inference, x_inference_artifact, y_inference_artifact):
+def pick(e_inference, x_inference_artifact, y_inference_artifact):
     
+    #data
+    img_rows, img_cols = 28, 28
+    x_inference = np.load(x_inference_artifact)
+    y_inference = np.load(y_inference_artifact)
+    E_inference = pd.read_csv(e_inference)
+        
+    x_inference = x_inference.reshape(x_inference.shape[0], img_rows, img_cols)
+
     #log
+    client = ScanflowTrackerClient(verbose=True)
+    mlflow.set_tracking_uri(client.get_tracker_uri(True))
+    logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))    
+
+
     mlflow.set_experiment("pick-data")
     with mlflow.start_run():
         
-        img_rows, img_cols = 28, 28
-        x_inference = np.load(x_inference_artifact)
-        y_inference = np.load(y_inference_artifact)
-        
-        x_inference = x_inference.reshape(x_inference.shape[0], img_rows, img_cols)
-        
         n_critical_points = int(x_inference.shape[0]*0.05)
+
         x_inference_chosen, y_inference_chosen = picker(E_inference, x_inference, y_inference, n_critical_points)
 
         with open('x_inference_chosen.npy', 'wb') as f:

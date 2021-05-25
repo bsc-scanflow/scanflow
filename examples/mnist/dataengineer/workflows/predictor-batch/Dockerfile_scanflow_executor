@@ -4,6 +4,4 @@ FROM 172.30.0.49:5000/modeling-cnn1:latest
 
 COPY predictor-batch /app/predictor-batch
 
-RUN pip install -r /app/predictor-batch/req_predictor.txt
-
 ENTRYPOINT ["python", "/app/predictor-batch/predictor.py"]
