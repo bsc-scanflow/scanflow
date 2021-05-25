@@ -41,13 +41,18 @@ def modeling(model_name, epochs, x_train_path, y_train_path, x_test_path, y_test
     if x_newdata_path is not None and y_newdata_path is not None:
         x_original_train = np.load(x_train_path)
         y_original_train = np.load(y_train_path)
+        x_original_train = x_original_train.reshape(x_original_train.shape[0], img_rows, img_cols)
+
         x_new_train = np.load(x_newdata_path)
         y_new_train = np.load(y_newdata_path)
+
         x_train = np.concatenate((x_original_train, x_new_train), axis=0)
         y_train = np.concatenate((y_original_train, y_new_train), axis=0)
     else:
         x_train = np.load(x_train_path)
         y_train = np.load(y_train_path)
+        x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols)
+        
 
     x_test = np.load(x_test_path)
     y_test = np.load(y_test_path)

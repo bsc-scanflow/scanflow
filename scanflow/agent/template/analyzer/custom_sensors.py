@@ -13,6 +13,7 @@ from fastapi import Response, status, HTTPException
 
 from datetime import datetime
 import time
+from functools import reduce
 
 from scanflow.agent.sensors.sensor import sensor
 from scanflow.agent.sensors.sensor_dependency import sensor_dependency
