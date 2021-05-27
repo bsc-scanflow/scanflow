@@ -2,8 +2,6 @@ from typing import List, Dict
 import logging
 
 from scanflow.app import Sensor
-from scanflow.app import Rule
-from scanflow.app import Actuator
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -13,8 +11,6 @@ class Agent:
                  name: str,
                  template: str = None,
                  sensors: List[Sensor] = None,
-                 rules: List[Rule] = None,
-                 actuators: List[Actuator] = None,
                  dependencies: List[str] = None,
                  dockerfile: str = None,
                  image: str = None):
@@ -26,8 +22,6 @@ class Agent:
         self.name = name
         self.template = template
         self.sensors = sensors
-        self.rules = rules
-        self.actuators = actuators
         self.dependencies = dependencies
         self.dockerfile = dockerfile
         self.image = image
@@ -41,16 +35,6 @@ class Agent:
                 for sensor in v:
                     sensors_list.append(sensor.to_dict())
                 tmp_dict[k] = sensors_list
-            elif k == 'rules' and v is not None:
-                rules_list = list()
-                for rule in v:
-                    rules_list.append(rule.__dict__)
-                tmp_dict[k] = rules_list
-            elif k == 'actuators' and v is not None:
-                actuators_list = list()
-                for actuator in v:
-                    actuators_list.append(actuator.__dict__)
-                tmp_dict[k] = actuators_list
             else:
                 tmp_dict[k] = v
 

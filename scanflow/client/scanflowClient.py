@@ -4,7 +4,7 @@ import os
 from typing import List, Dict
 
 # scanflow app
-from scanflow.app import Executor, Dependency, Workflow, Application, Tracker, Agent
+from scanflow.app import Executor, Dependency, Workflow, Application, Tracker, Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
 
 # scanflow graph
 #from scanflow.graph import ApplicationGraph
@@ -18,6 +18,7 @@ from scanflow.server.utils import (
 )
 import requests
 import json
+import datetime
 
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
@@ -85,12 +86,7 @@ class ScanflowClient:
                          output_dir: str = None):
         return Workflow(name, executors, dependencies, output_dir)
 
-    def ScanflowAgent(self,
-                      name: str,
-                      template: str,
-                      mainfile: str = None,
-                      parameters: dict = None):
-        return Agent(name, template, mainfile, parameters)
+
     
     def ScanflowApplication(self,
                             app_name: str,
@@ -100,4 +96,42 @@ class ScanflowClient:
                             agents: List[Agent]=None,
                             tracker: Tracker = None):
         return Application(app_name, app_dir, team_name, workflows, agents, tracker)
+
+    def ScanflowAgentSensor_IntervalTrigger(self,
+                                            weeks: int = 0,
+                                            days: int = 0,
+                                            hours: int = 0,
+                                            minutes: int = 0,
+                                            seconds: int = 0,
+                                            start_date: str = None,
+                                            end_date: str = None,
+                                            timezone: str = None,
+                                            jitter: int = None):
+        return IntervalTrigger(weeks, days, hours, minutes, seconds, start_date, end_date, timezone, jitter)
+
+    def ScanflowAgentSensor_DateTrigger(self,
+                                        run_date: str = None,
+                                        timezone: str = None):
+        return DateTrigger(run_date, timezone)
+
+    def ScanflowAgentSensor_CronTrigger(self,
+                                        crontab: str = None):
+        return CronTrigger(crontab)
+
+    def ScanflowAgentSensor(self,
+                            name: str,
+                            isCustom : bool,
+                            func_name: str,
+                            trigger: BaseTrigger = None,
+                            args: tuple = None,
+                            kwargs: dict = None,
+                            next_run_time: datetime = None):
+        return Sensor(name, isCustom, func_name, trigger, args, kwargs, next_run_time)
+
+    def ScanflowAgent(self,
+                      name: str,
+                      template: str = None,
+                      mainfile: str = None,
+                      parameters: dict = None,):
+        return Agent(name, template, mainfile, parameters)
 
