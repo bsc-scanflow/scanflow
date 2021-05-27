@@ -1,0 +1,7 @@
+
+FROM 172.30.0.49:5000/scanflow-agent
+
+ENV AGENT_NAME checker
+ENV AGENT_TYPE analyzer
+
+COPY checker /$AGENT_HOME/template/analyzer

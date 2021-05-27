@@ -60,6 +60,8 @@ class DockerBuilder(builder.Builder):
     def __build_image_to_registry(self, source):
 
         image_name = f"{self.registry}/{source.name}"
+        if isinstance(source, Agent):
+            image_name = f"{self.registry}/{source.name}-agent"
         logging.info(f"Building image {image_name}")
         try:
             image = self.client.images.get(image_name)
@@ -172,12 +174,15 @@ class DockerBuilder(builder.Builder):
                     FROM 172.30.0.49:5000/scanflow-agent
 
                     ENV AGENT_NAME {agent.name}
-                    ENV AGENT_TYPE {agent.type}
-    
-                    COPY {agent.name} /$AGENT_HOME/template/{agent.type}/{agent.name}
-    
-                    CMD uvicorn /agent/{agent.name}/{agent.mainfile}:agent --reload --host 0.0.0.0 --port 8080
+                    ENV AGENT_TYPE {agent.template}
         ''')
+        #sensors injection
+        if agent.sensors is not None:
+            sensors_template = dedent(f'''
+                    COPY {agent.name} /$AGENT_HOME/template/{agent.template}
+            ''')
+            template += sensors_template
+
         logging.info(f"{agent.name} 's Dockerfile {template}")
         return template
     

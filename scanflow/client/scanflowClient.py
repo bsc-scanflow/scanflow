@@ -131,7 +131,8 @@ class ScanflowClient:
     def ScanflowAgent(self,
                       name: str,
                       template: str = None,
-                      mainfile: str = None,
-                      parameters: dict = None,):
-        return Agent(name, template, mainfile, parameters)
+                      sensors: List[Sensor] = None,
+                      dockerfile: str = None,
+                      image: str = None):
+        return Agent(name, template, sensors, dockerfile, image)
 

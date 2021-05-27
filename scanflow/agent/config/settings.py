@@ -9,8 +9,8 @@ from datetime import datetime
 class Settings(BaseSettings):
     AGENT_NAME: str
     AGENT_TYPE: str
-    NAMESPACE: str
 
+    NAMESPACE: str
     SCANFLOW_TRACKER_URI : AnyHttpUrl
     SCANFLOW_TRACKER_LOCAL_URI : AnyHttpUrl
     SCANFLOW_SERVER_URI : AnyHttpUrl
@@ -34,12 +34,6 @@ class Settings(BaseSettings):
    #               'args':['predictor']
    #             }
    #     }
-    rules: Dict[str, Rule] = None
-    actuators: Dict[str, Actuator] = None
-
-    #dependencies: Dict[str, AnyHttpUrl] = {
-    #    'checker': 'http://172.30.0.49:4004'
-    #}
 
     class Config:
         case_sensitive = True

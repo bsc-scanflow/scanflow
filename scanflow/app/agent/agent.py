@@ -11,7 +11,6 @@ class Agent:
                  name: str,
                  template: str = None,
                  sensors: List[Sensor] = None,
-                 dependencies: List[str] = None,
                  dockerfile: str = None,
                  image: str = None):
         """
@@ -22,7 +21,6 @@ class Agent:
         self.name = name
         self.template = template
         self.sensors = sensors
-        self.dependencies = dependencies
         self.dockerfile = dockerfile
         self.image = image
 
