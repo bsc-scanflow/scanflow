@@ -6,7 +6,8 @@ from textwrap import dedent
 
 import scanflow.builder.builder as builder
 
-from scanflow.app import Application, Executor, Workflow, Tracker, Agent
+from scanflow.app import Application, Executor, Workflow, Tracker, Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
+from datetime import datetime
 
 from typing import List, Dict
 
@@ -175,13 +176,59 @@ class DockerBuilder(builder.Builder):
 
                     ENV AGENT_NAME {agent.name}
                     ENV AGENT_TYPE {agent.template}
+
+                    RUN mkdir /agent
         ''')
         #sensors injection
         if agent.sensors is not None:
+            #copy custom file
             sensors_template = dedent(f'''
-                    COPY {agent.name} /$AGENT_HOME/template/{agent.template}
+                    COPY {agent.name} /agent
             ''')
             template += sensors_template
+            #injection
+            sensors = {}
+            for sensor in agent.sensors:
+                #sensor_trigger_dict
+                sensor_conf = {}
+                sensor_conf.update(name=sensor.name)
+                if sensor.isCustom:
+                    sensor_conf.update(func=f"scanflow.agent.template.{agent.template}.custom_sensors.{sensor.name}")
+                else:
+                    sensor_conf.update(func=f"scanflow.agent.template.{agent.template}.sensors.{sensor.name}")
+                if isinstance(sensor.trigger, IntervalTrigger):
+                    trigger = {"type": "interval"}
+                    trigger.update(sensor.trigger.__dict__)
+                    sensor_conf.update(trigger=trigger)
+                elif isinstance(sensor.trigger, DateTrigger):
+                    trigger = {"type": "date"}
+                    trigger.update(sensor.trigger.__dict__)
+                    sensor_conf.update(trigger=trigger)
+                elif isinstance(sensor.trigger, CronTrigger):
+                    trigger = {"type": "cron"}
+                    trigger.update(sensor.trigger.__dict__)
+                    sensor_conf.update(trigger=trigger)
+                if sensor.args is not None:
+                    sensor_conf.update(args=sensor.args)
+                if sensor.kwargs is not None:
+                    sensor_conf.update(kwargs=sensor.kwargs)
+                if sensor.next_run_time is not None:
+                    sensor_conf.update(next_run_time=sensor.next_run_time.isoformat())
+                #sensor
+                sensor_dict = {f"{sensor.name}":sensor_conf}
+                sensors.update(sensor_dict)
+            #sensors
+            sensors = json.dumps(sensors)
+            logging.info(f"sensor configuration registered:{sensors}")
+            sensors_env_template = dedent(f'''
+                   ENV sensors '{sensors}' 
+            ''')
+            template += sensors_env_template
+
+        #start
+        template += dedent(f'''
+             CMD [ "cp /agent/* /scanflow/scanflow/scanflow/agent/template/{agent.template} && uvicorn main:agent --reload --host 0.0.0.0 --port 8080" ]
+        ''')
 
         logging.info(f"{agent.name} 's Dockerfile {template}")
         return template

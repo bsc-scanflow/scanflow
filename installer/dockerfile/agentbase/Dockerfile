@@ -6,6 +6,7 @@ RUN mkdir /scanflow
 #download scanlfow
 ENV SCANFLOW_PATH  /scanflow/scanflow
 ENV AGENT_HOME  ${SCANFLOW_PATH}/scanflow/agent
+RUN pip install APScheduler
 
 RUN pip install git+https://github.com/peiniliu/couler.git
 RUN pip install kubernetes==12.0.1
@@ -22,4 +23,4 @@ RUN pip install aiodns
 
 WORKDIR $AGENT_HOME
 
-CMD uvicorn main:agent --reload --host 0.0.0.0 --port 8080
+ENTRYPOINT ["/bin/bash", "-c"]

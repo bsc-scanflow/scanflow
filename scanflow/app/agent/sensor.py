@@ -66,7 +66,8 @@ class Sensor():
         for k, v in sensor_dict.items():
             if k == 'trigger' and v is not None:
                 tmp_dict[k] = v.__dict__
+            elif k == 'next_run_time' and v is not None:
+                tmp_dict[k] = v.isoformat()
             else:
                 tmp_dict[k] = v
         return tmp_dict
-    

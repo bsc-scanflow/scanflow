@@ -380,7 +380,7 @@ class Kubernetes:
         container = client.V1Container(
             name=name,
             image=image,
-            image_pull_policy="IfNotPresent",
+            image_pull_policy="Always",
             env=env,
             env_from=env_from,
             volume_mounts=volumeMounts
