@@ -20,6 +20,9 @@ logging.getLogger().setLevel(logging.INFO)
 
 class SeldonDeployer(deployer.Deployer):
     def __init__(self,
-                 verbose=True):
-        super(SeldonDeployer, self).__init__(verbose)
+                 k8s_config_file=True):
+        super(SeldonDeployer, self).__init__(k8s_config_file)
+
+        #self.seldonclient = SeldonServices(k8s_config_file=k8s_config_file)
+
         logging.info("seldon backend is not ready!")

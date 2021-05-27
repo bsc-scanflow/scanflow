@@ -349,16 +349,16 @@ class Kubernetes:
                 )
         return env_from_list
 
-    def build_volumeMount(self, **kwargs):
-        volumeMount = []
+    def build_volumeMounts(self, **kwargs):
+        volumeMounts = []
         for k, v in kwargs.items():
-            volumeMount.append(
+            volumeMounts.append(
                 client.V1VolumeMount(
                     name=k,
                     mount_path=v
                 ),
             )
-        return volumeMount
+        return volumeMounts
 
     def build_volumes(self, **kwargs):
         volumes = []
@@ -371,7 +371,7 @@ class Kubernetes:
             )
         return volumes
 
-    def build_deployment(self, namespace=None, name=None, label=None, image=None, volumes=None, env=None, env_from=None, volumeMount=None): 
+    def build_deployment(self, namespace=None, name=None, label=None, image=None, volumes=None, env=None, env_from=None, volumeMounts=None): 
         spec = client.V1DeploymentSpec(
             selector=client.V1LabelSelector(match_labels={label:name}),
             template=client.V1PodTemplateSpec(),
@@ -383,11 +383,11 @@ class Kubernetes:
             image_pull_policy="IfNotPresent",
             env=env,
             env_from=env_from,
-            volume_mounts=volumeMount
+            volume_mounts=volumeMounts
         )
         spec.template.metadata = client.V1ObjectMeta(
             name=name,
-            labels={"scanflow":name},
+            labels={label:name},
         )
         spec.template.spec = client.V1PodSpec(
             containers = [container],
@@ -406,11 +406,11 @@ class Kubernetes:
     def create_deployment(self, namespace, body):
         api_instance = client.AppsV1Api()
         try:
-            api_instance.create_namespaced_deployment(namespace=namespace, body=body)
-            logging.info(f"create_deployment true")
+            back = api_instance.create_namespaced_deployment(namespace=namespace, body=body)
+            logging.info(f"create_deployment true ")
             return True
         except:
-            logging.error(f"create_deployment error") 
+            logging.error(f"create_deployment error ") 
             return False
 
     def apply_deployment(self, namespace, name, deployment):

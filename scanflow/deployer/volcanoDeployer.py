@@ -19,6 +19,6 @@ logging.getLogger().setLevel(logging.INFO)
 
 class VolcanoDeployer(deployer.Deployer):
     def __init__(self,
-                 verbose=True):
-        super(VolcanoDeployer, self).__init__(verbose)
+                 k8s_config_file=None):
+        super(VolcanoDeployer, self).__init__(k8s_config_file)
         logging.info("volcano backend is not ready!")

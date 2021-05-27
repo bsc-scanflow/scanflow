@@ -1,8 +1,6 @@
 from pydantic import AnyHttpUrl, BaseSettings, PyObject, BaseModel
 from typing import List, Dict
 from scanflow.agent.schemas.sensor import SensorCallable
-from scanflow.agent.schemas.rule import Rule
-from scanflow.agent.schemas.actuator import Actuator
 
 from datetime import datetime
 

@@ -27,7 +27,7 @@ async def count_number_of_predictions(runs: List[mlflow.entities.Run], args, kwa
     logging.info(f"count_number_of_predictions - {number_of_predictions}")
 
     if number_of_predictions_threshold(number_of_predictions):
-       await call_analyze_check_predictions(args[0], run_ids = list(map(lambda run: run.info.run_id, runs)), a=kwargs['a'])
+       await call_analyze_check_predictions(run_ids = list(map(lambda run: run.info.run_id, runs)))
 
     return number_of_predictions
 

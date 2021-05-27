@@ -43,14 +43,17 @@ class Deployer():
         step5 = self.__create_configmap_client(namespace, scanflowClientConfig)
         # 6. start local tracker 
         step6 = self.__start_local_tracker(namespace, tracker)
+
+        #tempo mount scanflow
+        step8 = self.__create_scanflow_volume(namespace)
+
         # 7. start_agent if has
         if agents is not None:
             step7 = self.start_agents(namespace, agents)
         else:
             step7 = True
 
-        #tempo mount scanflow
-            step8 = self.__create_scanflow_volume(namespace)
+        
 
         return  step1 and step2 and step3 and step4 and step5 and step6 and step7 and step8 
 
@@ -197,7 +200,39 @@ class Deployer():
     def start_agent(self,
                     namespace: str,
                     agent: Agent):
-        pass
+        agent_name = agent.name
+        #deployment
+        env = self.kubeclient.build_env(NAMESPACE=namespace)
+        env_from_list = self.kubeclient.build_env_from_source(
+            secret_ref = "scanflow-secret",
+            config_map_ref = "scanflow-client-env"
+        )
+        volumes = self.kubeclient.build_volumes(scanflowpath=f"scanflow-{namespace}")
+        volumeMounts = self.kubeclient.build_volumeMounts(scanflowpath="/scanflow")
+        deployment = self.kubeclient.build_deployment(namespace = namespace, 
+        name = agent_name, 
+        label = "agent", 
+        image = agent.image,
+        volumes = volumes,
+        env_from = env_from_list,
+        env=env,
+        volumeMounts = volumeMounts)
+
+        step1 = self.kubeclient.create_deployment(namespace, deployment)
+        logging.info(f"[+] Created {agent_name} Deployment {step1}")
+
+        #service
+        ports= self.kubeclient.build_servicePort('TCP',port=80,targetPort=8080)
+        service=self.kubeclient.build_service(namespace = namespace, 
+        name = agent_name, 
+        label = "agent", 
+        ports = ports,
+        type = "ClusterIP")
+
+        step2 = self.kubeclient.create_service(namespace = namespace, body=service)
+        logging.info(f"[+] Created {agent_name} Service {step2}")
+
+        return step1 and step2
 
     def stop_agents(self, 
                     namespace: str, 
@@ -211,9 +246,11 @@ class Deployer():
     def stop_agent(self,
                    namespace: str,
                    agent: Agent):
-        pass
-
-
+        agent_name = agent.name
+        logging.info(f"[++] Stopping agent: [{agent_name}].")
+        step1 = self.kubeclient.delete_deployment(namespace, agent_name)
+        step2 = self.kubeclient.delete_service(namespace, agent_name)
+        return step1 and step2
 
     # workflows: with different deployer
 

@@ -67,10 +67,10 @@ class ScanflowDeployerClient:
             return ArgoDeployer(k8s_config_file)
         elif deployer == "volcano":
             from scanflow.deployer.volcanoDeployer import VolcanoDeployer
-            return VolcanoDeployer()
+            return VolcanoDeployer(k8s_config_file)
         elif deployer == "seldon":
             from scanflow.deployer.seldonDeployer import SeldonDeployer
-            return SeldonDeployer()
+            return SeldonDeployer(k8s_config_file)
         else:
             raise ValueError("unknown deployer: " + deployer)
 
@@ -120,7 +120,7 @@ class ScanflowDeployerClient:
                 return False
         else: #local
             namespace = f"scanflow-{app.app_name}-{app.team_name}" 
-            return self.deployerbackend.clean_environment(namespace)
+            return self.deployerbackend.clean_environment(namespace, app.agents)
 
     async def run_app(self,
                       app: Application):
