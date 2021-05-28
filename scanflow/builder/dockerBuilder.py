@@ -178,14 +178,15 @@ class DockerBuilder(builder.Builder):
                     ENV AGENT_TYPE {agent.template}
 
                     RUN mkdir /agent
+                    COPY {agent.name} /agent
         ''')
         #sensors injection
         if agent.sensors is not None:
             #copy custom file
-            sensors_template = dedent(f'''
-                    COPY {agent.name} /agent
-            ''')
-            template += sensors_template
+            #sensors_template = dedent(f'''
+            #        
+            #''')
+            #template += sensors_template
             #injection
             sensors = {}
             for sensor in agent.sensors:
