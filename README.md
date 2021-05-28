@@ -38,4 +38,4 @@ Please check [installing](installer/Readme.md) for more details
 
 Please check the jupyter notebook for more details.
 
-MNIST Project Tutorial: [mnist](tutorials/mnist/README.md)
+MNIST Project Tutorial: [mnist](tutorials/mnist/Readme.md)
