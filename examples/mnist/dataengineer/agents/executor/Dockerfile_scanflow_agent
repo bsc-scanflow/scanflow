@@ -3,3 +3,7 @@ FROM 172.30.0.49:5000/scanflow-agent
 
 ENV AGENT_NAME executor
 ENV AGENT_TYPE executor
+
+RUN mkdir /agent
+
+CMD [ "cp /agent/* /scanflow/scanflow/scanflow/agent/template/executor && uvicorn main:agent --reload --host 0.0.0.0 --port 8080" ]

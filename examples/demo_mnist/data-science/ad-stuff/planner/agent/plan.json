@@ -1,1 +1,0 @@
-{"Plan": {"action": "Transition new model to Production.", "current_model_name": "mnist_cnn", "new_model_name": "mnist_cnn_new", "result": "Current model stage = Staging. New model stage = Production"}}
