@@ -13,6 +13,7 @@ details in [mnist-data.ipynb](mnist-data.ipynb)
 
 details in [mnist-datascience.ipynb](mnist-datascience.ipynb)
 
+![datascience flow](../../images/datascienceflow.png)
 ### DataEngineerTeam (Inference phase/Operation phase)
 
 details in [mnist-dataengineer.ipynb](mnist-dataengineer.ipynb)
