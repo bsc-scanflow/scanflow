@@ -53,8 +53,6 @@ class Deployer():
         else:
             step7 = True
 
-        
-
         return  step1 and step2 and step3 and step4 and step5 and step6 and step7 and step8 
 
     def __create_scanflow_volume(self,namespace):

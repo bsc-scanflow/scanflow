@@ -1,10 +1,5 @@
-## Scanflow-Kubernetes 
+# Installing 
 
-Scanflow-Kubernetes is a web service deployed on Kubernetes. It provides a framework for managing and supervising a machine learning workflow in both the training stage and the inference stage. currently feature of scanflow includes:
-
-1. workflow definition,
-2. multi-agent system for supervising workflows,
-3. different deploying backend - k8s, argo, seldon
 
 ## Prerequisites
 
@@ -17,7 +12,7 @@ tracker(mlflow)
 - artifact store - Minio
 - backend store - PostgreSQL
 
-# Building scanflow server by dockerfile
+## Building scanflow server by dockerfile
 
 You can use the provided [Dockerfile](dockerfile/Dockerfile)
 
