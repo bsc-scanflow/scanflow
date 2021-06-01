@@ -4,41 +4,36 @@
 """The setup script."""
 
 from setuptools import setup, find_packages
+import io
+import os
 
-requirements = ['docker', 'pandas', 'scikit-learn']
 
-setup_requirements = [ ]
+with open("requirements.txt") as f:
+    requirements = f.read().splitlines()
 
-test_requirements = [ ]
+extras = {}
+with open("requirements-dev.txt") as f:
+    extras["dev"] = f.read().splitlines()
+
+version = {}  # type: dict
+with io.open(os.path.join("scanflow", "_version.py")) as fp:
+    exec(fp.read(), version)
+
 
 setup(
-    author="Gusseppe Bravo",
-    author_email='gusseppebravo@gmail.com',
-    classifiers=[
-        'Development Status :: 1 - Alpha',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-    ],
-    description="",
-    install_requires=requirements,
+    name = "scanflow",
+    description="An MLOps Platform",
+    keywords='scanflow, kubernetes, mlflow, argo, seldon',
+
+    author="BSC Scanflow Team",
+    author_email='peini.liu@bsc.es',
     license="MIT license",
+
+    version=version["__version__"],
     include_package_data=True,
-    keywords='scanflow',
-    name='scanflow',
-    packages=find_packages(include=['scanflow']),
-    setup_requires=setup_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
-    url='https://github.com/gusseppe/scanflow',
-    version='0.1.0',
-    zip_safe=False,
+    install_requires=requirements,
+    extras_require=extras,
+    python_requires=">=3.6",
+    packages=find_packages(exclude=["*test*"]),
+    package_data={"": ["requirements.txt"]},
 )
