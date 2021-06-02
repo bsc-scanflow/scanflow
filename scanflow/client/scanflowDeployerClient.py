@@ -122,6 +122,42 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app.app_name}-{app.team_name}" 
             return self.deployerbackend.clean_environment(namespace, app.agents)
 
+    async def start_agents(self,
+                          app: Application):
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/start_agents"
+            async with http_client.session.post(url, data=json.dumps(app.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+
+            if status == 200:
+                return True
+            else:
+                logging.error(f"create agents error: {text['detail']}")
+                return False
+
+        else: #local
+            namespace = f"scanflow-{app.app_name}-{app.team_name}"
+            result = self.deployerbackend.start_agents(namespace, app.agents)
+            return result
+
+    async def stop_agents(self,
+                         app: Application):
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/stop_agents"
+            async with http_client.session.post(url, data = json.dumps(app.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+
+            if status == 200:
+                return True
+            else:
+                logging.error(f"clean scanflow application agents error: {text['detail']}")
+                return False
+        else: #local
+            namespace = f"scanflow-{app.app_name}-{app.team_name}" 
+            return self.deployerbackend.stop_agents(namespace, app.agents)                 
+
     async def run_app(self,
                       app: Application):
         if self.user_type == "incluster":

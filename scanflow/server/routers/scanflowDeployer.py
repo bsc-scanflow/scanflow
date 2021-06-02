@@ -67,6 +67,32 @@ async def clean_environment(app: Application):
     else:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="clean environment error")
 
+@router.post("/start_agents",
+              summary="start agents for scanflow app",
+              status_code = status.HTTP_200_OK)
+async def start_agents(app: Application):
+    namespace = f"scanflow-{app.app_name}-{app.team_name}"
+    deployer = Deployer()
+    result = deployer.start_agents(namespace, app.agents)
+
+    if result:
+        return {'detail': "agents created"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="create agents error")
+
+@router.post("/stop_agents",
+              summary="start agents for scanflow app",
+              status_code = status.HTTP_200_OK)
+async def stop_agents(app:Application):
+    namespace = f"scanflow-{app.app_name}-{app.team_name}"
+    deployer = Deployer()
+    result = deployer.stop_agents(namespace, app.agents)
+
+    if result:
+        return {'detail': "agents deleted"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="deleted agents error")
+
 
 ## scanflow workflow deployer operations
 async def build_workflows():
