@@ -1,9 +1,7 @@
 
 
-FROM 172.30.0.49:5000/scanflow-executor
+FROM 172.30.0.49:5000/modelgarden:latest
 
 COPY modeling-tf /app/modeling-tf
-
-RUN pip install -r /app/modeling-tf/req_modeling.txt
 
 ENTRYPOINT ["python", "/app/modeling-tf/mnist_main_mlflow.py"]

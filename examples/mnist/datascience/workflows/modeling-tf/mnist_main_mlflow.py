@@ -1,23 +1,10 @@
-# Copyright 2018 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Runs a simple model on the MNIST dataset."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import os
+os.environ['PYTHONPATH'] += ":/models"
 
 # Import libraries
 from absl import app
@@ -36,6 +23,10 @@ sys.path.insert(0, '/scanflow/scanflow')
 from scanflow.client import ScanflowTrackerClient
 import mlflow
 import mlflow.tensorflow
+
+# Enable auto-logging to MLflow to capture TensorBoard metrics.
+mlflow.tensorflow.autolog()
+
 
 FLAGS = flags.FLAGS
 
@@ -144,6 +135,9 @@ def run(flags_obj, datasets_override=None, strategy_override=None):
   export_path = os.path.join(flags_obj.model_dir, 'saved_model')
   model.save(export_path, include_optimizer=False)
 
+  mlflow.keras.log_model(model, artifact_path="mnist-tf", 
+                          registered_model_name="mnist-tf")
+
   eval_output = model.evaluate(
       eval_input_dataset, steps=num_eval_steps, verbose=2)
 
@@ -165,9 +159,6 @@ def define_mnist_flags():
                     'Whether to download data to `--data_dir`.')
   FLAGS.set_default('batch_size', 1024)
 
-# Enable auto-logging to MLflow to capture TensorBoard metrics.
-mlflow.tensorflow.autolog()
-
 def main(_):
   model_helpers.apply_clean(FLAGS)
   stats = run(flags.FLAGS)
@@ -175,12 +166,12 @@ def main(_):
 
 
 if __name__ == '__main__':
+  logging.set_verbosity(logging.INFO)
 
   client = ScanflowTrackerClient(verbose=True)
   mlflow.set_tracking_uri(client.get_tracker_uri(True))
   logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
-  mlflow.set_experiment("modeling_tf_official")
+  mlflow.set_experiment("modeling_tf")
   with mlflow.start_run():
-      logging.set_verbosity(logging.INFO)
       define_mnist_flags()
       app.run(main)
