@@ -278,4 +278,24 @@ class Deployer():
                         workflow: Workflow):
         raise NotImplementedError("Backend:delete_workflow")
 
+    def deploy_workflows(self,
+                         namespace: str,
+                         workflows: List[Workflow]):
+        raise NotImplementedError("Backend: deploy_workflows")
+
+    def deploy_workflow(self,
+                        namespace: str,
+                        workflow: Workflow):
+        raise NotImplementedError("Backend: deploy_workflow")
+
+    def update_workflows(self,
+                         namespace: str,
+                         workflows: List[Workflow]):
+        raise NotImplementedError("Backend: update_workflows")
+
+    def update_workflow(self,
+                        namespace: str,
+                        workflow: Workflow):
+        raise NotImplementedError("Backend: update_workflow")
+
     
