@@ -4,9 +4,11 @@ class Edge():
     """
     def __init__(self, 
                  dependee: str,
-                 depender: str):
+                 depender: str,
+                 edge_type: str):
         self.depender = depender
         self.dependee = dependee
+        self.edge_type = edge_type
 
 
 class Dependency(Edge):
@@ -21,6 +23,6 @@ class Dependency(Edge):
           a relation from dependee to depender, will generate a edge from dependee -> depender
         """
         super(Dependency, self).__init__(dependee=dependee,
-                                       depender=depender)
+           depender=depender, edge_type='dependency')
         self.priority = priority
                     

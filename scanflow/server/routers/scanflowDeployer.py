@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi import FastAPI, Response, status, HTTPException
 
-from ..schemas.app import Application, Workflow, Executor
+from ..schemas.app import Application, Workflow, Node, Executor
 from ..schemas.deploy_env import ScanflowEnvironment
 
 from typing import Optional, List
@@ -22,9 +22,24 @@ import mlflow
 from scanflow.client import ScanflowTrackerClient
 
 from scanflow.deployer.deployer import Deployer
-#from scanflow.deployer.argoDeployer import ArgoDeployer
+from scanflow.deployer.argoDeployer import ArgoDeployer
 #from scanflow.deployer.volcanoDeployer import VolcanoDeployer
-#from scanflow.deployer.seldonDeployer import SeldonDeployer
+from scanflow.deployer.seldonDeployer import SeldonDeployer
+
+deployer = Deployer()
+argodeployer = ArgoDeployer()
+seldondeployer = SeldonDeployer()
+
+@router.on_event("startup")
+async def startup():
+    logging.info(f"scanflow server startup")
+    deployer = Deployer()
+    argodeployer = ArgoDeployer()
+    seldondeployer = SeldonDeployer()
+
+@router.on_event("shutdown")
+async def shutdown():
+    logging.info(f"scanflow server shutdown")
 
 
 # scanflow app environment
@@ -42,8 +57,7 @@ async def create_environment(app: Application,
         scanflowEnv.tracker_config.TRACKER_STORAGE = f"postgresql://scanflow:scanflow123@postgresql-service.postgresql.svc.cluster.local/{namespace}"
         scanflowEnv.tracker_config.TRACKER_ARTIFACT = f"s3://scanflow/{namespace}"
         scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker.{namespace}.svc.cluster.local"
-
-    deployer = Deployer()
+    
     result = deployer.create_environment(scanflowEnv.namespace, scanflowEnv.secret.dict(), scanflowEnv.tracker_config.dict(), scanflowEnv.client_config.dict(), app.tracker, app.agents)
 
     if result:
@@ -59,7 +73,6 @@ async def clean_environment(app: Application):
     logging.info(f"app {app.dict()}")
 
     namespace = f"scanflow-{app.app_name}-{app.team_name}"
-    deployer = Deployer()
     result = deployer.clean_environment(namespace)
 
     if result:
@@ -72,7 +85,6 @@ async def clean_environment(app: Application):
               status_code = status.HTTP_200_OK)
 async def start_agents(app: Application):
     namespace = f"scanflow-{app.app_name}-{app.team_name}"
-    deployer = Deployer()
     result = deployer.start_agents(namespace, app.agents)
 
     if result:
@@ -85,7 +97,6 @@ async def start_agents(app: Application):
               status_code = status.HTTP_200_OK)
 async def stop_agents(app:Application):
     namespace = f"scanflow-{app.app_name}-{app.team_name}"
-    deployer = Deployer()
     result = deployer.stop_agents(namespace, app.agents)
 
     if result:
@@ -106,7 +117,7 @@ async def run_app(app: Application, deployer: Optional[str]="argo"):
     logging.info(f"app {app.dict()}")
 
     namespace = f"scanflow-{app.app_name}-{app.team_name}"
-    deployerbackend = get_deployer(deployer)
+    deployerbackend = __get_deployer(deployer)
     result = deployerbackend.run_workflows(namespace, app.workflows)
 
     if result:
@@ -119,7 +130,7 @@ async def run_app(app: Application, deployer: Optional[str]="argo"):
            status_code = status.HTTP_200_OK)
 async def delete_app(app: Application, deployer: Optional[str]="argo"):
     namespace = f"scanflow-{app.app_name}-{app.team_name}"
-    deployerbackend = get_deployer(deployer)
+    deployerbackend = __get_deployer(deployer)
     result = deployerbackend.delete_workflows(namespace, app.workflows)
     
     if result:
@@ -151,7 +162,7 @@ async def delete_workflows(app_name: str,
                         workflows: List[Workflow],
                         deployer: Optional[str]="argo"):
     namespace = f"scanflow-{app_name}-{team_name}"
-    deployerbackend = get_deployer(deployer)
+    deployerbackend = __get_deployer(deployer)
     result = deployerbackend.delete_workflows(namespace, workflows)
 
     if result:
@@ -167,7 +178,7 @@ async def run_workflow(app_name: str,
                        workflow: Workflow,
                        deployer: Optional[str]="argo"):
     namespace = f"scanflow-{app_name}-{team_name}"
-    deployerbackend = get_deployer(deployer)
+    deployerbackend = __get_deployer(deployer)
     result = deployerbackend.run_workflow(namespace, workflow)
 
     if result:
@@ -183,7 +194,7 @@ async def delete_workflow(app_name: str,
                           workflow: Workflow,
                           deployer: Optional[str]="argo"):
     namespace = f"scanflow-{app_name}-{team_name}"
-    deployerbackend = get_deployer(deployer)
+    deployerbackend = __get_deployer(deployer)
     result = deployerbackend.delete_workflow(namespace, workflow)
 
     if result:
@@ -200,7 +211,7 @@ async def run_executor(app_name: str,
                      executor: Executor,
                      deployer: Optional[str]="argo"):
     namespace = f"scanflow-{app_name}-{team_name}"
-    deployerbackend = get_deployer(deployer)
+    deployerbackend = __get_deployer(deployer)
     result = deployerbackend.run_executor(namespace, executor)
 
     if result:
@@ -217,7 +228,7 @@ async def delete_executor(app_name: str,
                         executor: Executor,
                         deployer: Optional[str]="argo"):
     namespace = f"scanflow-{app_name}-{team_name}"
-    deployerbackend = get_deployer(deployer)
+    deployerbackend = __get_deployer(deployer)
     result = deployerbackend.delete_executor(namespace, executor)
 
     if result:
@@ -225,17 +236,10 @@ async def delete_executor(app_name: str,
     else:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="delete executor error")
 
-
-
-def get_deployer(deployer):
+def __get_deployer(deployer):
     if deployer == "argo":
-        from scanflow.deployer.argoDeployer import ArgoDeployer
-        return ArgoDeployer()
-    elif deployer == "volcano":
-        from scanflow.deployer.volcanoDeployer import VolcanoDeployer
-        return VolcanoDeployer()
+        return argodeployer
     elif deployer == "seldon":
-        from scanflow.deployer.seldonDeployer import SeldonDeployer
-        return SeldonDeployer()
+        return seldondeployer
     else:
         raise ValueError("unknown deployer: " + deployer)

@@ -1,9 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict
+from pydantic import BaseModel, Field, Extra, validator
+from typing import Optional, List, Dict, Union, Literal
 
-
-class Executor(BaseModel):
-    name: str 
+class Node(BaseModel):
+    name: str
+    node_type: str
     image: str
     mainfile: Optional[str] = None
     parameters: Optional[dict] = None
@@ -12,16 +12,27 @@ class Executor(BaseModel):
     base_image: Optional[str] = None
     env: Optional[str] = None
 
-class Dependency(BaseModel):
+class Executor(BaseModel):
+    name: str
+    node_type: str
+    image: str
+    mainfile: Optional[str] = None
+    parameters: Optional[dict] = None
+    requirements: Optional[str] = None
+    dockerfile: Optional[str] = None
+    base_image: Optional[str] = None
+    env: Optional[str] = None
+
+class Edge(BaseModel):
     dependee: str
     depender: str
+    edge_type: str
     priority: Optional[int] = 0
-
 
 class Workflow(BaseModel):
     name: str 
-    executors: List[Executor] 
-    dependencies: List[Dependency]
+    nodes: List[Node] = None
+    edges: List[Edge] = None
     output_dir: Optional[str] = None
 
 class Agent(BaseModel):

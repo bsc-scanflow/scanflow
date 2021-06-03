@@ -1,6 +1,6 @@
 #workflow
-from .workflow.executor import Executor, Node
-from .workflow.dependency import Dependency, Edge
+from .workflow.node import Executor, Node, Service
+from .workflow.edge import Dependency, Edge
 from .workflow.workflow import Workflow
 #agent
 from .agent.sensor import Sensor, BaseTrigger, CronTrigger, IntervalTrigger, DateTrigger

@@ -1,35 +1,35 @@
 from typing import List, Dict
 
-from scanflow.app import Executor
-from scanflow.app import Dependency
+from scanflow.app import Node
+from scanflow.app import Edge
 
 
 class Workflow(object):
     def __init__(self,
                  name: str,
-                 executors: List[Executor],
-                 dependencies: List[Dependency],
+                 nodes: List[Node],
+                 edges: List[Edge],
                  output_dir: str = None):
 
         self.name = name
-        self.executors = executors
-        self.dependencies = dependencies
+        self.nodes = nodes
+        self.edges = edges
         self.output_dir = output_dir
 
     def to_dict(self):
         tmp_dict = {}
         workflow_dict = self.__dict__
         for k,v in workflow_dict.items():
-            if k == 'executors':
-                executors_list = list()
-                for executor in v:
-                    executors_list.append(executor.__dict__)
-                tmp_dict[k] = executors_list
-            elif k == 'dependencies':
-                dependencies_list = list()
-                for dependency in v:
-                    dependencies_list.append(dependency.__dict__)
-                tmp_dict[k] = dependencies_list
+            if k == 'nodes':
+                nodes_list = list()
+                for node in v:
+                    nodes_list.append(node.__dict__)
+                tmp_dict[k] = nodes_list
+            elif k == 'edges':
+                edges_list = list()
+                for edge in v:
+                    edges_list.append(edge.__dict__)
+                tmp_dict[k] = edges_list
             else:
                 tmp_dict[k] = v
         return tmp_dict

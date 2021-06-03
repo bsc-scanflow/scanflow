@@ -6,8 +6,8 @@ class Message(BaseModel):
     function: str
 
 class SensorMessage(Message):
-    #sensor: f"{type}: call {function} from {executors} -- the result is {value}"
-    executors: List[str] = None 
+    #sensor: f"{type}: call {function} from {nodes} -- the result is {value}"
+    nodes: List[str] = None 
     value: str = None
     client: tuple = None
     server: tuple = None
