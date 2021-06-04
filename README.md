@@ -2,14 +2,14 @@
 
 Scanflow-Kubernetes is a platform to simplify MLOps. It originally supports deploying and operating on Kubernetes, but users can also extend it into other platforms. 
 
-Scanflow is a high-level library that is built on top of Mlflow. It provides the ability to define workflows, build each executor of workflows and agents, and deploy/run the agents/workflows. In addition, it announces a framework for developing agents in order to manage and supervise workflows in both the ML training stage and the inference stage. 
+Scanflow is a high-level library that is built on top of Mlflow. It provides the ability to define workflows, build each node of workflows and agents, and deploy/run the agents/workflows. In addition, it announces a framework for developing agents in order to manage and supervise workflows in both the ML training stage and the inference stage. 
 
 Current components of Scanflow includes:
 
 - **Scanflow Developing**(Scanflow Application): A format for teams defining workflows, agents and basic environment.
 
 
-- **Scanflow Building**: An API to build Scanflow Application(each executor of workflows and agents as containers)
+- **Scanflow Building**: An API to build Scanflow Application(each node of workflows and agents as containers)
 
 
 - **Scanflow Deploying**: An API to create a working environment for each team and deploy agents, also provides workflows running as batch workflows or deploying as online services
