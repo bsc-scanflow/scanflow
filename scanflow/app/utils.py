@@ -1,4 +1,4 @@
-from . import Application, Workflow, Executor, Dependency, Agent, Tracker
+from . import Application, Workflow, Executor, Service, Dependency, Agent, Tracker
 
 def dict_to_app(dictionary):
     app = Application(dictdictionary['app_name'], dictionary['app_dir'], dictionary['team_name'])
@@ -18,14 +18,18 @@ def dict_to_app(dictionary):
 
 def dict_to_workflow(dictionary):
     name = dictionary['name']
-    executors = []
-    for executor_dict in dictionary['executors']:
-        executors.append(dict_to_executor(executor_dict))
-    dependencies = []
-    for dependency_dict in dictionary['dependencies']:
-        dependencies.append(Dependency(dependency_dict['dependee'], dependency_dict['depender'], int(dependency_dict['priority'])))
+    nodes = []
+    for node_dict in dictionary['nodes']:
+        if node_dict['nodetype'] == 'executor':
+            nodes.append(dict_to_executor(node_dict))
+        else:
+            nodes.append(dict_to_service(node_dict))
+    edges = []
+    for edge_dict in dictionary['edges']:
+        if edge_dict['edge_type'] == 'dependency':
+            edges.append(Dependency(edge_dict['dependee'], edge_dict['depender'], int(edge_dict['priority'])))
     output_dir = dictionary['output_dir']
-    workflow = Workflow(name, executors, dependencies, output_dir)
+    workflow = Workflow(name, nodes, edges, output_dir)
     return workflow
 
 def dict_to_executor(dictionary):
@@ -45,6 +49,9 @@ def dict_to_executor(dictionary):
     if dictionary['image']:
         executor.image = dictionary['image']
     return executor
+
+def dict_to_service(dictionary):
+    pass
 
 def dict_to_agent(dictionary):
     agent = Agent(name)

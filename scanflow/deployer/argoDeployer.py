@@ -72,7 +72,7 @@ class ArgoDeployer(deployer.Deployer):
 
         #executor
         argoContainers = {}
-        for executor in workflow.executors:
+        for executor in workflow.nodes:
             #volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir)
             volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir, scanflowpath="/scanflow")
             logging.info(f"[+] Building workflow: [{workflow.name}:{executor.name}].")
@@ -85,18 +85,18 @@ class ArgoDeployer(deployer.Deployer):
                          env = env, 
                          volumeMounts = volumeMounts)
 
-        #dependencies
-        logging.info(f"[+] Building workflow: [{workflow_name}- dependencies]")
-        dependency_graph = []
-        for dependency in workflow.dependencies:
-            dependency_graph.append(
-                [argoContainers[f"{dependency.dependee}"],
-                 argoContainers[f"{dependency.depender}"]]
+        #edges
+        logging.info(f"[+] Building workflow: [{workflow_name}- edges]")
+        edge_graph = []
+        for edge in workflow.edges:
+            edge_graph.append(
+                [argoContainers[f"{edge.dependee}"],
+                 argoContainers[f"{edge.depender}"]]
             )
 
         #dag
         logging.info(f"[+] Building workflow: [{workflow_name}- dag]")
-        self.argoclient.argoDag(dependency_graph)
+        self.argoclient.argoDag(edge_graph)
 
         argoWorkflow = self.argoclient.submitWorkflow(namespace)
         logging.info(f"[+++] Workflow: [{workflow_name}] has been submitted to argo {argoWorkflow}")

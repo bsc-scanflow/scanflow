@@ -268,6 +268,81 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app_name}-{team_name}"
             return self.deployerbackend.delete_workflow(namespace, workflow)
 
+    async def deploy_workflows(self,
+                      app_name: str,
+                      team_name: str,
+                      workflows: List[Workflow]):
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/deploy_workflows/{app_name}/{team_name}/?deployer={self.deployer}"
+            async with http_client.session.post(url,
+                data= json.dumps(workflows.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+            logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
+        else: #local
+            namespace = f"scanflow-{app_name}-{team_name}"
+            return self.deployerbackend.deploy_workflows(namespace, workflows)
+
+    async def deploy_workflow(self,
+                     app_name: str,
+                     team_name: str,
+                     workflow: Workflow):
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/deploy_workflow/{app_name}/{team_name}/?deployer={self.deployer}"
+            async with http_client.session.post(url,
+                data= json.dumps(workflow.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+            logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
+        else: #local
+            namespace = f"scanflow-{app_name}-{team_name}"
+            return self.deployerbackend.deploy_workflow(namespace, workflow)
+
+    async def update_workflows(self,
+                      app_name: str,
+                      team_name: str,
+                      workflows: List[Workflow]):
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/update_workflows/{app_name}/{team_name}/?deployer={self.deployer}"
+            async with http_client.session.post(url,
+                data= json.dumps(workflows.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+            logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
+        else: #local
+            namespace = f"scanflow-{app_name}-{team_name}"
+            return self.deployerbackend.update_workflows(namespace, workflows)
+
+    async def update_workflow(self,
+                     app_name: str,
+                     team_name: str,
+                     workflow: Workflow):
+        if self.user_type == "incluster":
+            url = f"{self.scanflow_server_uri}/deployer/update_workflow/{app_name}/{team_name}/?deployer={self.deployer}"
+            async with http_client.session.post(url,
+                data= json.dumps(workflow.to_dict())) as response:
+                status = response.status
+                text = await response.json()
+            logging.info(f"{text['detail']}")
+            if status == 200:
+                return True
+            else:
+                return False
+        else: #local
+            namespace = f"scanflow-{app_name}-{team_name}"
+            return self.deployerbackend.update_workflow(namespace, workflow)
 
     async def run_executor(self,
                      app_name: str,

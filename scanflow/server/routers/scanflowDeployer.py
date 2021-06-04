@@ -146,7 +146,7 @@ async def run_workflows(app_name: str,
                         workflows: List[Workflow],
                         deployer: Optional[str]="argo"):
     namespace = f"scanflow-{app_name}-{team_name}"
-    deployerbackend = get_deployer(deployer)
+    deployerbackend = __get_deployer(deployer)
     result = deployerbackend.run_workflows(namespace, workflows)
 
     if result:
@@ -201,6 +201,71 @@ async def delete_workflow(app_name: str,
         return {'detail': f"workflow {workflow.name} has been deleted"}
     else:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="delete workflow error")
+
+@router.post("/deploy_workflows/{app_name}/{team_name}",
+           summary="deploy workflows",
+           status_code = status.HTTP_200_OK)
+async def deploy_workflows(app_name: str,
+                        team_name: str,
+                        workflows: List[Workflow],
+                        deployer: Optional[str]="seldon"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = __get_deployer(deployer)
+    result = deployerbackend.deploy_workflows(namespace, workflows)
+
+    if result:
+        return {'detail': "all workflows have been deployed"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run workflows error")
+
+@router.post("/deploy_workflow/{app_name}/{team_name}",
+           summary="deploy workflow",
+           status_code = status.HTTP_200_OK)
+async def deploy_workflow(app_name: str,
+                       team_name: str,
+                       workflow: Workflow,
+                       deployer: Optional[str]="seldon"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = __get_deployer(deployer)
+    result = deployerbackend.deploy_workflow(namespace, workflow)
+
+    if result:
+        return {'detail': f"workflow {workflow.name} has been deployed"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run workflow error")
+
+@router.post("/update_workflows/{app_name}/{team_name}",
+           summary="update workflows",
+           status_code = status.HTTP_200_OK)
+async def update_workflows(app_name: str,
+                        team_name: str,
+                        workflows: List[Workflow],
+                        deployer: Optional[str]="seldon"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = __get_deployer(deployer)
+    result = deployerbackend.update_workflows(namespace, workflows)
+
+    if result:
+        return {'detail': "all workflows have been updated"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run workflows error")
+
+@router.post("/update_workflow/{app_name}/{team_name}",
+           summary="update workflow",
+           status_code = status.HTTP_200_OK)
+async def update_workflow(app_name: str,
+                       team_name: str,
+                       workflow: Workflow,
+                       deployer: Optional[str]="seldon"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = __get_deployer(deployer)
+    result = deployerbackend.update_workflow(namespace, workflow)
+
+    if result:
+        return {'detail': f"workflow {workflow.name} has been updated"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run workflow error")
+
 
 @router.post("/run_executor/{app_name}/{team_name}/{workflow_name}",
            summary="run executor",

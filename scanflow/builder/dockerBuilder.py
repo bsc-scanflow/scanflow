@@ -6,7 +6,7 @@ from textwrap import dedent
 
 import scanflow.builder.builder as builder
 
-from scanflow.app import Application, Executor, Workflow, Tracker, Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
+from scanflow.app import Application, Executor, Service, Node, Workflow, Tracker, Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
 from datetime import datetime
 
 from typing import List, Dict
@@ -49,14 +49,15 @@ class DockerBuilder(builder.Builder):
             self.build_ScanflowWorkflow(workflow)
 
     def build_ScanflowWorkflow(self, workflow: Workflow):
-        self.build_ScanflowExecutors(workflow.executors)
+        self.build_ScanflowNodes(workflow.nodes)
 
-    def build_ScanflowExecutors(self, executors: List[Executor]):
-        for executor in executors:
-            self.build_ScanflowExecutor(executor)
+    def build_ScanflowNodes(self, nodes: List[Node]):
+        for node in nodes:
+            self.build_ScanflowNode(node)
 
-    def build_ScanflowExecutor(self, executor: Executor):
-        executor.image = self.__build_image_to_registry(executor)
+    def build_ScanflowNode(self, node: Node):
+        node.image = self.__build_image_to_registry(node)
+
 
     def __build_image_to_registry(self, source):
 
@@ -64,6 +65,7 @@ class DockerBuilder(builder.Builder):
         if isinstance(source, Agent):
             image_name = f"{self.registry}/{source.name}-agent"
         logging.info(f"Building image {image_name}")
+
         try:
             image = self.client.images.get(image_name)
             return image.tags[0]
@@ -75,7 +77,7 @@ class DockerBuilder(builder.Builder):
             if source.dockerfile is None:
                 dockerfile, build_path = self.__generate_dockerfile(source)
             else:
-                if isinstance(source, Executor):
+                if isinstance(source, Node):
                     build_path = f"{self.paths['workflows_dir']}"
                     dockerfile = f"{self.paths['workflows_dir']}/{source.name}/{source.dockerfile}"
                 elif isinstance(source, Agent):
@@ -108,6 +110,11 @@ class DockerBuilder(builder.Builder):
         if isinstance(source, Executor):
             dockerfile_content = self.__dockerfile_template_executor(source)
             filename = "Dockerfile_scanflow_executor"
+            dockerfile = f"{self.paths['workflows_dir']}/{source.name}/{filename}"
+            build_path = f"{self.paths['workflows_dir']}"
+        elif isinstance(source, Service):
+            dockerfile_content = self.__dockerfile_template_service(source)
+            filename = "Dockerfile_scanflow_service"
             dockerfile = f"{self.paths['workflows_dir']}/{source.name}/{filename}"
             build_path = f"{self.paths['workflows_dir']}"
         elif isinstance(source, Agent):
@@ -169,6 +176,9 @@ class DockerBuilder(builder.Builder):
 
         logging.info(f"{executor.name} 's Dockerfile {template}")
         return template
+
+    def __dockerfile_template_service(self, service):
+        pass
  
     def __dockerfile_template_agent(self, agent):
         template = dedent(f'''

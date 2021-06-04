@@ -2,8 +2,6 @@ import logging
 import os
 from typing import List
 
-#from scanflow.app import Workflow, Executor
-
 import scanflow.deployer.deployer as deployer
 from scanflow.templates import SeldonClient
 

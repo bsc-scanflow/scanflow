@@ -4,7 +4,7 @@ import os
 from typing import List, Dict
 
 # scanflow app
-from scanflow.app import Executor, Dependency, Workflow, Application, Tracker, Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
+from scanflow.app import Executor, Dependency, Node, Edge, Service, Workflow, Application, Tracker, Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
 
 # scanflow graph
 #from scanflow.graph import ApplicationGraph
@@ -73,6 +73,9 @@ class ScanflowClient:
                          env: str = None):
         return Executor(name, mainfile, parameters, requirements, dockerfile, base_image, env)
 
+    def ScanflowService(self):
+        pass
+
     def ScanflowDependency(self,
                          dependee: str,
                          depender: str,
@@ -81,12 +84,10 @@ class ScanflowClient:
 
     def ScanflowWorkflow(self,
                          name: str,
-                         executors: List[Executor],
-                         dependencies: List[Dependency],
+                         nodes: List[Node],
+                         edges: List[Edge],
                          output_dir: str = None):
-        return Workflow(name, executors, dependencies, output_dir)
-
-
+        return Workflow(name, nodes, edges, output_dir)
     
     def ScanflowApplication(self,
                             app_name: str,

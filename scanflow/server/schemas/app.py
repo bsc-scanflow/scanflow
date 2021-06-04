@@ -23,7 +23,17 @@ class Executor(BaseModel):
     base_image: Optional[str] = None
     env: Optional[str] = None
 
+class Service(BaseModel):
+    name: str
+    node_type: str
+
 class Edge(BaseModel):
+    dependee: str
+    depender: str
+    edge_type: str
+    priority: Optional[int] = 0
+
+class Dependency(BaseModel):
     dependee: str
     depender: str
     edge_type: str
