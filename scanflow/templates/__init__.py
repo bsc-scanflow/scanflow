@@ -1,3 +1,3 @@
 from .kubernetes import Kubernetes
 from .argoWorkflows import ArgoWorkflows
-#from .seldonDeployment import seldonDeployment
+from .seldonClient import SeldonClient

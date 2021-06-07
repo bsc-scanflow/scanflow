@@ -60,7 +60,7 @@ async def sensors_analyze_predictions(info: tuple = Depends(sensor_dependency)):
     return {"detail": "sensors_analyze_predictions received"}
 
 
-@sensor(executors=["pick-data"], filter_string="metrics.n_critical_data > 0")
+@sensor(nodes=["pick-data"], filter_string="metrics.n_critical_data > 0")
 async def count_number_of_newdata(runs: List[mlflow.entities.Run], args, kwargs):
     print(args)
     print(kwargs)

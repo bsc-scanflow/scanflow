@@ -14,13 +14,13 @@ client = ScanflowTrackerClient(verbose=True)
 
 class sensor:
     def __init__(self,
-                 executors: List[str] = None,
+                 nodes: List[str] = None,
                  filter_string: str = '', 
                  order_by: Optional[List[str]] = None,
                  max_results: int = 100,
                  islocal: Optional[bool] = True):
         self.islocal = islocal
-        self.executors = executors
+        self.nodes = nodes
         # default search all runs
         self.filter_string = filter_string
         self.order_by = order_by
@@ -33,7 +33,7 @@ class sensor:
             print(type(args))
             print(kwargs)
             print(type(kwargs))
-            if self.executors is not None:
+            if self.nodes is not None:
                 mlflow.set_tracking_uri(client.get_tracker_uri(self.islocal))
                 logging.info("Connecting tracking server uri: {}".format(mlflow.get_tracking_uri()))
 
@@ -50,13 +50,13 @@ class sensor:
                 await self.save_message(
                     SensorMessage(type="sensor",
                                   function=f"{func.__name__}",
-                                  executors=self.executors,
+                                  nodes=self.nodes,
                                   value=metric_value)
                 )
         return search_runs
 
     def get_experiment_ids(self):
-        experiments =  list(map(mlflow.get_experiment_by_name, self.executors))
+        experiments =  list(map(mlflow.get_experiment_by_name, self.nodes))
         experiment_ids = list(map(lambda experiment: experiment.experiment_id, experiments))
         return experiment_ids
 

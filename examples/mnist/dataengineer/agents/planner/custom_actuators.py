@@ -11,11 +11,11 @@ async def call_run_retrain_workflow(run_id: str, artifact_path="data"):
     #get workflow meta
     trackerClient = ScanflowTrackerClient(verbose=True)
     workflow = trackerClient.download_workflow("mnist", "datascience", "mnist-wf", local_dir="/tmp")
-    workflow.executors[0].parameters.update({"run_id": run_id, "path": artifact_path, "fromlocal": True})
-    workflow.executors[1].parameters.update({"x_newdata_path":"/workflow/load-data/data/x_newdata.npy","y_newdata_path":"/workflow/load-data/data/y_newdata.npy"})
-    workflow.executors[2].parameters.update({"x_newdata_path":"/workflow/load-data/data/x_newdata.npy","y_newdata_path":"/workflow/load-data/data/y_newdata.npy"})
+    workflow.nodes[0].parameters.update({"run_id": run_id, "path": artifact_path, "fromlocal": True})
+    workflow.nodes[1].parameters.update({"x_newdata_path":"/workflow/load-data/data/x_newdata.npy","y_newdata_path":"/workflow/load-data/data/y_newdata.npy"})
+    workflow.nodes[2].parameters.update({"x_newdata_path":"/workflow/load-data/data/x_newdata.npy","y_newdata_path":"/workflow/load-data/data/y_newdata.npy"})
 
-    #platform executor
+    #platform nodes
     deployerClient = ScanflowDeployerClient(user_type="incluster",
                                         deployer="argo")
     #run workflow
@@ -29,9 +29,9 @@ async def call_update_workflow(run_id: str, artifact_path="data"):
     #get workflow meta
     trackerClient = ScanflowTrackerClient(verbose=True)
     workflow = trackerClient.download_workflow("mnist", "dataengineer", "online-inference", local_dir="/tmp")
-    workflow.executors[0].parameters.update({"run_id": run_id, "path": artifact_path, "fromlocal": True})
+    workflow.nodes[0].parameters.update({"run_id": run_id, "path": artifact_path, "fromlocal": True})
 
-    #platform executor
+    #platform nodes
     deployerClient = ScanflowDeployerClient(user_type="incluster",
                                         deployer="seldon")
     #update workflow

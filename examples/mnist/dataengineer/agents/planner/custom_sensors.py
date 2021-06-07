@@ -59,7 +59,7 @@ async def sensors_plan_retain_model(info: tuple = Depends(sensor_dependency)):
     return {"detail": "sensors_plan_retain_model received"}
 
 
-@sensor(executors=["modeling_cnn1","modeling_cnn2","mnist"], filter_string="metrics.accuracy > 0", order_by=["metric.accuracy DESC"], max_results=1)
+@sensor(nodes=["modeling_cnn1","modeling_cnn2","mnist"], filter_string="metrics.accuracy > 0", order_by=["metric.accuracy DESC"], max_results=1)
 async def check_model_accuracy(runs: List[mlflow.entities.Run], args, kwargs):
     print(args)
     print(kwargs)
