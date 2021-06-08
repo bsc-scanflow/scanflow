@@ -4,7 +4,7 @@ import os
 from typing import List, Dict
 
 # scanflow app
-from scanflow.app import Executor, Dependency, Node, Edge, Service, Workflow, Application, Tracker, Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
+from scanflow.app import Executor, Dependency, Node, Edge, Service, Workflow, Application, Tracker, Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger, KedaSpec
 
 # scanflow graph
 #from scanflow.graph import ApplicationGraph
@@ -73,8 +73,22 @@ class ScanflowClient:
                          env: str = None):
         return Executor(name, mainfile, parameters, requirements, dockerfile, base_image, env)
 
-    def ScanflowService(self):
-        pass
+    def ScanflowService(self,
+                        name: str,
+                        image: str = None,
+                        env: dict = None,
+                        envfrom: dict = None,
+                        requirements: str = None,
+                        dockerfile: str = None,
+                        base_image: str = None,
+                        service_type: str = None,
+                        implementation_type: str = None,
+                        modelUri: str = None,
+                        envSecretRefName: str = None,
+                        endpoint: dict = None,
+                        parameters: List[dict] = None,
+                        kedaSpec: KedaSpec = None):
+        return Service(name, image, env, envfrom, requirements, dockerfile, base_image, service_type, implementation_type, modelUri, envSecretRefName, endpoint, parameters, kedaSpec)
 
     def ScanflowDependency(self,
                          dependee: str,
@@ -85,7 +99,7 @@ class ScanflowClient:
     def ScanflowWorkflow(self,
                          name: str,
                          nodes: List[Node],
-                         edges: List[Edge],
+                         edges: List[Edge] = None,
                          output_dir: str = None):
         return Workflow(name, nodes, edges, output_dir)
     

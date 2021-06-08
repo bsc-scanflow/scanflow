@@ -8,7 +8,7 @@ class Workflow(object):
     def __init__(self,
                  name: str,
                  nodes: List[Node],
-                 edges: List[Edge],
+                 edges: List[Edge] = None,
                  output_dir: str = None):
 
         self.name = name
@@ -23,9 +23,9 @@ class Workflow(object):
             if k == 'nodes':
                 nodes_list = list()
                 for node in v:
-                    nodes_list.append(node.__dict__)
+                    nodes_list.append(node.to_dict())
                 tmp_dict[k] = nodes_list
-            elif k == 'edges':
+            elif k == 'edges' and v is not None:
                 edges_list = list()
                 for edge in v:
                     edges_list.append(edge.__dict__)
