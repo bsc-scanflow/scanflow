@@ -1,5 +1,6 @@
 from kubernetes import client, config, utils
 from os import path
+from typing import List, Dict
 import yaml
 import pyaml
 #from pick import pick  # install pick using `pip install pick`
@@ -318,59 +319,7 @@ class Kubernetes:
 #                                'volumes': None}}},
 # 'status': None}
 
-    def build_env(self, **kwargs):
-        env_list = []
-        for k, v in kwargs.items():
-            env_list.append(
-                client.V1EnvVar(
-                    name=k,
-                    value=v
-                ),
-            )
-        return env_list
 
-    def build_env_from_source(self, **kwargs):
-        env_from_list = []
-        for k, v in kwargs.items():
-            if k == "config_map_ref":
-                env_from_list.append(
-                    client.V1EnvFromSource(
-                        config_map_ref=client.V1ConfigMapEnvSource(
-                            name = v
-                        )
-                    )
-                )
-            elif k == "secret_ref":
-                env_from_list.append(
-                    client.V1EnvFromSource(
-                        secret_ref=client.V1SecretEnvSource(
-                            name = v
-                        )
-                    )
-                )
-        return env_from_list
-
-    def build_volumeMounts(self, **kwargs):
-        volumeMounts = []
-        for k, v in kwargs.items():
-            volumeMounts.append(
-                client.V1VolumeMount(
-                    name=k,
-                    mount_path=v
-                ),
-            )
-        return volumeMounts
-
-    def build_volumes(self, **kwargs):
-        volumes = []
-        for k, v in kwargs.items():
-            volumes.append(
-                client.V1Volume(
-                    name=k,
-                    persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(claim_name=v)
-                ),
-            )
-        return volumes
 
     def build_deployment(self, namespace=None, name=None, label=None, image=None, volumes=None, env=None, env_from=None, volumeMounts=None): 
         spec = client.V1DeploymentSpec(
@@ -653,6 +602,7 @@ class Kubernetes:
     def create_seldonDeployment(self, namespace, body):
         api_client = client.CustomObjectsApi()
         yaml_str = pyaml.dump(body)
+        logging.info(f"seldon deployment {yaml_str}")
         body = yaml.safe_load(yaml_str)
         logging.info("Submitting workflow to Seldon")
         try:
@@ -665,7 +615,7 @@ class Kubernetes:
             )
             logging.info(
                 'Workflow %s has been submitted in "%s" namespace!'
-                % (response.get("metadata", {}).get("name"), self.namespace)
+                % (response.get("metadata", {}).get("name"), namespace)
             )
             return response
         except Exception as e:
@@ -687,4 +637,116 @@ class Kubernetes:
             )
         except client.api_client.rest.ApiException as e:
             raise Exception("Exception when deleting the workflow: %s\n" % e)
-    
+
+
+###pod spec: affinity, nodeselector, priority, schedulerName, volume
+    def build_podSpec(self, 
+                      containers: List[client.V1Container],
+                      affinity: client.V1Affinity = None,
+                      node_name: str = None,
+                      node_selector: dict = None,
+                      preemption_policy: str = None,
+                      priority: int = None,
+                      priority_class_name: str = None,
+                      restart_policy: str = None,
+                      scheduler_name: str = None,
+                      volumes: List[client.V1Volume] = None,
+                      active_deadline_seconds: int = None): 
+        spec = client.V1PodSpec(containers=containers,
+        affinity=affinity, node_name=node_name, node_selector=node_selector, preemption_policy=preemption_policy, priority=priority, priority_class_name=priority_class_name, restart_policy=restart_policy, scheduler_name=scheduler_name, volumes=volumes, active_deadline_seconds=active_deadline_seconds)
+        return spec
+        
+    def build_affinity(self,
+                       node_affinity: client.V1NodeAffinity = None,
+                       pod_affinity: client.V1PodAffinity = None,
+                       pod_anti_affinity: client.V1PodAntiAffinity = None):
+        affinities = client.V1Affinity(node_affinity=node_affinity, pod_affinity=pod_affinity,pod_anti_affinity=pod_anti_affinity)
+        return affinities    
+        #TODO: https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1Affinity.md
+
+
+    def build_container(self,
+                        name: str,
+                        image: str,
+                        args: List[str] = None,
+                        command: List[str] = None,
+                        env: List[client.V1EnvVar] = None,
+                        env_from: List[client.V1EnvFromSource] = None,
+                        image_pull_policy: str = "Always",
+                        resources: client.V1ResourceRequirements = None,
+                        volume_mounts: List[client.V1VolumeMount] = None,
+                        working_dir: str = None):
+        container = client.V1Container(
+            name=name,
+            image=image,
+            args=args,
+            command=command,
+            env=env,
+            env_from=env_from,
+            image_pull_policy=image_pull_policy,
+            resources=resources,
+            volume_mounts=volume_mounts,
+            working_dir=working_dir
+        )
+        
+        return container
+
+    def build_resources(self,
+                        requests: dict = None,
+                        limits: dict = None):
+        resources = client.V1ResourceRequirements(limits=limit, requests=requests)
+        return resources
+
+    def build_env(self, **kwargs):
+        env_list = []
+        for k, v in kwargs.items():
+            env_list.append(
+                client.V1EnvVar(
+                    name=k,
+                    value=v
+                ),
+            )
+        return env_list
+
+    def build_env_from_source(self, **kwargs):
+        env_from_list = []
+        for k, v in kwargs.items():
+            if k == "config_map_ref":
+                env_from_list.append(
+                    client.V1EnvFromSource(
+                        config_map_ref=client.V1ConfigMapEnvSource(
+                            name = v
+                        )
+                    )
+                )
+            elif k == "secret_ref":
+                env_from_list.append(
+                    client.V1EnvFromSource(
+                        secret_ref=client.V1SecretEnvSource(
+                            name = v
+                        )
+                    )
+                )
+        return env_from_list
+
+    def build_volumeMounts(self, **kwargs):
+        volumeMounts = []
+        for k, v in kwargs.items():
+            volumeMounts.append(
+                client.V1VolumeMount(
+                    name=k,
+                    mount_path=v
+                ),
+            )
+        return volumeMounts
+
+    def build_volumes(self, **kwargs):
+        volumes = []
+        for k, v in kwargs.items():
+            volumes.append(
+                client.V1Volume(
+                    name=k,
+                    persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(claim_name=v)
+                ),
+            )
+        return volumes

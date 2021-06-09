@@ -34,10 +34,6 @@ class Executor(Node):
         self.env = env
         self.image = image
 
-
-    def to_dict(self):
-        return self.__dict__
-
 #    @property
 #    def image(self):
 #        return self.__image
@@ -65,8 +61,7 @@ class Service(Node):
                  modelUri: str = None,
                  envSecretRefName: str = None,
                  endpoint: dict = None,
-                 parameters: List[dict] = None,
-                 kedaSpec: KedaSpec = None):
+                 parameters: List[dict] = None):
         super(Service, self).__init__(name=name, node_type='service')
         
         self.image = image
@@ -88,20 +83,3 @@ class Service(Node):
         self.envSecretRefName = envSecretRefName
         self.endpoint = endpoint
         self.parameters = parameters
-        
-        #3. keda
-        self.kedaSpec = kedaSpec
-
-        
-    def to_dict(self):
-        tmp_dict = {}
-        service_dict = self.__dict__
-        for k,v in service_dict.items():
-            if k == 'kedaSpec' and v is not None:
-                keda_list = list()
-                for keda in v:
-                    keda_list.append(keda.to_dict())
-                tmp_dict[k] = nodes_list
-            else:
-                tmp_dict[k] = v
-        return tmp_dict

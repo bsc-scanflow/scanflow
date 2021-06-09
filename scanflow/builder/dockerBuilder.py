@@ -88,15 +88,16 @@ class DockerBuilder(builder.Builder):
 
             logging.info(f"dockerfile for using {dockerfile} from {build_path}")
             
-            try:    
-                image, stat = self.client.images.build(path=build_path,
-                                      dockerfile=dockerfile,
-                                    tag=image_name)
-                logging.info(f'[+] Image [{source.name}] was built successfully. image_tag {image.tags}')
-                self.client.images.push(image_name)
-                logging.info(f'[+] Image [{source.name}] was pushed to registry successfully.')
+            try:
+                if dockerfile is not None:    
+                    image, stat = self.client.images.build(path=build_path,
+                                          dockerfile=dockerfile,
+                                        tag=image_name)
+                    logging.info(f'[+] Image [{source.name}] was built successfully. image_tag {image.tags}')
+                    self.client.images.push(image_name)
+                    logging.info(f'[+] Image [{source.name}] was pushed to registry successfully.')
 
-                return image.tags[0]
+                    return image.tags[0]
             except docker.api.client.DockerException as e:
                 logging.error(f"{e}")
                 logging.error(f"[-] Image building failed.", exc_info=True)
@@ -125,12 +126,17 @@ class DockerBuilder(builder.Builder):
         else:
             logging.error(f"unknown source {source}")
             
-        with open(dockerfile, 'w') as f:
-            f.writelines(dockerfile_content)
-
-        logging.info(f'[+] Dockerfile: [{filename}] was created successfully.')
-
-        return dockerfile, build_path
+        if dockerfile_content is not None:
+            with open(dockerfile, 'w') as f:
+                f.writelines(dockerfile_content)
+    
+            logging.info(f'[+] Dockerfile: [{filename}] was created successfully.')
+    
+            return dockerfile, build_path
+        else:
+            logging.info(f'[+] Dockerfile: [{filename}] was not created.')
+             
+            return None, build_path
     
 
     def __dockerfile_template_executor(self, executor):
@@ -180,39 +186,41 @@ class DockerBuilder(builder.Builder):
     def __dockerfile_template_service(self, service):
         template = dedent(f'''
         ''')
+        if service.service_type is not None:
+            #baseimage
+            if executor.base_image is not None:
+                image_name = f"{self.registry}/{executor.base_image}"
+                try:
+                    image = self.client.images.get(image_name)    
+                except docker.api.client.DockerException as e:
+                    raise EnvironmentError(f"[+] Base Image [{image_name}] not found in repository.")
+                base_image_template = dedent(f'''
+                        FROM {image.tags[0]}
+                ''')
+                template += base_image_template
+            else:
+                base_image_template = dedent(f'''
+                        FROM seldonio/seldon-core-s2i-python36:1.7.0-dev
+                ''')
+                template += base_image_template
 
-        #baseimage
-        if executor.base_image is not None:
-            image_name = f"{self.registry}/{executor.base_image}"
-            try:
-                image = self.client.images.get(image_name)    
-            except docker.api.client.DockerException as e:
-                raise EnvironmentError(f"[+] Base Image [{image_name}] not found in repository.")
-            base_image_template = dedent(f'''
-                    FROM {image.tags[0]}
+            #code
+            code_template = dedent(f'''
+                        COPY {executor.name} /microservice
             ''')
-            template += base_image_template
-        else:
-            base_image_template = dedent(f'''
-                    FROM seldonio/seldon-core-s2i-python36:1.7.0-dev
-            ''')
-            template += base_image_template
+            template += code_template
 
-        #code
-        code_template = dedent(f'''
-                    COPY {executor.name} /microservice
-        ''')
-        template += code_template
-
-        #requirements
-        if executor.requirements is not None:
-            req_template = dedent(f'''
-                    RUN pip install -r /microservice/{executor.requirements}
-            ''')
-            template  += req_template
+            #requirements
+            if executor.requirements is not None:
+                req_template = dedent(f'''
+                        RUN pip install -r /microservice/{executor.requirements}
+                ''')
+                template  += req_template
         
-        logging.info(f"{executor.name} 's Dockerfile {template}")
-        return template
+            logging.info(f"{executor.name} 's Dockerfile {template}")
+            return template
+        else:
+            return None
  
     def __dockerfile_template_agent(self, agent):
         template = dedent(f'''

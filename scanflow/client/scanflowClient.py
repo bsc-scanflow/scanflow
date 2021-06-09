@@ -86,9 +86,8 @@ class ScanflowClient:
                         modelUri: str = None,
                         envSecretRefName: str = None,
                         endpoint: dict = None,
-                        parameters: List[dict] = None,
-                        kedaSpec: KedaSpec = None):
-        return Service(name, image, env, envfrom, requirements, dockerfile, base_image, service_type, implementation_type, modelUri, envSecretRefName, endpoint, parameters, kedaSpec)
+                        parameters: List[dict] = None):
+        return Service(name, image, env, envfrom, requirements, dockerfile, base_image, service_type, implementation_type, modelUri, envSecretRefName, endpoint, parameters)
 
     def ScanflowDependency(self,
                          dependee: str,

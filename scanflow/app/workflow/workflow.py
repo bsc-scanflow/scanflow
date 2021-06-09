@@ -23,7 +23,7 @@ class Workflow(object):
             if k == 'nodes':
                 nodes_list = list()
                 for node in v:
-                    nodes_list.append(node.to_dict())
+                    nodes_list.append(node.__dict__)
                 tmp_dict[k] = nodes_list
             elif k == 'edges' and v is not None:
                 edges_list = list()
