@@ -5,6 +5,7 @@ from typing import List
 import scanflow.deployer.deployer as deployer
 from scanflow.templates import SeldonClient, SeldonDeployments, ComponentSpec, PredictiveUnit
 from scanflow.deployer.env import ScanflowSecret, ScanflowClientConfig
+from scanflow.app import Workflow
 
 #from scanflow.deployer.env import ScanflowSecret, ScanflowClientConfig
 #from scanflow.tools.param import format_parameter
@@ -123,5 +124,34 @@ class SeldonDeployer(deployer.Deployer):
             raise NotImplementedError("seldonClient is not defined")
         else:
             return self.seldonClient.predict(data)
+
+    def delete_workflows(self,
+                         namespace: str,
+                         workflows: List[Workflow]):
+        """
+        delete seldon workflows
+        """
+        deleted = True
+        for workflow in workflows:
+            deleted = deleted and self.delete_workflow(namespace, workflow)
+        return deleted
+
+    def delete_workflow(self, 
+                        namespace: str,
+                        workflow: Workflow):
+        
+        workflow_name = workflow.name
+        deleted = False
+        try:
+            result = self.kubeclient.delete_seldonDeployment(namespace, workflow_name)
+            if result is not None:
+                deleted = True
+        except:
+            logging.info(f"cannot find workflows")
+        finally:
+            #output dir
+            #self.kubeclient.delete_persistentvolumeclaim(namespace, workflow_name)
+            #self.kubeclient.delete_persistentvolume(workflow_name)
+            return deleted
 
     

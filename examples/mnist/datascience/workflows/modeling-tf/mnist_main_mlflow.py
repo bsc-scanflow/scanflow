@@ -135,6 +135,9 @@ def run(flags_obj, datasets_override=None, strategy_override=None):
   export_path = os.path.join(flags_obj.model_dir, 'saved_model')
   model.save(export_path, include_optimizer=False)
 
+  #mlflow.keras.save_model(model, export_path)
+  mlflow.log_artifacts(export_path, artifact_path="mnist-tf/model/0")
+
   mlflow.keras.log_model(model, artifact_path="mnist-tf", 
                           registered_model_name="mnist-tf")
 
