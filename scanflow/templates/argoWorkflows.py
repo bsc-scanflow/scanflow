@@ -40,13 +40,14 @@ class ArgoWorkflows:
             volumeMounts.append(volumeMount)
         return volumeMounts
 
-    def argoExecutor(self, name, image, args, env, volumeMounts):
+    def argoExecutor(self, name, image, args, env, volumeMounts, resources):
         return lambda: couler.run_container(
             image = image,
             step_name = name,
             #command = command,
             args = args,
             env = env,
+            resources=resources,
             volume_mounts= volumeMounts)
         
     def argoDag(self, dependency_graph):

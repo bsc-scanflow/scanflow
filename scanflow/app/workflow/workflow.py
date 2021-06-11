@@ -2,6 +2,7 @@ from typing import List, Dict
 
 from scanflow.app import Node
 from scanflow.app import Edge
+from scanflow.app import KedaSpec
 
 
 class Workflow(object):
@@ -9,11 +10,15 @@ class Workflow(object):
                  name: str,
                  nodes: List[Node],
                  edges: List[Edge] = None,
+                 affinity: V1Affinity = None,
+                 kedaSpec: KedaSpec = None,
                  output_dir: str = None):
 
         self.name = name
         self.nodes = nodes
         self.edges = edges
+        self.affinity = affinity
+        self.kedaSpec = kedaSpec
         self.output_dir = output_dir
 
     def to_dict(self):
@@ -30,6 +35,8 @@ class Workflow(object):
                 for edge in v:
                     edges_list.append(edge.__dict__)
                 tmp_dict[k] = edges_list
+            elif k == 'kedaSpec' and v is not None:
+                tmp_dict[k] = v.to_dict()
             else:
                 tmp_dict[k] = v
         return tmp_dict

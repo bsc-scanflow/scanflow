@@ -654,16 +654,7 @@ class Kubernetes:
                       active_deadline_seconds: int = None): 
         spec = client.V1PodSpec(containers=containers,
         affinity=affinity, node_name=node_name, node_selector=node_selector, preemption_policy=preemption_policy, priority=priority, priority_class_name=priority_class_name, restart_policy=restart_policy, scheduler_name=scheduler_name, volumes=volumes, active_deadline_seconds=active_deadline_seconds)
-        return spec
-        
-    def build_affinity(self,
-                       node_affinity: client.V1NodeAffinity = None,
-                       pod_affinity: client.V1PodAffinity = None,
-                       pod_anti_affinity: client.V1PodAntiAffinity = None):
-        affinities = client.V1Affinity(node_affinity=node_affinity, pod_affinity=pod_affinity,pod_anti_affinity=pod_anti_affinity)
-        return affinities    
-        #TODO: https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1Affinity.md
-
+        return spec  
 
     def build_container(self,
                         name: str,
@@ -690,12 +681,6 @@ class Kubernetes:
         )
         
         return container
-
-    def build_resources(self,
-                        requests: dict = None,
-                        limits: dict = None):
-        resources = client.V1ResourceRequirements(limits=limit, requests=requests)
-        return resources
 
     def build_env(self, **kwargs):
         env_list = []

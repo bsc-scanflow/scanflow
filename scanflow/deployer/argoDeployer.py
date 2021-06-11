@@ -83,7 +83,8 @@ class ArgoDeployer(deployer.Deployer):
                          image = executor.image,
                          args = format_parameters(executor.parameters),
                          env = env, 
-                         volumeMounts = volumeMounts)
+                         volumeMounts = volumeMounts,
+                         resources = executor.resources)
 
         #edges
         logging.info(f"[+] Building workflow: [{workflow_name}- edges]")

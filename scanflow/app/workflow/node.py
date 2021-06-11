@@ -1,4 +1,4 @@
-from .scale import KedaSpec
+from kubernetes.client import V1ResourceRequirements
 from typing import List
 
 class Node():
@@ -23,7 +23,8 @@ class Executor(Node):
                  dockerfile: str = None,
                  base_image: str = None,
                  env: dict = None,
-                 image: str = None):
+                 image: str = None,
+                 resources: V1ResourceRequirements = None):
 
         super(Executor, self).__init__(name=name, node_type='executor')
         self.mainfile = mainfile
@@ -33,6 +34,7 @@ class Executor(Node):
         self.base_image = base_image
         self.env = env
         self.image = image
+        self.resources = resources
 
 #    @property
 #    def image(self):
@@ -61,7 +63,8 @@ class Service(Node):
                  modelUri: str = None,
                  envSecretRefName: str = None,
                  endpoint: dict = None,
-                 parameters: List[dict] = None):
+                 parameters: List[dict] = None,
+                 resources: V1ResourceRequirements = None):
         super(Service, self).__init__(name=name, node_type='service')
         
         self.image = image
@@ -83,3 +86,4 @@ class Service(Node):
         self.envSecretRefName = envSecretRefName
         self.endpoint = endpoint
         self.parameters = parameters
+        self.resources = resources
