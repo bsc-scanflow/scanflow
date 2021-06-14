@@ -4,6 +4,7 @@ from scanflow.app import Node
 from scanflow.app import Edge
 from scanflow.app import KedaSpec
 
+from kubernetes.client import V1Affinity
 
 class Workflow(object):
     def __init__(self,

@@ -1,16 +1,28 @@
 from pydantic import BaseModel, Field, Extra, validator
-from typing import Optional, List, Dict, Union, Literal
+from typing import Optional, List, Dict, Union, Literal, Any
 
+from scanflow.agent.schemas.sensor import Trigger
+from datetime import datetime
 class Node(BaseModel):
     name: str
     node_type: str
-    image: str
+    image: Optional[str] = None
     mainfile: Optional[str] = None
-    parameters: Optional[dict] = None
+    parameters: Any = None
     requirements: Optional[str] = None
     dockerfile: Optional[str] = None
     base_image: Optional[str] = None
-    env: Optional[str] = None
+    env: Optional[dict] = None
+    resources: Optional[dict] = None
+
+    env: Optional[dict] = None
+    envfrom: Optional[dict] = None
+    service_type: Optional[str] = None
+    implementation_type: Optional[str] = None
+    modelUri: Optional[str] = None
+    envSecretRefName: Optional[str] = None
+    endpoint: Optional[dict] = None
+
 
 class Executor(BaseModel):
     name: str
@@ -21,11 +33,26 @@ class Executor(BaseModel):
     requirements: Optional[str] = None
     dockerfile: Optional[str] = None
     base_image: Optional[str] = None
-    env: Optional[str] = None
+    env: Optional[dict] = None
+    resources: Optional[dict] = None
 
 class Service(BaseModel):
     name: str
     node_type: str
+    image: Optional[str] = None
+    env: Optional[dict] = None
+    envfrom: Optional[dict] = None
+    requirements: Optional[dict] = None
+    dockerfile: Optional[str] = None
+    base_image: Optional[str] = None
+    service_type: Optional[str] = None
+    implementation_type: Optional[str] = None
+    modelUri: Optional[str] = None
+    envSecretRefName: Optional[str] = None
+    endpoint: Optional[dict] = None
+    parameters: Optional[List[dict]] = None
+    resources: Optional[dict] = None
+
 
 class Edge(BaseModel):
     dependee: str
@@ -45,13 +72,21 @@ class Workflow(BaseModel):
     edges: List[Edge] = None
     output_dir: Optional[str] = None
 
+
+class Sensor(BaseModel):
+    name: str
+    isCustom : bool
+    func_name: str
+    trigger: Trigger = None
+    args: tuple = None
+    kwargs: dict = None
+    next_run_time: datetime = None
 class Agent(BaseModel):
     name: str
     image: str
     template: Optional[str] = None
-    mainfile: Optional[str] = None
-    parameters: Optional[dict] = None
-
+    dockerfile: Optional[str] = None
+    sensors: Optional[List[Sensor]] = None
 
 class Tracker(BaseModel):
     nodePort: int

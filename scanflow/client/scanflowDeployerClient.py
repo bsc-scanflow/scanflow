@@ -109,6 +109,7 @@ class ScanflowDeployerClient:
                           app: Application):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/clean_environment"
+            logging.info(f"{json.dumps(app.to_dict())}")
             async with http_client.session.post(url, data = json.dumps(app.to_dict())) as response:
                 status = response.status
                 text = await response.json()

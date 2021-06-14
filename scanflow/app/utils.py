@@ -1,7 +1,7 @@
 from . import Application, Workflow, Executor, Service, Dependency, Agent, Tracker
 
 def dict_to_app(dictionary):
-    app = Application(dictdictionary['app_name'], dictionary['app_dir'], dictionary['team_name'])
+    app = Application(dictionary['app_name'], dictionary['app_dir'], dictionary['team_name'])
     if dictionary['workflows']:
         workflows = []
         for workflow_dict in dictionary['workflows']:
@@ -20,17 +20,34 @@ def dict_to_workflow(dictionary):
     name = dictionary['name']
     nodes = []
     for node_dict in dictionary['nodes']:
-        if node_dict['nodetype'] == 'executor':
+        if node_dict['node_type'] == 'executor':
             nodes.append(dict_to_executor(node_dict))
-        else:
+        elif node_dict['node_type'] == 'service':
             nodes.append(dict_to_service(node_dict))
-    edges = []
-    for edge_dict in dictionary['edges']:
-        if edge_dict['edge_type'] == 'dependency':
-            edges.append(Dependency(edge_dict['dependee'], edge_dict['depender'], int(edge_dict['priority'])))
-    output_dir = dictionary['output_dir']
-    workflow = Workflow(name, nodes, edges, output_dir)
+    workflow = Workflow(name, nodes)
+    if dictionary['edges']:
+        edges = []
+        for edge_dict in dictionary['edges']:
+            if edge_dict['edge_type'] == 'dependency':
+                edges.append(Dependency(edge_dict['dependee'], edge_dict['depender'], int(edge_dict['priority'])))
+        workflow.edges = edges
+    if dictionary['affinity']:
+        affinity = dict_to_affinity(dictionary['affinity'])
+        workflow.affinity = affinity
+    if dictionary['kedaSpec']:
+        kedaSpec = dict_to_kedaSpec(dictionary['kedaSpec'])
+        workflow.kedaSpec = kedaSpec
+    if dictionary['output_dir']:
+        output_dir = dictionary['output_dir']
+        workflow.output_dir = output_dir
+    
     return workflow
+
+def dict_to_affinity(dictionary):
+    pass
+
+def dict_to_kedaSpec(dictionary):
+    pass
 
 def dict_to_executor(dictionary):
     name = dictionary['name']
@@ -48,7 +65,12 @@ def dict_to_executor(dictionary):
         executor.env = dictionary['env']
     if dictionary['image']:
         executor.image = dictionary['image']
+    if dictionary['resources']:
+        executor.resources = dict_to_resources(dictionary['resources'])
     return executor
+
+def dict_to_resources(dictionary):
+    pass
 
 def dict_to_service(dictionary):
     pass

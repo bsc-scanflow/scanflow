@@ -7,12 +7,12 @@ from typing import List, Dict
 from scanflow.app import Executor, Service, Node
 from scanflow.app import Edge, Dependency
 from scanflow.app import Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
-from scanflow.app import Application, Tracker
+from scanflow.app import Workflow, Application, Tracker
 from scanflow.app import KedaSpec
 
 # kubernetes
 from kubernetes.client import V1Affinity, V1NodeAffinity, V1PodAffinity, V1PodAntiAffinity
-from kubernetes.client import V1NodeSelectorRequiement, V1NodeSelectorTerm, V1PreferredSchedulingTerm, V1NodeSelector, V1LabelSelectorRequirement
+from kubernetes.client import V1LabelSelectorRequirement, V1NodeSelectorTerm, V1PreferredSchedulingTerm, V1NodeSelector, V1LabelSelectorRequirement, V1WeightedPodAffinityTerm
 from kubernetes.client import V1PodAffinityTerm
 from kubernetes.client import V1ResourceRequirements
 
@@ -178,9 +178,9 @@ class ScanflowClient:
 
 #affinity
     def V1Affinity(self,
-                   node_affinity: client.V1NodeAffinity = None,
-                   pod_affinity: client.V1PodAffinity = None,
-                   pod_anti_affinity: client.V1PodAntiAffinity = None):
+                   node_affinity: V1NodeAffinity = None,
+                   pod_affinity: V1PodAffinity = None,
+                   pod_anti_affinity: V1PodAntiAffinity = None):
         return V1Affinity(node_affinity=node_affinity, 
                           pod_affinity=pod_affinity,
                           pod_anti_affinity=pod_anti_affinity)

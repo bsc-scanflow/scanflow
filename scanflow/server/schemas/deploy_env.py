@@ -5,6 +5,7 @@ class ScanflowSecret(BaseModel):
     AWS_ACCESS_KEY_ID : Optional[str] = "admin"
     AWS_SECRET_ACCESS_KEY : Optional[str] = "admin123"
     MLFLOW_S3_ENDPOINT_URL : Optional[str] = "http://minio.minio-system.svc.cluster.local:9000"
+    AWS_ENDPOINT_URL: Optional[str] = "http://minio.minio-system.svc.cluster.local:9000"
 
 class ScanflowTrackerConfig(BaseModel):
     TRACKER_STORAGE: Optional[str] = "postgresql://scanflow:scanflow123@postgresql-service.postgresql.svc.cluster.local/scanflow-default"

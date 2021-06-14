@@ -16,7 +16,7 @@ def tock():
     print('Tock! The time is: %s' %  time.strftime("'%Y-%m-%d %H:%M:%S'"))
 
 #example 1: count number of predictions in last 5 min
-@sensor(executors=["predictor"], filter_string="tags.mlflow.runName='predictor-batch' and metrics.n_predictions > 0")
+@sensor(nodes=["predictor"], filter_string="tags.mlflow.runName='predictor-batch' and metrics.n_predictions > 0")
 async def count_number_of_predictions(runs: List[mlflow.entities.Run], args, kwargs):
     print(args)
     print(kwargs)
