@@ -45,3 +45,5 @@ Please check [installing](installer/Readme.md) for more details
 Please check the jupyter notebook for more details.
 
 MNIST Project Tutorial: [mnist](tutorials/mnist/Readme.md)
+
+mlperf Project Tutorial: [mlperf](tutorials/mlperf/Readme.md)
