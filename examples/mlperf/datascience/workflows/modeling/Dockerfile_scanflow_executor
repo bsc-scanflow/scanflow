@@ -1,0 +1,9 @@
+
+
+FROM 172.30.0.49:5000/scanflow-executor
+
+COPY modeling /app/modeling
+
+RUN pip install -r /app/modeling/requirements.txt
+
+ENTRYPOINT ["python", "/app/modeling/modeling.py"]

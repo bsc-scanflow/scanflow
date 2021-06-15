@@ -89,11 +89,14 @@ class ArgoDeployer(deployer.Deployer):
         #edges
         logging.info(f"[+] Building workflow: [{workflow_name}- edges]")
         edge_graph = []
-        for edge in workflow.edges:
-            edge_graph.append(
-                [argoContainers[f"{edge.dependee}"],
-                 argoContainers[f"{edge.depender}"]]
-            )
+        if workflow.edges:
+            for edge in workflow.edges:
+                edge_graph.append(
+                    [argoContainers[f"{edge.dependee}"],
+                     argoContainers[f"{edge.depender}"]]
+                )
+        else:
+            edge_graph.append([argoContainers[workflow.nodes[0].name]])
 
         #dag
         logging.info(f"[+] Building workflow: [{workflow_name}- dag]")
