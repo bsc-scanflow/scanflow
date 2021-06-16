@@ -26,10 +26,10 @@ def modeling(model_name, model_path):
     mlflow.set_experiment("modeling")
     with mlflow.start_run():
         model = tf.keras.applications.resnet50.ResNet50(
-            include_top=True, weights='imagenet'
+            weights='imagenet'
         )
         #tf.saved_model.load(f"{model_path}")
-        tf.saved_model.save(model, "/workflow/model/0")
+        tf.saved_model.save(model, "/workflow/model/1")
         mlflow.keras.log_model(model, artifact_path=model_name, 
                           registered_model_name=model_name)
 

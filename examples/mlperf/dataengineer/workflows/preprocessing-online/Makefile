@@ -1,0 +1,8 @@
+IMAGE_VERSION=0.1
+IMAGE_NAME=172.30.0.49:5000/imagenet-transformer
+
+build:
+	s2i build -E environment . seldonio/seldon-core-s2i-python36:1.7.0-dev $(IMAGE_NAME):$(IMAGE_VERSION)
+
+push_to_dockerhub:
+	docker push $(IMAGE_NAME):$(IMAGE_VERSION)

@@ -3,9 +3,14 @@
 ## mlperf inference
 
 ```
-git clone https://github.com/peiniliu/inference/tree/dev
+git clone https://github.com/peiniliu/inference/tree/scanflow
 ```
 In this tutorial, we use mlperf benchmark to test different inference scenarios that Scanflow could support.
+
+In our inference scanflow version, we add more backend: 
+1. tfserving
+2. seldon: used for scanflow online inference.
+3. tflocal: used for scanflow batch inference, tensorflow saved_model format support.
 
 For example:
 #### Based on MLPerf Inference (submission 9/18/2020)
@@ -33,12 +38,12 @@ These scenarios can be tested directly using scripts that we provided inside mod
 
 Tutorial of using Scanflow to implement these scenarios are described in [mlperf-dataengineer.ipynb](inference/mlperf-dataengineer.ipynb)
 
-| scenarios | reference app | framework | model/dataset |
-| ---- | ---- | ---- | ---- |
-| batch-inference-single | [scenarios/job-single](https://github.com/peiniliu/inference/tree/dev/vision/classification_and_detection/scenarios/job-single) | tensorflow | resnet/imagenet2012 |
-| batch-inference-workflow | [scenarios/job-pipeline](https://github.com/peiniliu/inference/tree/dev/vision/classification_and_detection/scenarios/job-pipeline) | tensorflow | resnet/imagenet2012 |
-| online-inference-single | [scenarios/service-single](https://github.com/peiniliu/inference/tree/dev/vision/classification_and_detection/scenarios/service-single) | tensorflow | resnet/imagenet2012 |
-| online-inference-graph | [scenarios/service-graph](https://github.com/peiniliu/inference/tree/dev/vision/classification_and_detection/scenarios/service-graph) | tensorflow | resnet/imagenet2012 |
+| scenarios | reference app | framework | model/dataset | mlperf backend|
+| ---- | ---- | ---- | ---- | ---- |
+| batch-inference-single | [scenarios/job-single](https://github.com/peiniliu/inference/tree/dev/vision/classification_and_detection/scenarios/job-single) | tensorflow | resnet/imagenet2012 | tflocal |
+| batch-inference-workflow | [scenarios/job-pipeline](https://github.com/peiniliu/inference/tree/dev/vision/classification_and_detection/scenarios/job-pipeline) | tensorflow | resnet/imagenet2012 | tf |
+| online-inference-single | [scenarios/service-single](https://github.com/peiniliu/inference/tree/dev/vision/classification_and_detection/scenarios/service-single) | tensorflow | resnet/imagenet2012 | seldon |
+| online-inference-graph | [scenarios/service-graph](https://github.com/peiniliu/inference/tree/dev/vision/classification_and_detection/scenarios/service-graph) | tensorflow | resnet/imagenet2012 | seldon |
 
 
 ### Client 
