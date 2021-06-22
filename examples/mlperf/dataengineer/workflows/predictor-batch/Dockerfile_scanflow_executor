@@ -1,0 +1,7 @@
+
+
+FROM 172.30.0.49:5000/mlperf:latest
+
+COPY predictor-batch /app/predictor-batch
+
+ENTRYPOINT ["python", "/tmp/inference/vision/classification_and_detection/python/main.py"]

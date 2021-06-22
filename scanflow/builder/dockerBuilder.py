@@ -175,9 +175,19 @@ class DockerBuilder(builder.Builder):
         
         #mainfile
         if executor.mainfile is not None:
-            exec_template = dedent(f''' 
-                    ENTRYPOINT ["python", "/app/{executor.name}/{executor.mainfile}"]
-            ''')
+            if executor.mainfile.endswith('.py'):
+                if os.path.isabs(executor.mainfile):
+                    exec_template = dedent(f''' 
+                        ENTRYPOINT ["python", "{executor.mainfile}"]
+                    ''')
+                else:
+                    exec_template = dedent(f''' 
+                        ENTRYPOINT ["python", "/app/{executor.name}/{executor.mainfile}"]
+                    ''')
+            elif executor.mainfile.endswith('.sh'):
+	            exec_template = dedent(f''' 
+                    ENTRYPOINT ["/bin/bash", "-c", "/app/{executor.name}/{executor.mainfile}"]
+                ''')
             template += exec_template
 
         logging.info(f"{executor.name} 's Dockerfile {template}")

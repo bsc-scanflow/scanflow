@@ -76,9 +76,9 @@ class ArgoDeployer(deployer.Deployer):
             #volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir)
             volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir, scanflowpath="/scanflow")
             logging.info(f"[+] Building workflow: [{workflow.name}:{executor.name}].")
-            logging.info(f"{format_parameters(executor.parameters)}")
             if executor.env is not None:
                 env.update(executor.env)
+            logging.info(f"{format_parameters(executor.parameters)}")
             argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
                          image = executor.image,
                          args = format_parameters(executor.parameters),

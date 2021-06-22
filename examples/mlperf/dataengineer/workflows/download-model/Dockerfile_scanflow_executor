@@ -1,0 +1,7 @@
+
+
+FROM 172.30.0.49:5000/scanflow-executor
+
+COPY download-model /app/download-model
+
+ENTRYPOINT ["python", "/app/download-model/download.py"]
