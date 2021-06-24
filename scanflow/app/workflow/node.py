@@ -52,6 +52,7 @@ class Service(Node):
     """
     def __init__(self,
                  name: str,
+                 mainfile: str = None,
                  image: str = None,
                  env: dict = None,
                  envfrom: dict = None,
@@ -70,6 +71,7 @@ class Service(Node):
         self.image = image
         self.env = env
         self.envfrom = envfrom
+        self.mainfile = mainfile
         #build
         self.requirements = requirements
         self.dockerfile = dockerfile

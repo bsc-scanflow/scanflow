@@ -4,8 +4,9 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 class ImageNetTransformer(object):
+    
     def __init__(self, metrics_ok=True):
-        print("Init called")
+        print("Init ImageNetTransformer")
 
     def transform_input(self, X, names, meta):
         logger.info("Transform called")

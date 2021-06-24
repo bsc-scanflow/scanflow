@@ -1,0 +1,14 @@
+
+
+FROM python:3.7-slim 
+
+COPY preprocessing-online /app
+WORKDIR /app
+EXPOSE 5000
+
+RUN pip install -r /app/requirements.txt
+
+ENV MODEL_NAME ImageNetTransformer
+ENV SERVICE_TYPE TRANSFORMER
+
+CMD exec seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE

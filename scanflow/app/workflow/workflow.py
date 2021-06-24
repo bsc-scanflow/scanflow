@@ -36,8 +36,8 @@ class Workflow(object):
                 for edge in v:
                     edges_list.append(edge.__dict__)
                 tmp_dict[k] = edges_list
-            elif k == 'kedaSpec' and v is not None:
-                tmp_dict[k] = v.to_dict()
+            #elif k == 'kedaSpec' and v is not None:
+            #    tmp_dict[k] = v.to_dict()
             else:
                 tmp_dict[k] = v
         return tmp_dict

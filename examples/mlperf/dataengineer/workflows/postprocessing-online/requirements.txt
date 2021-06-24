@@ -1,0 +1,8 @@
+seldon-core==1.6.0
+#scanflow==0.1
+mlflow==1.14.1
+kubernetes==12.0.1
+boto3
+aiohttp
+pyaml
+couler-scanflow==0.1

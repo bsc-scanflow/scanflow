@@ -3,6 +3,8 @@ from os import path
 from typing import List, Dict
 import yaml
 import pyaml
+import json
+from scanflow.tools.seldon_dict import remove_empty_elements, verify_dict
 #from pick import pick  # install pick using `pip install pick`
 
 import logging
@@ -602,8 +604,9 @@ class Kubernetes:
     def create_seldonDeployment(self, namespace, body):
         api_client = client.CustomObjectsApi()
         yaml_str = pyaml.dump(body)
-        logging.info(f"seldon deployment {yaml_str}")
         body = yaml.safe_load(yaml_str)
+        body = verify_dict(remove_empty_elements(body))
+        #logging.info(f"seldon deployment {yaml_str} {body}")
         logging.info("Submitting workflow to Seldon")
         try:
             response = api_client.create_namespaced_custom_object(
@@ -611,7 +614,8 @@ class Kubernetes:
                 "v1",
                 namespace,
                 "seldondeployments",
-                body
+                body,
+                #pretty='pretty_example'
             )
             logging.info(
                 'Workflow %s has been submitted in "%s" namespace!'

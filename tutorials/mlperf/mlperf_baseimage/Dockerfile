@@ -36,10 +36,13 @@ RUN pip install future pillow onnx opencv-python-headless tensorflow onnxruntime
 RUN pip install Cython && pip install pycocotools
 RUN cd /tmp && \
     #git clone --recursive https://github.com/mlcommons/inference && \
-    git clone  --recursive https://github.com/peiniliu/inference -b scanflow && \
+    #git clone  --recursive https://github.com/peiniliu/inference -b scanflow && \
+    git clone --recursive https://github.com/peiniliu/inference -b scanflow && \
     cd inference/loadgen && \
     pip install pybind11 && \
     CFLAGS="-std=c++14" python setup.py install && \
     rm -rf mlperf
+
+RUN cd /tmp/inference && git checkout scanflow
 
 ENTRYPOINT ["/bin/bash"]

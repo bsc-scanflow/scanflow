@@ -3,7 +3,7 @@ import os
 from typing import List
 
 import scanflow.deployer.deployer as deployer
-from scanflow.templates import SeldonClient, SeldonDeployments, ComponentSpec, PredictiveUnit
+from scanflow.templates import SeldonClient, SeldonDeployments, SeldonPodSpec, PredictiveUnit, PredictorSpec
 from scanflow.deployer.env import ScanflowSecret, ScanflowClientConfig
 from scanflow.app import Workflow
 
@@ -35,13 +35,13 @@ class SeldonDeployer(deployer.Deployer):
             logging.info(f"[+] Workflow: [{workflow.name}] was deployed successfully.")
         return submitted
 
-    def deploy_workflow(self, namespace, workflow, replica: int = 1):
+    def deploy_workflow(self, namespace, workflow, replicas: int = 1):
         """
            deploy workflow by seldon
         """
         workflow_name = workflow.name
-        self.seldonDeployments = SeldonDeployments(workflow_name, namespace, replica)
-     
+        self.seldonDeployments = SeldonDeployments(workflow_name, namespace, replicas)
+        
         #volume
         volumes = self.kubeclient.build_volumes(scanflowpath=f"scanflow-{namespace}")
         #env
@@ -61,28 +61,39 @@ class SeldonDeployer(deployer.Deployer):
             if service.service_type:
                 if service.env is not None:
                     env.update(service.env)
-                containers.append(self.kubeclient.build_container(service.name, service.image, env=self.kubeclient.build_env(**env), volume_mounts=self.kubeclient.build_volumeMounts(scanflowpath="/scanflow")))
+                containers.append(self.kubeclient.build_container(service.name, 
+                                 service.image, env=self.kubeclient.build_env(**env), 
+                                 volume_mounts=self.kubeclient.build_volumeMounts(scanflowpath="/scanflow")))
             #predictiveUnit
-            predictiveUnits[f"{service.name}"] = PredictiveUnit(service.name, type=service.service_type, implementation=service.implementation_type, endpoint=service.endpoint, parameters=service.parameters, modelUri=service.modelUri, envSecretRefName=service.envSecretRefName)
+            predictiveUnits[f"{service.name}"] = PredictiveUnit(service.name, 
+                         type=service.service_type, implementation=service.implementation_type,
+                         endpoint=service.endpoint, parameters=service.parameters, 
+                         modelUri=service.modelUri, envSecretRefName=service.envSecretRefName)
 
+        componentSpecs = None
+        seldonPodSpec = SeldonPodSpec()
         if containers:
             spec = self.kubeclient.build_podSpec(containers, volumes=volumes)
-            componentSpec = ComponentSpec(spec.to_dict())
-            self.seldonDeployments.componentSpecs = [componentSpec.__dict__]
+            seldonPodSpec.spec = spec
+        if workflow.kedaSpec:
+            seldonPodSpec.kedaSpec = kedaSpec
+        componentSpecs = [seldonPodSpec]
 
         #edges
         logging.info(f"[+] Building workflow: [{workflow_name}- edges]")
         if workflow.edges:
             edge_count = {}
             for edge in workflow.edges:
-                edge_count[f"edge.dependee"] = 0
-                edge_count[f"edge.depender"] = 0
+                edge_count[f"{edge.dependee}"] = 0
+                edge_count[f"{edge.depender}"] = 0
             for edge in workflow.edges:
-                edge_count[f"edge.depender"] = edge_count[f"edge.depender"] + 1
+                edge_count[f"{edge.depender}"] = edge_count[f"{edge.depender}"] + 1
                 predictiveUnits[f"{edge.dependee}"].add_children(predictiveUnits[f"{edge.depender}"])
         else:
-            logging.info(f"[+] workflow does not have edges]")
+            logging.info(f"[+] workflow does not have edges")
             
+
+        
         #graph
         logging.info(f"[+] Building workflow: [{workflow_name}- graph]")
         if workflow.edges:
@@ -90,9 +101,14 @@ class SeldonDeployer(deployer.Deployer):
             for k,v in edge_count.items():
                 if v == 0:
                     graph_head = k
-            self.seldonDeployments.graph = predictiveUnits[f"{graph_head}"].to_dict()           
+            logging.info(f"Graph head: {graph_head}")
+            self.predictor = PredictorSpec(workflow_name, predictiveUnits[f"{graph_head}"],
+                                          componentSpecs, replicas)        
         else:
-            self.seldonDeployments.graph = predictiveUnits[f"{workflow.nodes[0].name}"].to_dict() 
+            self.predictor = PredictorSpec(workflow_name, predictiveUnits[f"{workflow.nodes[0].name}"],
+                                            componentSpecs, replicas)   
+
+        self.seldonDeployments.predictors = [self.predictor]     
 
         #deploy
         logging.info(f"[+++] Workflow: deploying [{workflow_name}] to seldon {self.seldonDeployments.to_dict()}")

@@ -10,6 +10,7 @@ import os
 
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
+    
 
 extras = {}
 with open("requirements-dev.txt") as f:

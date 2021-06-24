@@ -198,8 +198,8 @@ class DockerBuilder(builder.Builder):
         ''')
         if service.service_type is not None:
             #baseimage
-            if executor.base_image is not None:
-                image_name = f"{self.registry}/{executor.base_image}"
+            if service.base_image is not None:
+                image_name = f"{self.registry}/{service.base_image}"
                 try:
                     image = self.client.images.get(image_name)    
                 except docker.api.client.DockerException as e:
@@ -210,24 +210,38 @@ class DockerBuilder(builder.Builder):
                 template += base_image_template
             else:
                 base_image_template = dedent(f'''
-                        FROM seldonio/seldon-core-s2i-python36:1.7.0-dev
+                        FROM python:3.7-slim 
                 ''')
                 template += base_image_template
 
             #code
             code_template = dedent(f'''
-                        COPY {executor.name} /microservice
+                        COPY {service.name} /app
+                        WORKDIR /app
+                        EXPOSE 5000
             ''')
             template += code_template
 
             #requirements
-            if executor.requirements is not None:
+            if service.requirements is not None:
                 req_template = dedent(f'''
-                        RUN pip install -r /microservice/{executor.requirements}
+                        RUN pip install -r /app/{service.requirements}
                 ''')
                 template  += req_template
+
+            #mainfile
+            if service.mainfile is not None:
+                (filename, extension) = os.path.splitext(service.mainfile)
+                if extension == '.py':
+                    exec_template = dedent(f'''
+                        ENV MODEL_NAME {filename}
+                        ENV SERVICE_TYPE {service.service_type}
+
+                        CMD exec seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE
+                    ''')
+                template += exec_template
         
-            logging.info(f"{executor.name} 's Dockerfile {template}")
+            logging.info(f"{service.name} 's Dockerfile {template}")
             return template
         else:
             return None
@@ -295,4 +309,5 @@ class DockerBuilder(builder.Builder):
 
         logging.info(f"{agent.name} 's Dockerfile {template}")
         return template
+        
     

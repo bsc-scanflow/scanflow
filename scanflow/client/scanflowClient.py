@@ -88,6 +88,7 @@ class ScanflowClient:
 
     def ScanflowService(self,
                         name: str,
+                        mainfile: str = None,
                         image: str = None,
                         env: dict = None,
                         envfrom: dict = None,
@@ -101,7 +102,7 @@ class ScanflowClient:
                         endpoint: dict = None,
                         parameters: List[dict] = None,
                         resources: V1ResourceRequirements = None):
-        return Service(name, image, env, envfrom, 
+        return Service(name, mainfile, image, env, envfrom, 
         requirements, dockerfile, base_image, service_type, 
         implementation_type, modelUri, envSecretRefName, endpoint, 
         parameters, resources)
