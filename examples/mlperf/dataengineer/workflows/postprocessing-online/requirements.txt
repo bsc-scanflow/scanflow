@@ -1,4 +1,7 @@
-seldon-core==1.6.0
+seldon-core==1.8.0
+tensorflow==2.4.0
+grpcio==1.32.0
+grpcio-reflection==1.32.0
 #scanflow==0.1
 mlflow==1.14.1
 kubernetes==12.0.1
