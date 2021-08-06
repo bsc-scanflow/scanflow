@@ -65,14 +65,14 @@ The following are the list configurable parameters of Volcano Chart and their de
 |`basic.scanflow_server_image_name`|server Docker Image Name|`172.30.0.49/scanflow-server`|
 |`basic.scanflow_tracker_image_name`|server Docker Image Name|`172.30.0.49/scanflow-tracker`|
 |`basic.image_pull_policy`|Image Pull Policy|`IfNotPresent`|
-|`trakcer.scanflow_trakcer_storage_backend`|||
-|`trakcer.scanflow_trakcer_storage_url`|||
-|`trakcer.scanflow_trakcer_storage_username`|||
-|`trakcer.scanflow_trakcer_storage_password`|||
-|`trakcer.scanflow_trakcer_artifact_backend`|||
-|`trakcer.scanflow_trakcer_artifact_url`|||
-|`trakcer.scanflow_trakcer_artifact_username`|||
-|`trakcer.scanflow_trakcer_artifact_password`|||
+|`tracker.scanflow_tracker_storage_backend`|||
+|`tracker.scanflow_tracker_storage_url`|||
+|`tracker.scanflow_tracker_storage_username`|||
+|`tracker.scanflow_tracker_storage_password`|||
+|`tracker.scanflow_tracker_artifact_backend`|||
+|`tracker.scanflow_tracker_artifact_url`|||
+|`tracker.scanflow_tracker_artifact_username`|||
+|`tracker.scanflow_tracker_artifact_password`|||
 to change each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
 ```bash
