@@ -57,7 +57,7 @@ $ helm delete --namespace scanflow-system scanflow
 
 ## Configuration
 
-The following are the list configurable parameters of Volcano Chart and their default values.
+The following are the list configurable parameters of Scanflow Helm Chart and their default values.
 
 | Parameter|Description|Default Value|
 |----------------|-----------------|----------------------|
