@@ -1,4 +1,4 @@
-from kubernetes.client import V1ResourceRequirements
+from kubernetes.client import V1ResourceRequirements, V1Affinity
 from typing import List
 
 class Node():
@@ -24,7 +24,8 @@ class Executor(Node):
                  base_image: str = None,
                  env: dict = None,
                  image: str = None,
-                 resources: V1ResourceRequirements = None):
+                 resources: V1ResourceRequirements = None,
+                 affinity: V1Affinity = None):
 
         super(Executor, self).__init__(name=name, node_type='executor')
         self.mainfile = mainfile
@@ -35,6 +36,7 @@ class Executor(Node):
         self.env = env
         self.image = image
         self.resources = resources
+        self.affinity = affinity
 
 #    @property
 #    def image(self):
@@ -65,7 +67,8 @@ class Service(Node):
                  envSecretRefName: str = None,
                  endpoint: dict = None,
                  parameters: List[dict] = None,
-                 resources: V1ResourceRequirements = None):
+                 resources: V1ResourceRequirements = None,
+                 affinity: V1Affinity = None):
         super(Service, self).__init__(name=name, node_type='service')
         
         self.image = image
@@ -89,3 +92,4 @@ class Service(Node):
         self.endpoint = endpoint
         self.parameters = parameters
         self.resources = resources
+        self.affinity = affinity

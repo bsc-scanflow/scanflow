@@ -1,10 +1,15 @@
 from typing import List, Dict
+import logging
 
 from scanflow.app import Node
 from scanflow.app import Edge
 from scanflow.app import KedaSpec
 
 from kubernetes.client import V1Affinity
+
+logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
+logging.getLogger().setLevel(logging.INFO)
 
 class Workflow(object):
     def __init__(self,
@@ -36,9 +41,11 @@ class Workflow(object):
                 for edge in v:
                     edges_list.append(edge.__dict__)
                 tmp_dict[k] = edges_list
-            #elif k == 'kedaSpec' and v is not None:
-            #    tmp_dict[k] = v.to_dict()
+            elif k == 'kedaSpec' and v is not None:
+                tmp_dict[k] = v.to_dict()
             else:
                 tmp_dict[k] = v
+
+        logging.info(f"workflow {self.name}: {tmp_dict}")
         return tmp_dict
             

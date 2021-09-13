@@ -76,7 +76,7 @@ class SeldonDeployer(deployer.Deployer):
             spec = self.kubeclient.build_podSpec(containers, volumes=volumes)
             seldonPodSpec.spec = spec
         if workflow.kedaSpec:
-            seldonPodSpec.kedaSpec = kedaSpec
+            seldonPodSpec.kedaSpec = workflow.kedaSpec
         componentSpecs = [seldonPodSpec]
 
         #edges

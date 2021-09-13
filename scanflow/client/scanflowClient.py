@@ -3,12 +3,14 @@ import os
 
 from typing import List, Dict
 
+from kubernetes.client.models.v1_node_selector_requirement import V1NodeSelectorRequirement
+
 # scanflow app
 from scanflow.app import Executor, Service, Node
 from scanflow.app import Edge, Dependency
 from scanflow.app import Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
 from scanflow.app import Workflow, Application, Tracker
-from scanflow.app import KedaSpec
+from scanflow.app import KedaSpec, ScalerTrigger, ScalerTriggerPrometheusMetadata
 
 # kubernetes
 from kubernetes.client import V1Affinity, V1NodeAffinity, V1PodAffinity, V1PodAntiAffinity
@@ -82,9 +84,10 @@ class ScanflowClient:
                          dockerfile: str = None,
                          base_image: str = None,
                          env: str = None,
-                         resources: V1ResourceRequirements = None):
+                         resources: V1ResourceRequirements = None,
+                         affinity: V1Affinity = None):
         return Executor(name, mainfile, parameters, requirements, 
-        dockerfile, base_image, env, resources=resources)
+        dockerfile, base_image, env, resources, affinity)
 
     def ScanflowService(self,
                         name: str,
@@ -101,11 +104,12 @@ class ScanflowClient:
                         envSecretRefName: str = None,
                         endpoint: dict = None,
                         parameters: List[dict] = None,
-                        resources: V1ResourceRequirements = None):
+                        resources: V1ResourceRequirements = None,
+                        affinity: V1Affinity = None):
         return Service(name, mainfile, image, env, envfrom, 
         requirements, dockerfile, base_image, service_type, 
         implementation_type, modelUri, envSecretRefName, endpoint, 
-        parameters, resources)
+        parameters, resources, affinity)
 
     def ScanflowDependency(self,
                          dependee: str,
@@ -131,6 +135,7 @@ class ScanflowClient:
                             tracker: Tracker = None):
         return Application(app_name, app_dir, team_name, workflows, agents, tracker)
 
+#agent
     def ScanflowAgentSensor_IntervalTrigger(self,
                                             weeks: int = 0,
                                             days: int = 0,
@@ -171,11 +176,29 @@ class ScanflowClient:
         return Agent(name, template, sensors, dockerfile, image)
 
 
+#scalers
+    def KedaSpec(self, 
+                 triggers: List[ScalerTrigger] = None,
+                 pollingInterval: int = 30,
+                 cooldownPeriod: int = 30,
+                 minReplicaCount: int = 0,
+                 maxReplicaCount: int = 10):
+        return KedaSpec(triggers, pollingInterval, cooldownPeriod, minReplicaCount, maxReplicaCount)
+
+    def ScalerTriggerPrometheus(self,
+                                serverAddress: str,
+                                metricName: str,
+                                query: str,
+                                threshold: int,
+                                type: str = 'prometheus'):
+        metadata = ScalerTriggerPrometheusMetadata(serverAddress,metricName,query,threshold)
+        return ScalerTrigger(type, metadata.__dict__)
+
 #resources
     def V1ResourceRequirements(self,
                                requests: dict = None,
                                limits: dict = None):
-        return V1ResourceRequirements(limits=limit, requests=requests)
+        return V1ResourceRequirements(limits=limits, requests=requests)
 
 #affinity
     def V1Affinity(self,
@@ -208,7 +231,7 @@ class ScanflowClient:
         return V1NodeAffinity(preferred_during_scheduling_ignored_during_execution=preferred_during_scheduling_ignored_during_execution,
         required_during_scheduling_ignored_during_execution=required_during_scheduling_ignored_during_execution)
 
-    def V1NodeSelectorRequiement(self,
+    def V1NodeSelectorRequirement(self,
                  key: str,
        		     operator: str,
        		     values: List[str] = None):
@@ -219,12 +242,12 @@ class ScanflowClient:
        	If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. 
        	This array is replaced during a strategic merge patch.
        	"""
-        return V1NodeSelectorRequiement(key, operator, values)
+        return V1NodeSelectorRequirement(key, operator, values)
 
 
     def V1NodeSelectorTerm(self,
-                 match_expressions: List[V1NodeSelectorRequiement]=None,
-		         match_fields: List[V1NodeSelectorRequiement]=None):
+                 match_expressions: List[V1NodeSelectorRequirement]=None,
+		         match_fields: List[V1NodeSelectorRequirement]=None):
         return V1NodeSelectorTerm(match_expressions=match_expressions,
         match_fields=match_fields)
 
