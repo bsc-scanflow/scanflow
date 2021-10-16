@@ -9,6 +9,8 @@ from scanflow.templates import ArgoWorkflows
 from scanflow.deployer.env import ScanflowSecret, ScanflowClientConfig
 from scanflow.tools.param import format_parameters
 
+from kubernetes.client import V1ResourceRequirements
+
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
@@ -78,13 +80,24 @@ class ArgoDeployer(deployer.Deployer):
             logging.info(f"[+] Building workflow: [{workflow.name}:{executor.name}].")
             if executor.env is not None:
                 env.update(executor.env)
-            logging.info(f"{format_parameters(executor.parameters)}")
-            argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
+           
+            if executor.resources is not None:            
+                logging.info(f"{executor.resources}")
+                logging.info(f"{executor.resources.to_dict().get('limits')}")
+                argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
                          image = executor.image,
                          args = format_parameters(executor.parameters),
                          env = env, 
                          volumeMounts = volumeMounts,
-                         resources = executor.resources)
+                         resources = executor.resources.to_dict().get('limits'))
+            else:
+                logging.info(f"{format_parameters(executor.parameters)}")
+                argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
+                         image = executor.image,
+                         args = format_parameters(executor.parameters),
+                         env = env, 
+                         volumeMounts = volumeMounts,
+                         resources=None)
 
         #edges
         logging.info(f"[+] Building workflow: [{workflow_name}- edges]")

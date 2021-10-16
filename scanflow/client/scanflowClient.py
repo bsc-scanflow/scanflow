@@ -84,10 +84,12 @@ class ScanflowClient:
                          dockerfile: str = None,
                          base_image: str = None,
                          env: str = None,
+                         image: str = None,
+                         timeout: int = None,
                          resources: V1ResourceRequirements = None,
                          affinity: V1Affinity = None):
         return Executor(name, mainfile, parameters, requirements, 
-        dockerfile, base_image, env, resources, affinity)
+        dockerfile, base_image, env, image, timeout, resources, affinity)
 
     def ScanflowService(self,
                         name: str,
