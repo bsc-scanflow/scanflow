@@ -5,7 +5,7 @@ from scanflow.app import Node
 from scanflow.app import Edge
 from scanflow.app import KedaSpec
 
-from kubernetes.client import V1Affinity
+from kubernetes.client import V1Affinity, V1ResourceRequirements
 
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -16,6 +16,7 @@ class Workflow(object):
                  name: str,
                  nodes: List[Node],
                  edges: List[Edge] = None,
+                 resources: V1ResourceRequirements = None,
                  affinity: V1Affinity = None,
                  kedaSpec: KedaSpec = None,
                  output_dir: str = None):
@@ -23,6 +24,7 @@ class Workflow(object):
         self.name = name
         self.nodes = nodes
         self.edges = edges
+        self.resources = resources
         self.affinity = affinity
         self.kedaSpec = kedaSpec
         self.output_dir = output_dir
@@ -42,6 +44,10 @@ class Workflow(object):
                 for edge in v:
                     edges_list.append(edge.__dict__)
                 tmp_dict[k] = edges_list
+            elif k == 'resources' and v is not None:
+                tmp_dict[k] = v.to_dict()
+            elif k == 'affinity' and v is not None:
+                tmp_dict[k] = v.to_dict()
             elif k == 'kedaSpec' and v is not None:
                 tmp_dict[k] = v.to_dict()
             else:

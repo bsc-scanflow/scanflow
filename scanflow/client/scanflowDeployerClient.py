@@ -272,7 +272,8 @@ class ScanflowDeployerClient:
     async def deploy_workflows(self,
                       app_name: str,
                       team_name: str,
-                      workflows: List[Workflow]):
+                      workflows: List[Workflow],
+                      replicas: int):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/deploy_workflows/{app_name}/{team_name}/?deployer={self.deployer}"
             async with http_client.session.post(url,
@@ -286,12 +287,13 @@ class ScanflowDeployerClient:
                 return False
         else: #local
             namespace = f"scanflow-{app_name}-{team_name}"
-            return self.deployerbackend.deploy_workflows(namespace, workflows)
+            return self.deployerbackend.deploy_workflows(namespace, workflows, replicas)
 
     async def deploy_workflow(self,
                      app_name: str,
                      team_name: str,
-                     workflow: Workflow):
+                     workflow: Workflow,
+                     replicas: int):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/deploy_workflow/{app_name}/{team_name}/?deployer={self.deployer}"
             async with http_client.session.post(url,
@@ -305,7 +307,7 @@ class ScanflowDeployerClient:
                 return False
         else: #local
             namespace = f"scanflow-{app_name}-{team_name}"
-            return self.deployerbackend.deploy_workflow(namespace, workflow)
+            return self.deployerbackend.deploy_workflow(namespace, workflow, replicas)
 
     async def update_workflows(self,
                       app_name: str,

@@ -123,10 +123,11 @@ class ScanflowClient:
                          name: str,
                          nodes: List[Node],
                          edges: List[Edge] = None,
+                         resources: V1ResourceRequirements = None,
                          affinity: V1Affinity = None,
                          kedaSpec: KedaSpec = None,
                          output_dir: str = None):
-        return Workflow(name, nodes, edges, affinity, kedaSpec, output_dir)
+        return Workflow(name, nodes, edges, resources, affinity, kedaSpec, output_dir)
     
     def ScanflowApplication(self,
                             app_name: str,

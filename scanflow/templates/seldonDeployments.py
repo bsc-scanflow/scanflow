@@ -2,6 +2,7 @@ from typing import List, Any, OrderedDict
 import yaml
 from kubernetes.client import V1PodSpec
 from scanflow.app import KedaSpec
+from kubernetes.client import V1ResourceRequirements
 
 import logging
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
@@ -84,6 +85,7 @@ class PredictorSpec:
                  componentSpecs: List[SeldonPodSpec] = None,
                  replicas: int = None,
                  annotation: dict = None,
+                 engineResources:  V1ResourceRequirements = None,
                  svcOrchSpec = None,
                  explainer = None):
         
@@ -92,6 +94,7 @@ class PredictorSpec:
         self.graph = graph
         self.replicas = replicas
         self.annotation = annotation
+        self.engineResources = engineResources
         self.svcOrchSpec = svcOrchSpec
         self.explainer = explainer
 
@@ -108,6 +111,9 @@ class PredictorSpec:
         # -- Graph
         if self.graph:
             predictors_spec["graph"] = self.graph.to_dict()
+        # -- engineResources
+        if self.engineResources:
+            predictors_spec["engineResources"] = self.engineResources.to_dict()
         # -- SvcOrchSpec
         if self.svcOrchSpec:
             logging.info("svcOrchSpec is not ready")

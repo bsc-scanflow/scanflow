@@ -27,15 +27,15 @@ class SeldonDeployer(deployer.Deployer):
 
         self.seldonClient = None
 
-    def deploy_workflows(self, namespace, workflows, replica: int = 1):
+    def deploy_workflows(self, namespace, workflows, replicas: int = 5):
         submitted = True
         for workflow in workflows:
             logging.info(f"[++] Deploying workflow: [{workflow.name}].")
-            submitted = submitted and self.deploy_workflow(namespace, workflow, replica)
+            submitted = submitted and self.deploy_workflow(namespace, workflow, replicas)
             logging.info(f"[+] Workflow: [{workflow.name}] was deployed successfully.")
         return submitted
 
-    def deploy_workflow(self, namespace, workflow, replicas: int = 1):
+    def deploy_workflow(self, namespace, workflow, replicas: int = 5):
         """
            deploy workflow by seldon
         """
@@ -63,7 +63,8 @@ class SeldonDeployer(deployer.Deployer):
                     env.update(service.env)
                 containers.append(self.kubeclient.build_container(service.name, 
                                  service.image, env=self.kubeclient.build_env(**env), 
-                                 volume_mounts=self.kubeclient.build_volumeMounts(scanflowpath="/scanflow")))
+                                 volume_mounts=self.kubeclient.build_volumeMounts(scanflowpath="/scanflow"),
+                                 resources=service.resources))
             #predictiveUnit
             predictiveUnits[f"{service.name}"] = PredictiveUnit(service.name, 
                          type=service.service_type, implementation=service.implementation_type,
@@ -103,10 +104,10 @@ class SeldonDeployer(deployer.Deployer):
                     graph_head = k
             logging.info(f"Graph head: {graph_head}")
             self.predictor = PredictorSpec(workflow_name, predictiveUnits[f"{graph_head}"],
-                                          componentSpecs, replicas)        
+                                          componentSpecs, replicas, engineResources=workflow.resources)        
         else:
             self.predictor = PredictorSpec(workflow_name, predictiveUnits[f"{workflow.nodes[0].name}"],
-                                            componentSpecs, replicas)   
+                                            componentSpecs, replicas, engineResources=workflow.resources)   
 
         self.seldonDeployments.predictors = [self.predictor]     
 

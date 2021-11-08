@@ -56,8 +56,8 @@ class ArgoWorkflows:
     def configWorkflow(self, workflow_name):
         couler.config_workflow(
             name=workflow_name,
-            timeout=10800,
-            time_to_clean=10800 * 1.5,
+            # timeout=10800,
+            # time_to_clean=10800 * 1.5,
         )
 
     
