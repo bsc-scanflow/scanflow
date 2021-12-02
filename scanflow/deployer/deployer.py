@@ -251,7 +251,6 @@ class Deployer():
         return step1 and step2
 
     # workflows: with different deployer
-
     def run_workflows(self,
                       namespace: str,
                       workflows: List[Workflow]):
@@ -277,15 +276,18 @@ class Deployer():
                         namespace: str,
                         workflow: Workflow):
         raise NotImplementedError("Backend:delete_workflow")
-
+    
+    #online
     def deploy_workflows(self,
                          namespace: str,
-                         workflows: List[Workflow]):
+                         workflows: List[Workflow],
+                         replicas: int):
         raise NotImplementedError("Backend: deploy_workflows")
 
     def deploy_workflow(self,
                         namespace: str,
-                        workflow: Workflow):
+                        workflow: Workflow,
+                        replicas: int):
         raise NotImplementedError("Backend: deploy_workflow")
 
     def update_workflows(self,

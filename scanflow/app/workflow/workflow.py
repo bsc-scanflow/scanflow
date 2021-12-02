@@ -7,6 +7,8 @@ from scanflow.app import KedaSpec
 
 from kubernetes.client import V1Affinity, V1ResourceRequirements
 
+from scanflow.app.workflow.scaler import HpaSpec
+
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
@@ -16,17 +18,21 @@ class Workflow(object):
                  name: str,
                  nodes: List[Node],
                  edges: List[Edge] = None,
+                 type: str = None,
                  resources: V1ResourceRequirements = None,
                  affinity: V1Affinity = None,
                  kedaSpec: KedaSpec = None,
+                 hpaSpec: HpaSpec = None,
                  output_dir: str = None):
 
         self.name = name
         self.nodes = nodes
         self.edges = edges
+        self.type = type #batch or online
         self.resources = resources
         self.affinity = affinity
         self.kedaSpec = kedaSpec
+        self.hpaSpec = hpaSpec
         self.output_dir = output_dir
 
     def to_dict(self):
@@ -49,6 +55,8 @@ class Workflow(object):
             elif k == 'affinity' and v is not None:
                 tmp_dict[k] = v.to_dict()
             elif k == 'kedaSpec' and v is not None:
+                tmp_dict[k] = v.to_dict()
+            elif k == 'hpaSpec' and v is not None:
                 tmp_dict[k] = v.to_dict()
             else:
                 tmp_dict[k] = v

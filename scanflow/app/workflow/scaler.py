@@ -1,4 +1,5 @@
 from typing import Optional, List
+from kubernetes.client import V2beta2MetricSpec
 
 class ScalerTrigger():
     def __init__(self,
@@ -12,7 +13,7 @@ class ScalerTriggerPrometheusMetadata():
                  serverAddress: str,
                  metricName: str,
                  query: str,
-                 threshold: int):
+                 threshold: str):
         self.serverAddress = serverAddress
         self.metricName = metricName
         self.query = query
@@ -51,6 +52,32 @@ class KedaSpec():
             else:
                 tmp_dict[k] = v
         return tmp_dict  
+class HpaSpec():
+    def __init__(self,
+                 minReplica: Optional[int],
+                 maxReplica: Optional[int],
+                 metrics: List[V2beta2MetricSpec]):
+        """
+        default
+           minreplica:
+           maxreplica: 
+           metrics: autoscaling
+        """
+        self.metrics = metrics
+        self.minReplica = minReplica
+        self.maxReplica = maxReplica
 
+    def to_dict(self):
+        tmp_dict = {}
+        hpa_dict = self.__dict__
+        for k,v in hpa_dict.items():
+            if k == 'metrics':
+                metrics_list = list()
+                for metric in v:
+                    metrics_list.append(metric.__dict__)
+                tmp_dict[k] = metrics_list
+            else:
+                tmp_dict[k] = v
+        return tmp_dict  
 
 

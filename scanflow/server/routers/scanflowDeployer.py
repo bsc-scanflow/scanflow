@@ -177,6 +177,8 @@ async def run_workflow(app_name: str,
                        team_name: str,
                        workflow: Workflow,
                        deployer: Optional[str]="argo"):
+    logging.info(f"server run workflow: {workflow}")
+    
     namespace = f"scanflow-{app_name}-{team_name}"
     deployerbackend = __get_deployer(deployer)
     result = deployerbackend.run_workflow(namespace, workflow)
@@ -202,16 +204,32 @@ async def delete_workflow(app_name: str,
     else:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="delete workflow error")
 
+
+@router.post("/deploy_app/{replicas}",
+           summary="deploy application",
+           status_code = status.HTTP_200_OK)
+async def deploy_app(app: Application,
+                           replicas: int,
+                           deployer: Optional[str]="seldon"):
+    namespace = f"scanflow-{app.app_name}-{app.team_name}"
+    deployerbackend = __get_deployer(deployer)
+    result = deployerbackend.deploy_workflows(namespace, app.workflows, replicas)
+
+    if result:
+        return {'detail': "all workflows have been deployed"}
+
+
 @router.post("/deploy_workflows/{app_name}/{team_name}",
            summary="deploy workflows",
            status_code = status.HTTP_200_OK)
 async def deploy_workflows(app_name: str,
                         team_name: str,
                         workflows: List[Workflow],
+                        replicas: Optional[int] = 1,
                         deployer: Optional[str]="seldon"):
     namespace = f"scanflow-{app_name}-{team_name}"
     deployerbackend = __get_deployer(deployer)
-    result = deployerbackend.deploy_workflows(namespace, workflows)
+    result = deployerbackend.deploy_workflows(namespace, workflows, replicas)
 
     if result:
         return {'detail': "all workflows have been deployed"}
@@ -224,10 +242,13 @@ async def deploy_workflows(app_name: str,
 async def deploy_workflow(app_name: str,
                        team_name: str,
                        workflow: Workflow,
+                       replicas: Optional[int] = 1,
                        deployer: Optional[str]="seldon"):
+    logging.info(f"server deploy workflow: {workflow}")
+    
     namespace = f"scanflow-{app_name}-{team_name}"
     deployerbackend = __get_deployer(deployer)
-    result = deployerbackend.deploy_workflow(namespace, workflow)
+    result = deployerbackend.deploy_workflow(namespace, workflow, replicas)
 
     if result:
         return {'detail': f"workflow {workflow.name} has been deployed"}
