@@ -65,7 +65,36 @@ def find_scaling_config():
     return kedaSpec.to_dict()
 
 def find_backup_service():
-    backupservice = {'image','172.30.0.49:5000/predictor-online'}
+    backupservice = {'modelUri','s3://scanflow/scanflow-mlperf-dataengineer/1/fde8c5e912a84b8385e1154053c3e759/artifacts/mlperf-resnet/model'}
     
     logging.info(f"backupservice dict: {backupservice}")
     return backupservice
+
+def check_availability(avireplicas, name):
+    if avireplicas == 0:
+        patch = {"route": [
+					{
+						"destination": {
+							"host": f"{name}-{name}",
+							"port": {
+								"number": 5001
+							},
+							"subset": f"{name}"
+						},
+						"weight": 0
+					},
+					{
+						"destination": {
+							"host": f"{name}-backup",
+							"port": {
+								"number": 5001
+							},
+							"subset": "backup"
+						},
+						"weight": 100
+					}
+				]}
+        return patch
+    else:
+        return None
+    

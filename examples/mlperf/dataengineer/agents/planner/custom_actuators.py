@@ -70,7 +70,7 @@ async def call_deploy_workflow_backupservice(app_name : str,
     logging.info(f"workflownew: {workflow.dict()}")
 
     #deploy workflow
-    url = f"http://scanflow-server-service.scanflow-system.svc.cluster.local/deployer/deploy_workflow/{app_name}/{team_name}?replicas={replicas}&deployer={deployer}"
+    url = f"http://scanflow-server-service.scanflow-system.svc.cluster.local/deployer/deploy_workflow/{app_name}/{team_name}?replicas={replicas}&deployer={deployer}&backupservice={backupservice}"
     async with http_client.session.post(url, 
                                         data=json.dumps(workflow.dict()),
                                         headers={'Content-Type':'application/json'}) as response:
@@ -81,3 +81,40 @@ async def call_deploy_workflow_backupservice(app_name : str,
         return True
     else:
         return False
+    
+    
+#ok!
+async def call_update_traffic(app_name : str,
+                              team_name : str,
+                              name: str,
+                              patch: dict,
+                              deployer :str):
+
+    logging.info(f"patch: {patch}")
+
+    #deploy workflow
+    url = f"http://scanflow-server-service.scanflow-system.svc.cluster.local/deployer/update_traffic/{app_name}/{team_name}/{name}?deployer={deployer}"
+    async with http_client.session.post(url, 
+                                        data = json.dumps(patch),
+                                        headers={'Content-Type':'application/json'}) as response:
+                status = response.status
+                text = await response.json()
+    logging.info(f"{text['detail']}")
+    if status == 200:
+        return True
+    else:
+        return False
+    
+    
+async def find_available_replicas(url):
+    #deploy workflow
+    url = url
+    async with http_client.session.get(url, 
+                                        headers={'Content-Type':'application/json'}) as response:
+                status = response.status
+                text = await response.json()
+    logging.info(f"response: {text['data']}")
+    if status == 200:
+        return text["data"]["result"][0]["value"][1]
+    else:
+        return -1

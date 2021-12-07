@@ -242,18 +242,38 @@ async def deploy_workflows(app_name: str,
 async def deploy_workflow(app_name: str,
                        team_name: str,
                        workflow: Workflow,
+                       backupservice: Optional[str] = None,
                        replicas: Optional[int] = 1,
                        deployer: Optional[str]="seldon"):
     logging.info(f"server deploy workflow: {workflow}")
     
     namespace = f"scanflow-{app_name}-{team_name}"
     deployerbackend = __get_deployer(deployer)
-    result = deployerbackend.deploy_workflow(namespace, workflow, replicas)
+    result = deployerbackend.deploy_workflow(namespace, workflow, replicas, backupservice)
 
     if result:
         return {'detail': f"workflow {workflow.name} has been deployed"}
     else:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="run workflow error")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="deploy workflow error")
+    
+    
+@router.post("/update_traffic/{app_name}/{team_name}/{name}",
+           summary="update traffic",
+           status_code = status.HTTP_200_OK)
+async def update_traffic(app_name: str,
+                       team_name: str,
+                       name: str,
+                       patch: Optional[dict] = None,
+                       deployer: Optional[str]="seldon"):
+    namespace = f"scanflow-{app_name}-{team_name}"
+    deployerbackend = __get_deployer(deployer)
+    result = deployerbackend.update_traffic(namespace, name, patch)
+
+    if result:
+        return {'detail': f"virtualservice {name} traffic has been updated"}
+    else:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="update traffic error")
+    
 
 @router.post("/update_workflows/{app_name}/{team_name}",
            summary="update workflows",

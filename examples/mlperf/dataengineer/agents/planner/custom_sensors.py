@@ -41,6 +41,27 @@ async def sensors_deploy_autoconfig_workflow(app_name: str,
     
     return {"detail": "sensors_deploy_autoconfig_workflow received"}
 
+
+@custom_sensor_router.post("/run_autoconfig_workflow/{app_name}/{team_name}",
+                           status_code= status.HTTP_200_OK)
+async def sensors_run_autoconfig_workflow(app_name: str,
+                                          team_name: str,
+                                          workflow: Workflow,
+                                          deployer: Optional[str]="argo"):
+    antipodaffinity = find_antiaffinity_config()
+    if antipodaffinity is not None:
+        await call_run_workflow_affinity(app_name=app_name,
+                                            team_name=team_name,
+                                            workflow=workflow, 
+                                            antipodaffinity=antipodaffinity,
+                                            deployer=deployer)
+    else:
+        logging.info(f"cannot find affinity config")
+    
+    return {"detail": "sensors_run_autoconfig_workflow received"}
+
+
+
 @custom_sensor_router.post("/deploy_backuped_workflow/{app_name}/{team_name}",
                            status_code= status.HTTP_200_OK)
 async def sensors_deploy_autoconfig_workflow(app_name: str,
@@ -62,66 +83,27 @@ async def sensors_deploy_autoconfig_workflow(app_name: str,
     return {"detail": "sensors_deploy_backuped_workflow received"}
     
 
-@custom_sensor_router.post("/run_autoconfig_workflow/{app_name}/{team_name}",
+@custom_sensor_router.post("/testtraffic",
                            status_code= status.HTTP_200_OK)
-async def sensors_run_autoconfig_workflow(app_name: str,
-                                          team_name: str,
-                                          workflow: Workflow,
-                                          deployer: Optional[str]="argo"):
-    antipodaffinity = find_antiaffinity_config()
-    if antipodaffinity is not None:
-        await call_run_workflow_affinity(app_name=app_name,
-                                            team_name=team_name,
-                                            workflow=workflow, 
-                                            antipodaffinity=antipodaffinity,
-                                            deployer=deployer)
-    else:
-        logging.info(f"cannot find affinity config")
+async def sensors_get_availability(app_name: str,
+                                     team_name: str,
+                                     name: str,
+                                     deployer: Optional[str]="seldon"):
+    #need to use scanflow trigger to check the number of available replicas.
+    # curl -g 'http://172.30.0.50:30002/api/v1/query?query=sum(kube_deployment_status_replicas{namespace=~"scanflow-mlperf-dataengineer",deployment=~"seldon.*"})i'
+    while True:
+        availreplicas = await find_available_replicas("http://prometheus.istio-system.svc.cluster.local:9090/api/v1/query?query=sum(kube_deployment_status_replicas{namespace=~\"scanflow-mlperf-dataengineer\",deployment=~\"seldon.*\"})")
+        
+        patch = check_availability(availreplicas, name)
+        if patch:
+            await call_update_traffic(app_name=app_name,
+                                      team_name=team_name,
+                                      name=f"{name}-grpc", 
+                                      patch=patch,
+                                      deployer=deployer)
+            break
+        else:
+            logging.info(f"service is available")
+        time.sleep(30)
     
-    return {"detail": "sensors_run_autoconfig_workflow received"}
-
-# @custom_sensor_router.post("/plan_retain_model",
-#                             status_code= status.HTTP_200_OK)
-# async def sensors_plan_retain_model(info: tuple = Depends(sensor_dependency)):
-#     run = info[0]
-#     print("Active run_id: {}".format(run.info.run_id))
-#     with mlflow.start_run(run_id=run.info.run_id):
-
-#         #logic
-#         images = []
-#         labels = []
-#         mlflowClient = MlflowClient(client.get_tracker_uri(True))
-#         for run_id in info[2]['run_ids']:
-#             mlflowClient.download_artifacts(run_id, path="data", dst_path="/tmp")
-#             images.append(np.load("/tmp/data/x_inference_chosen.npy"))
-#             labels.append(np.load("/tmp/data/y_inference_chosen.npy"))
-            
-#         x_newdata = []
-#         x_newdata = np.concatenate((images), axis=0)
-#         y_newdata = []
-#         y_newdata = np.concatenate((labels), axis=0)
-
-#         with open('x_newdata.npy', 'wb') as f:
-#             np.save(f, x_newdata)
-#         with open('y_newdata.npy', 'wb') as f:
-#             np.save(f, y_newdata)
-            
-#         mlflow.log_artifact('x_newdata.npy', artifact_path="data")
-#         mlflow.log_artifact('y_newdata.npy', artifact_path="data") 
-
-#     await call_run_retrain_workflow(run_id = run.info.run_id, artifact_path="data")
-
-#     return {"detail": "sensors_plan_retain_model received"}
-
-
-# @sensor(nodes=["modeling_cnn1","modeling_cnn2","mnist"], filter_string="metrics.accuracy > 0", order_by=["metric.accuracy DESC"], max_results=1)
-# async def check_model_accuracy(runs: List[mlflow.entities.Run], args, kwargs):
-#     print(args)
-#     print(kwargs)
-
-#     if better_model(runs[0]):
-#         await call_executor_transit_model(run_id = runs[0].info.run_id)
-#         #await call_update_workflow(run_id = runs[0].info.run_id, artifact_path="data")
-
-#     return f"new model run {runs[0].info.run_id}"
-
+    return {"detail": "sensors_deploy_backuped_workflow received"}

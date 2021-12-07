@@ -1,3 +1,4 @@
+import re
 from kubernetes import client, config, utils
 from os import path
 from typing import List, Dict
@@ -641,6 +642,41 @@ class Kubernetes:
             )
         except client.api_client.rest.ApiException as e:
             raise Exception("Exception when deleting the workflow: %s\n" % e)
+        
+    def get_virtualservice(self, namespace, name):
+        
+        api_client = client.CustomObjectsApi()
+        try:
+            api_response = api_client.get_namespaced_custom_object(
+                "networking.istio.io",
+                "v1alpha3",
+                namespace,
+                "virtualservices",
+                name)
+            logging.info(f"get vs:{api_response}")
+            return api_response
+        except client.api_client.rest.ApiException as e:
+            raise Exception("Exception when calling CustomObjectsApi->get_namespaced_custom_object: %s\n" % e)
+        
+    def replace_virtualservice(self, namespace, name, body):
+        
+        api_client = client.CustomObjectsApi()
+        try:
+            response =  api_client.replace_namespaced_custom_object(
+                "networking.istio.io",
+                "v1alpha3",
+                namespace,
+                "virtualservices",
+                name,
+                body
+            )
+            logging.info(
+                'virtualservice %s has been replaced in "%s" namespace!'
+                % (response.get("metadata", {}).get("name"), namespace)
+            )
+            return response
+        except client.api_client.rest.ApiException as e:
+            raise Exception("Failed to patch virtualservice")
 
 
 ###pod spec: affinity, nodeselector, priority, schedulerName, volume

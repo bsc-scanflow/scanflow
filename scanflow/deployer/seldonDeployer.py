@@ -140,7 +140,7 @@ class SeldonDeployer(deployer.Deployer):
         
         if backupservice is not None:
             backupPredictor = predictor
-            backupPredictor.componentSpecs[0].spec.containers[0]['image'] = backupservice['image']
+            backupPredictor.graph.modelUri = backupservice['modelUri']
             backupPredictor.name = "backup"
             backupPredictor.traffic = 0
             self.seldonDeployments.predictors = [predictor, backupPredictor] 
@@ -152,7 +152,14 @@ class SeldonDeployer(deployer.Deployer):
         return self.kubeclient.create_seldonDeployment(namespace, self.seldonDeployments.to_dict())
 
 
-
+    def update_traffic(self,
+                       namespace,
+                       name,
+                       body: dict):
+        oldjson = self.kubeclient.get_virtualservice(namespace, name)
+        oldjson["spec"]["http"][0]["route"] = body["route"]
+        logging.info(f"[++++++++++++++++++++++++++]update traffic {oldjson}")
+        return self.kubeclient.replace_virtualservice(namespace, name, oldjson)
 
 
     ## user can directly use seldonclient to develop their application, here we only wrapped seldon client
