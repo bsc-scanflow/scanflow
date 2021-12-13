@@ -1,7 +1,7 @@
 from .custom_rules import *
 from .custom_actuators import *
 import numpy as np
-from typing import List
+from typing import List, Optional
 import logging
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
@@ -69,4 +69,26 @@ async def check_model_accuracy(runs: List[mlflow.entities.Run], args, kwargs):
         #await call_update_workflow(run_id = runs[0].info.run_id, artifact_path="data")
 
     return f"new model run {runs[0].info.run_id}"
+
+
+@custom_sensor_router.post("/deploy_autoconfig_workflow/{app_name}/{team_name}",
+                           status_code= status.HTTP_200_OK)
+async def sensors_deploy_autoconfig_workflow(app_name: str,
+                                             team_name: str,
+                                             workflow: Workflow,
+                                             replicas: Optional[int] = 1,
+                                             deployer: Optional[str]="seldon"):
+    kedaconfig = find_scaling_config(requirement=2)
+    if kedaconfig is not None:
+        await call_deploy_workflow_replicas(app_name=app_name,
+                                            team_name=team_name,
+                                            workflow=workflow, 
+                                            kedaconfig=kedaconfig,
+                                            replicas=replicas,
+                                            deployer=deployer)
+    else:
+        logging.info(f"cannot find scaling config")
+    
+    return {"detail": "sensors_deploy_autoconfig_workflow received"}
+    
 

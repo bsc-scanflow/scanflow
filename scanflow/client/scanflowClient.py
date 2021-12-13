@@ -1,20 +1,22 @@
 import logging
 import os
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 # scanflow app
 from scanflow.app import Executor, Service, Node
 from scanflow.app import Edge, Dependency
 from scanflow.app import Agent, Sensor, IntervalTrigger, DateTrigger, CronTrigger, BaseTrigger
 from scanflow.app import Workflow, Application, Tracker
-from scanflow.app import KedaSpec
+from scanflow.app import KedaSpec, ScalerTrigger, ScalerTriggerPrometheusMetadata
 
 # kubernetes
 from kubernetes.client import V1Affinity, V1NodeAffinity, V1PodAffinity, V1PodAntiAffinity
-from kubernetes.client import V1LabelSelectorRequirement, V1NodeSelectorTerm, V1PreferredSchedulingTerm, V1NodeSelector, V1LabelSelectorRequirement, V1WeightedPodAffinityTerm
+from kubernetes.client import V1LabelSelectorRequirement, V1NodeSelectorTerm, V1PreferredSchedulingTerm, V1NodeSelector, V1LabelSelectorRequirement, V1WeightedPodAffinityTerm, V1NodeSelectorRequirement, V1LabelSelector
 from kubernetes.client import V1PodAffinityTerm
 from kubernetes.client import V1ResourceRequirements
+from scanflow.app.workflow.scaler import HpaSpec
+from kubernetes.client import V2beta2MetricSpec, V2beta2ExternalMetricSource, V2beta2ObjectMetricSource, V2beta2PodsMetricSource, V2beta2ResourceMetricSource, V2beta2MetricTarget
 
 
 # scanflow graph
@@ -82,9 +84,12 @@ class ScanflowClient:
                          dockerfile: str = None,
                          base_image: str = None,
                          env: str = None,
-                         resources: V1ResourceRequirements = None):
+                         image: str = None,
+                         timeout: int = None,
+                         resources: V1ResourceRequirements = None,
+                         affinity: V1Affinity = None):
         return Executor(name, mainfile, parameters, requirements, 
-        dockerfile, base_image, env, resources=resources)
+        dockerfile, base_image, env, image, timeout, resources, affinity)
 
     def ScanflowService(self,
                         name: str,
@@ -101,11 +106,12 @@ class ScanflowClient:
                         envSecretRefName: str = None,
                         endpoint: dict = None,
                         parameters: List[dict] = None,
-                        resources: V1ResourceRequirements = None):
+                        resources: V1ResourceRequirements = None,
+                        affinity: V1Affinity = None):
         return Service(name, mainfile, image, env, envfrom, 
         requirements, dockerfile, base_image, service_type, 
         implementation_type, modelUri, envSecretRefName, endpoint, 
-        parameters, resources)
+        parameters, resources, affinity)
 
     def ScanflowDependency(self,
                          dependee: str,
@@ -117,10 +123,13 @@ class ScanflowClient:
                          name: str,
                          nodes: List[Node],
                          edges: List[Edge] = None,
+                         type: str = None,
+                         resources: V1ResourceRequirements = None,
                          affinity: V1Affinity = None,
                          kedaSpec: KedaSpec = None,
+                         hpcSpec: HpaSpec = None,
                          output_dir: str = None):
-        return Workflow(name, nodes, edges, affinity, kedaSpec, output_dir)
+        return Workflow(name, nodes, edges, type, resources, affinity, kedaSpec, hpcSpec, output_dir)
     
     def ScanflowApplication(self,
                             app_name: str,
@@ -131,6 +140,7 @@ class ScanflowClient:
                             tracker: Tracker = None):
         return Application(app_name, app_dir, team_name, workflows, agents, tracker)
 
+#agent
     def ScanflowAgentSensor_IntervalTrigger(self,
                                             weeks: int = 0,
                                             days: int = 0,
@@ -171,47 +181,93 @@ class ScanflowClient:
         return Agent(name, template, sensors, dockerfile, image)
 
 
+#scalers
+    def KedaSpec(self, 
+                 triggers: List[ScalerTrigger] = None,
+                 pollingInterval: int = 30,
+                 cooldownPeriod: int = 30,
+                 minReplicaCount: int = 0,
+                 maxReplicaCount: int = 10):
+        return KedaSpec(triggers, pollingInterval, cooldownPeriod, minReplicaCount, maxReplicaCount)
+
+    def ScalerTriggerPrometheus(self,
+                                serverAddress: str,
+                                metricName: str,
+                                query: str,
+                                threshold: str,
+                                type: str = 'prometheus'):
+        metadata = ScalerTriggerPrometheusMetadata(serverAddress,metricName,query,threshold)
+        return ScalerTrigger(type, metadata.__dict__)
+    
+    def HpaSpec(self,
+                metrics: V2beta2MetricSpec,
+                minReplica: int = 0,
+                maxReplica: int = 10):
+        return HpaSpec(minReplica, maxReplica, metrics)
+    
+    #https://github.com/kubernetes-client/python/blob/d3de7a85a63fa6bec6518d1cc75dc5e9458b9bbc/kubernetes/docs/V2beta2MetricSpec.md
+    def AutoscalingMetric(self,
+                          type: str,
+                          external: V2beta2ExternalMetricSource = None,
+                          object: V2beta2ObjectMetricSource = None,
+                          pods: V2beta2PodsMetricSource = None,
+                          resource: V2beta2ResourceMetricSource = None):
+        return V2beta2MetricSpec(external,object,pods,resource,type)
+    
+    def ResourceMetricSource(self,
+                             name: str,
+                             target: V2beta2MetricTarget):
+        return V2beta2ResourceMetricSource(name, target)
+    
+    def MetricTarget(self,
+                     average_utilization : int,
+                     average_value: str,
+                     type: str,
+                     value: str):
+        return V2beta2MetricTarget(average_utilization, average_value, type, value)
+    
+
 #resources
     def V1ResourceRequirements(self,
                                requests: dict = None,
                                limits: dict = None):
-        return V1ResourceRequirements(limits=limit, requests=requests)
+        return V1ResourceRequirements(limits=limits, requests=requests)
 
 #affinity
     def V1Affinity(self,
-                   node_affinity: V1NodeAffinity = None,
-                   pod_affinity: V1PodAffinity = None,
-                   pod_anti_affinity: V1PodAntiAffinity = None):
+                   node_affinity: Optional[V1NodeAffinity] = None,
+                   pod_affinity: Optional[V1PodAffinity] = None,
+                   pod_anti_affinity: Optional[V1PodAntiAffinity] = None):
         return V1Affinity(node_affinity=node_affinity, 
                           pod_affinity=pod_affinity,
                           pod_anti_affinity=pod_anti_affinity)
         #TODO: https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1Affinity.md    
 
     def V1PodAntiAffinity(self,
-                 preferred_during_scheduling_ignored_during_execution: List[V1WeightedPodAffinityTerm] = None,
-		         required_during_scheduling_ignored_during_execution: List[V1PodAffinityTerm] = None):
+                 preferred_during_scheduling_ignored_during_execution: Optional[List[V1WeightedPodAffinityTerm]] = None,
+		         required_during_scheduling_ignored_during_execution: Optional[List[V1PodAffinityTerm]] = None):
         return V1PodAntiAffinity(
             preferred_during_scheduling_ignored_during_execution=preferred_during_scheduling_ignored_during_execution,
             required_during_scheduling_ignored_during_execution=required_during_scheduling_ignored_during_execution)
 
     def V1PodAffinity(self,
-                 preferred_during_scheduling_ignored_during_execution: List[V1WeightedPodAffinityTerm] = None,
-		         required_during_scheduling_ignored_during_execution: List[V1PodAffinityTerm] = None):
+                 preferred_during_scheduling_ignored_during_execution: Optional[List[V1WeightedPodAffinityTerm]] = None,
+		         required_during_scheduling_ignored_during_execution: Optional[List[V1PodAffinityTerm]] = None):
         return V1PodAffinity(
             preferred_during_scheduling_ignored_during_execution=preferred_during_scheduling_ignored_during_execution,
             required_during_scheduling_ignored_during_execution=required_during_scheduling_ignored_during_execution
         )
 
     def V1NodeAffinity(self,
-                 preferred_during_scheduling_ignored_during_execution: List[V1PreferredSchedulingTerm] = None,
-		         required_during_scheduling_ignored_during_execution: V1NodeSelector = None):
+                 preferred_during_scheduling_ignored_during_execution: Optional[List[V1PreferredSchedulingTerm]] = None,
+		         required_during_scheduling_ignored_during_execution: Optional[V1NodeSelector] = None):
         return V1NodeAffinity(preferred_during_scheduling_ignored_during_execution=preferred_during_scheduling_ignored_during_execution,
         required_during_scheduling_ignored_during_execution=required_during_scheduling_ignored_during_execution)
 
-    def V1NodeSelectorRequiement(self,
+    def V1NodeSelectorRequirement(self,
                  key: str,
        		     operator: str,
-       		     values: List[str] = None):
+       		     values: Optional[List[str]] = None):
         """
        	:params: values: An array of string values. 
        	If the operator is In or NotIn, the values array must be non-empty. 
@@ -219,12 +275,12 @@ class ScanflowClient:
        	If the operator is Gt or Lt, the values array must have a single element, which will be interpreted as an integer. 
        	This array is replaced during a strategic merge patch.
        	"""
-        return V1NodeSelectorRequiement(key, operator, values)
+        return V1NodeSelectorRequirement(key, operator, values)
 
 
     def V1NodeSelectorTerm(self,
-                 match_expressions: List[V1NodeSelectorRequiement]=None,
-		         match_fields: List[V1NodeSelectorRequiement]=None):
+                 match_expressions: Optional[List[V1NodeSelectorRequirement]] = None,
+		         match_fields: Optional[List[V1NodeSelectorRequirement]] = None):
         return V1NodeSelectorTerm(match_expressions=match_expressions,
         match_fields=match_fields)
 
@@ -240,7 +296,7 @@ class ScanflowClient:
     def V1LabelSelectorRequirement(self,
                  key: str,
 		         operator: str,
-		         values: List[str] = None):
+		         values: Optional[List[str]] = None):
         """
      	:params: values: An array of string values. 
      	If the operator is In or NotIn, the values array must be non-empty. 
@@ -250,15 +306,15 @@ class ScanflowClient:
         return V1LabelSelectorRequirement(key, operator, values)
 
     def V1LabelSelector(self,
-                 match_expressions: List[V1LabelSelectorRequirement] = None,
-		         match_labels: dict = None):
+                 match_expressions: Optional[List[V1LabelSelectorRequirement]] = None,
+		         match_labels: Optional[dict] = None):
         return V1LabelSelector(match_expressions,match_labels)
 
     def V1PodAffinityTerm(self,
                  topology_key: str,
-                 label_selector: V1LabelSelector,
-		         namespaces: List[str]):
-        return V1PodAffinityTerm(topology_key, label_selector, namespaces)
+                 label_selector: Optional[V1LabelSelector] = None,
+		         namespaces: Optional[List[str]] = None):
+        return V1PodAffinityTerm(label_selector, namespaces, topology_key)
 
     def V1WeightedPodAffinityTerm(self,
                 pod_affinity_term: V1PodAffinityTerm,

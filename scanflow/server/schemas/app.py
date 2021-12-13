@@ -3,6 +3,21 @@ from typing import Optional, List, Dict, Union, Literal, Any
 
 from scanflow.agent.schemas.sensor import Trigger
 from datetime import datetime
+
+#scaler
+#class ScalerTrigger(BaseModel):
+#    type: str
+#    metadata: dict
+#class KedaSpec(BaseModel):
+#    triggers: List[ScalerTrigger]
+#    pollingInterval: Optional[int]
+#    cooldownPeriod: Optional[int]
+#    minReplicaCount: Optional[int]
+#    maxReplicaCount: Optional[int]
+    
+#affinity
+
+
 class Node(BaseModel):
     name: str
     node_type: str
@@ -13,7 +28,9 @@ class Node(BaseModel):
     dockerfile: Optional[str] = None
     base_image: Optional[str] = None
     env: Optional[dict] = None
+    timeout: Optional[int] = 7200
     resources: Optional[dict] = None
+    affinity: Optional[dict] = None
 
     env: Optional[dict] = None
     envfrom: Optional[dict] = None
@@ -34,7 +51,9 @@ class Executor(BaseModel):
     dockerfile: Optional[str] = None
     base_image: Optional[str] = None
     env: Optional[dict] = None
+    timeout: Optional[int] = 7200
     resources: Optional[dict] = None
+    affinity: Optional[dict] = None
 
 class Service(BaseModel):
     name: str
@@ -52,6 +71,7 @@ class Service(BaseModel):
     endpoint: Optional[dict] = None
     parameters: Optional[List[dict]] = None
     resources: Optional[dict] = None
+    affinity: Optional[dict] = None
 
 
 class Edge(BaseModel):
@@ -69,7 +89,12 @@ class Dependency(BaseModel):
 class Workflow(BaseModel):
     name: str 
     nodes: List[Node] = None
-    edges: List[Edge] = None
+    edges: Optional[List[Edge]] = None
+    type: Optional[str] = None
+    resources: Optional[dict] = None
+    affinity: Optional[dict] = None
+    kedaSpec: Optional[dict] = None
+    hpaSpec: Optional[dict] = None
     output_dir: Optional[str] = None
 
 

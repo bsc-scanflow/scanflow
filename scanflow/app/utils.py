@@ -31,12 +31,21 @@ def dict_to_workflow(dictionary):
             if edge_dict['edge_type'] == 'dependency':
                 edges.append(Dependency(edge_dict['dependee'], edge_dict['depender'], int(edge_dict['priority'])))
         workflow.edges = edges
+    if dictionary['type']:
+        type = dictionary['type']
+        workflow.type = type
+    if dictionary['resources']:
+        resources = dict_to_resources(dictionary['resources'])
+        workflow.resources = resources
     if dictionary['affinity']:
         affinity = dict_to_affinity(dictionary['affinity'])
         workflow.affinity = affinity
     if dictionary['kedaSpec']:
         kedaSpec = dict_to_kedaSpec(dictionary['kedaSpec'])
         workflow.kedaSpec = kedaSpec
+    if dictionary['hpaSpec']:
+        hpaSpec = dict_to_hpaSpec(dictionary['hpaSpec'])
+        workflow.hpaSpec = hpaSpec
     if dictionary['output_dir']:
         output_dir = dictionary['output_dir']
         workflow.output_dir = output_dir
@@ -44,10 +53,13 @@ def dict_to_workflow(dictionary):
     return workflow
 
 def dict_to_affinity(dictionary):
-    pass
+    return dictionary
 
 def dict_to_kedaSpec(dictionary):
-    pass
+    return dictionary
+
+def dict_to_hpaSpec(dictionary):
+    return dictionary
 
 def dict_to_executor(dictionary):
     name = dictionary['name']
@@ -65,16 +77,52 @@ def dict_to_executor(dictionary):
         executor.env = dictionary['env']
     if dictionary['image']:
         executor.image = dictionary['image']
+    if dictionary['timeout']:
+        executor.timeout = dictionary['timeout']
     if dictionary['resources']:
         executor.resources = dict_to_resources(dictionary['resources'])
+    if dictionary['affinity']:
+        executor.affinity = dict_to_affinity(dictionary['affinity'])
     return executor
 
 def dict_to_resources(dictionary):
-    pass
+    return dictionary
 
 def dict_to_service(dictionary):
-    pass
-
+    name = dictionary['name']
+    service = Service(name)
+    if dictionary['mainfile']:
+        service.mainfile = dictionary['mainfile']
+    if dictionary['image']:
+        service.image = dictionary['image']
+    if dictionary['env']:
+        service.env = dictionary['env']
+    if dictionary['envfrom']:
+        service.env = dictionary['envfrom']
+    if dictionary['requirements']:
+        service.requirements = dictionary['requirements']
+    if dictionary['dockerfile']:
+        service.dockerfile = dictionary['dockerfile']
+    if dictionary['base_image']:
+        service.base_image = dictionary['base_image']
+    if dictionary['service_type']:
+        service.service_type = dictionary['service_type']
+    if dictionary['implementation_type']:
+        service.implementation_type = dictionary['implementation_type']
+    if dictionary['modelUri']:
+        service.modelUri = dictionary['modelUri']
+    if dictionary['envSecretRefName']:
+        service.envSecretRefName = dictionary['envSecretRefName']
+    if dictionary['endpoint']:
+        service.endpoint = dictionary['endpoint']
+    if dictionary['parameters']:
+        service.parameters = dictionary['parameters']
+    if dictionary['resources']:
+        service.resources = dict_to_resources(dictionary['resources'])
+    if dictionary['affinity']:
+        service.affinity = dict_to_affinity(dictionary['affinity'])
+    
+    
 def dict_to_agent(dictionary):
     agent = Agent(name)
     return agent

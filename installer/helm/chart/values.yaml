@@ -6,7 +6,7 @@ basic:
   image_tag_version: "latest"
   scanflow_server_image_name: "172.30.0.49:5000/scanflow-server"
   scanflow_tracker_image_name: "172.30.0.49:5000/scanflow-tracker"
-  image_pull_policy: "IfNotPresent"
+  image_pull_policy: "Always"
 tracker:
   scanflow_tracker_storage_backend: "postgresql"
   scanflow_tracker_storage_url: "postgresql-service.postgresql.svc.cluster.local"

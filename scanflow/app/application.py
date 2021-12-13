@@ -47,7 +47,7 @@ class Application:
             else:
                 tmp_dict[k] = v
             
-        logging.info(f"Scanflowapp: {tmp_dict}")
+        # logging.info(f"Scanflowapp: {tmp_dict}")
         return tmp_dict
 
 

@@ -1,7 +1,7 @@
 #workflow
 from .workflow.node import Executor, Service, Node
 from .workflow.edge import Dependency, Edge
-from .workflow.scale import  ScaleTrigger, ScaleTriggerPrometheus, KedaSpec
+from .workflow.scaler import  ScalerTrigger, ScalerTriggerPrometheusMetadata, KedaSpec, HpaSpec
 from .workflow.workflow import Workflow
 #agent
 from .agent.sensor import Sensor, BaseTrigger, CronTrigger, IntervalTrigger, DateTrigger

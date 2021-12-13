@@ -9,6 +9,8 @@ from scanflow.templates import ArgoWorkflows
 from scanflow.deployer.env import ScanflowSecret, ScanflowClientConfig
 from scanflow.tools.param import format_parameters
 
+from kubernetes.client import V1ResourceRequirements
+
 logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
@@ -31,9 +33,12 @@ class ArgoDeployer(deployer.Deployer):
                       workflows : List[Workflow]):
         submitted = True
         for workflow in workflows:
-            logging.info(f"[++] Running workflow: [{workflow.name}].")
-            submitted = submitted and self.run_workflow(namespace, workflow)
-            logging.info(f"[+] Workflow: [{workflow.name}] was run successfully.")
+            if workflow.type == 'batch':
+                logging.info(f"[++] Running workflow: [{workflow.name}].")
+                submitted = submitted and self.run_workflow(namespace, workflow)
+                logging.info(f"[+] Workflow: [{workflow.name}] was run successfully.")
+            else:
+                logging.error(f"[**] Workflow [{workflow.name}] is not batch")
         return submitted
 
     def run_workflow(self, 
@@ -42,73 +47,95 @@ class ArgoDeployer(deployer.Deployer):
         """
         run workflow by argo
         """
-        workflow_name = workflow.name
-        self.argoclient.configWorkflow(workflow_name)
+        if workflow.type == 'batch':
+            workflow_name = workflow.name
+            if workflow.affinity:
+                if isinstance(workflow.affinity, dict):
+                    workflow_affinity = workflow.affinity
+                else:
+                    workflow_affinity = workflow.affinity.to_dict()
+            else:
+                workflow_affinity = None
+                
+            self.argoclient.configWorkflow(workflow_name, workflow_affinity)
 
-        #output volume - deleted mode
-        if workflow.output_dir is not None:
-            set_output_dir(workflow.output_dir)
-        output_dir = get_output_dir()
-        logging.info(f"[+] output dir {output_dir}")
-        logging.info(f"[+] Create {workflow_name} output PV")
-        pv = self.kubeclient.build_persistentvolume(workflow_name, "1Gi", f"/gpfs/bsc_home/xpliu/pv/scanflow-output/{workflow_name}-output")
-        step1 = self.kubeclient.create_persistentvolume(body=pv)
-        logging.info(f"[+] Create {workflow_name} output PVC")
-        pvc = self.kubeclient.build_persistentvolumeclaim(namespace, workflow_name, None,"ReadWriteMany", "512Mi")
-        step2 = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
-        if step1 and step2:
-            logging.info("output dir created")
+            #output volume - deleted mode
+            if workflow.output_dir is not None:
+                set_output_dir(workflow.output_dir)
+            output_dir = get_output_dir()
+            logging.info(f"[+] output dir {output_dir}")
+            logging.info(f"[+] Create {workflow_name} output PV")
+            pv = self.kubeclient.build_persistentvolume(workflow_name, "1Gi", f"/gpfs/bsc_home/xpliu/pv/scanflow-output/{workflow_name}-output")
+            step1 = self.kubeclient.create_persistentvolume(body=pv)
+            logging.info(f"[+] Create {workflow_name} output PVC")
+            pvc = self.kubeclient.build_persistentvolumeclaim(namespace, workflow_name, None,"ReadWriteMany", "512Mi")
+            step2 = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
+            if step1 and step2:
+                logging.info("output dir created")
 
-        #volume
-        #self.argoclient.buildVolumes(outputpath=workflow_name)
-        self.argoclient.buildVolumes(outputpath=workflow_name, scanflowpath=f"scanflow-{namespace}")
-        #env
-        ss = ScanflowSecret()
-        scc = ScanflowClientConfig()
-        scc.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker.{namespace}.svc.cluster.local"
-        env = ss.__dict__
-        env.update(scc.__dict__)
-        logging.info(f"env for executor {env}")
+            #volume
+            #self.argoclient.buildVolumes(outputpath=workflow_name)
+            self.argoclient.buildVolumes(outputpath=workflow_name, scanflowpath=f"scanflow-{namespace}")
+            #env
+            ss = ScanflowSecret()
+            scc = ScanflowClientConfig()
+            scc.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker.{namespace}.svc.cluster.local"
+            env = ss.__dict__
+            env.update(scc.__dict__)
+            logging.info(f"env for executor {env}")
 
-        #executor
-        argoContainers = {}
-        for executor in workflow.nodes:
-            #volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir)
-            volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir, scanflowpath="/scanflow")
-            logging.info(f"[+] Building workflow: [{workflow.name}:{executor.name}].")
-            if executor.env is not None:
-                env.update(executor.env)
-            logging.info(f"{format_parameters(executor.parameters)}")
-            argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
-                         image = executor.image,
-                         args = format_parameters(executor.parameters),
-                         env = env, 
-                         volumeMounts = volumeMounts,
-                         resources = executor.resources)
+            #executor
+            argoContainers = {}
+            for executor in workflow.nodes:
+                #volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir)
+                volumeMounts = self.argoclient.buildVolumeMounts(outputpath=output_dir, scanflowpath="/scanflow")
+                logging.info(f"[+] Building workflow: [{workflow.name}:{executor.name}].")
+                if executor.env is not None:
+                    env.update(executor.env)
+               
+                if executor.resources is not None:            
+                    logging.info(f"{executor.resources}")
+                    logging.info(f"{executor.resources.to_dict().get('limits')}")
+                    argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
+                             image = executor.image,
+                             args = format_parameters(executor.parameters),
+                             env = env, 
+                             volumeMounts = volumeMounts,
+                             resources = executor.resources.to_dict().get('limits'))
+                else:
+                    logging.info(f"{format_parameters(executor.parameters)}")
+                    argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
+                             image = executor.image,
+                             args = format_parameters(executor.parameters),
+                             env = env, 
+                             volumeMounts = volumeMounts,
+                             resources=None)
 
-        #edges
-        logging.info(f"[+] Building workflow: [{workflow_name}- edges]")
-        edge_graph = []
-        if workflow.edges:
-            for edge in workflow.edges:
-                edge_graph.append(
-                    [argoContainers[f"{edge.dependee}"],
-                     argoContainers[f"{edge.depender}"]]
-                )
+            #edges
+            logging.info(f"[+] Building workflow: [{workflow_name}- edges]")
+            edge_graph = []
+            if workflow.edges:
+                for edge in workflow.edges:
+                    edge_graph.append(
+                        [argoContainers[f"{edge.dependee}"],
+                         argoContainers[f"{edge.depender}"]]
+                    )
+            else:
+                edge_graph.append([argoContainers[workflow.nodes[0].name]])
+
+            #dag
+            logging.info(f"[+] Building workflow: [{workflow_name}- dag]")
+            self.argoclient.argoDag(edge_graph)
+
+            argoWorkflow = self.argoclient.submitWorkflow(namespace)
+            logging.info(f"[+++] Workflow: [{workflow_name}] has been submitted to argo {argoWorkflow}")
+
+            if argoWorkflow is not None:
+                return True
+            else:
+                return False
         else:
-            edge_graph.append([argoContainers[workflow.nodes[0].name]])
-
-        #dag
-        logging.info(f"[+] Building workflow: [{workflow_name}- dag]")
-        self.argoclient.argoDag(edge_graph)
-
-        argoWorkflow = self.argoclient.submitWorkflow(namespace)
-        logging.info(f"[+++] Workflow: [{workflow_name}] has been submitted to argo {argoWorkflow}")
-
-        if argoWorkflow is not None:
-            return True
-        else:
-            return False
+            logging.error(f"[**] Workflow [{workflow}] is not batch")
 
     def delete_workflows(self,
                          namespace: str,

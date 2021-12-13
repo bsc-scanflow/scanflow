@@ -1,5 +1,10 @@
-from kubernetes.client import V1ResourceRequirements
+from kubernetes.client import V1ResourceRequirements, V1Affinity
 from typing import List
+
+import logging
+logging.basicConfig(format='%(asctime)s -  %(levelname)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
+logging.getLogger().setLevel(logging.INFO)
 
 class Node():
     """
@@ -24,7 +29,9 @@ class Executor(Node):
                  base_image: str = None,
                  env: dict = None,
                  image: str = None,
-                 resources: V1ResourceRequirements = None):
+                 timeout: int = None,
+                 resources: V1ResourceRequirements = None,
+                 affinity: V1Affinity = None):
 
         super(Executor, self).__init__(name=name, node_type='executor')
         self.mainfile = mainfile
@@ -34,7 +41,25 @@ class Executor(Node):
         self.base_image = base_image
         self.env = env
         self.image = image
+        self.timeout = timeout
         self.resources = resources
+        self.affinity = affinity
+
+    def to_dict(self):
+        tmp_dict = {}
+        executor_dict = self.__dict__
+        # api = ApiClient()
+        for k, v in executor_dict.items():
+            if k == 'resources' and v is not None:
+                tmp_dict[k] = v.to_dict()
+            elif k == 'affinity' and v is not None:
+                tmp_dict[k] = v.to_dict()
+            else:
+                tmp_dict[k] = v
+        
+        # logging.info(f"executor {self.name}: {tmp_dict}")
+        return tmp_dict
+
 
 #    @property
 #    def image(self):
@@ -65,7 +90,8 @@ class Service(Node):
                  envSecretRefName: str = None,
                  endpoint: dict = None,
                  parameters: List[dict] = None,
-                 resources: V1ResourceRequirements = None):
+                 resources: V1ResourceRequirements = None,
+                 affinity: V1Affinity = None):
         super(Service, self).__init__(name=name, node_type='service')
         
         self.image = image
@@ -89,3 +115,16 @@ class Service(Node):
         self.endpoint = endpoint
         self.parameters = parameters
         self.resources = resources
+        self.affinity = affinity
+
+    def to_dict(self):
+        tmp_dict = {}
+        service_dict = self.__dict__
+        for k, v in service_dict.items():
+            if k == 'resources' and v is not None:
+                tmp_dict[k] = v.to_dict()
+            elif k == 'affinity' and v is not None:
+                tmp_dict[k] = v.to_dict()
+            else:
+                tmp_dict[k] = v
+        return tmp_dict

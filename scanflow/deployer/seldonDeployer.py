@@ -26,24 +26,50 @@ class SeldonDeployer(deployer.Deployer):
         super(SeldonDeployer, self).__init__(k8s_config_file)
 
         self.seldonClient = None
-
-    def deploy_workflows(self, namespace, workflows, replica: int = 1):
+        self.seldonDeployments = None
+    
+    # deploy application contains different version of models
+    # this function is not ready now(14/11)
+    def deploy_app(self, namespace, app, replicas: int = 1):
+        """
+           deploy application(diff version?) by seldon
+        """
+        #SeldonDeployments
+        app_name = app.app_name
+        annotations = {'seldon.io/istio-gateway':'mesh','seldon.io/istio-host':''}
+        self.seldonDeployments = SeldonDeployments(app_name, namespace, replicas)
+        #1. volume
+        volumes = self.kubeclient.build_volumes(scanflowpath=f"scanflow-{namespace}")
+        
         submitted = True
         for workflow in workflows:
             logging.info(f"[++] Deploying workflow: [{workflow.name}].")
-            submitted = submitted and self.deploy_workflow(namespace, workflow, replica)
+            submitted = submitted and self.deploy_workflow(namespace, workflow, replicas)
+            logging.info(f"[+] Workflow: [{workflow.name}] was deployed successfully.")
+    
+        #deploy
+        logging.info(f"[+++] Workflow: deploying [{app_name}] to seldon {self.seldonDeployments.to_dict()}")
+        return self.kubeclient.create_seldonDeployment(namespace, self.seldonDeployments.to_dict())
+
+    def deploy_workflows(self, namespace, workflows, replicas: int = 1):
+        submitted = True
+        for workflow in workflows:
+            logging.info(f"[++] Deploying workflow: [{workflow.name}].")
+            submitted = submitted and self.deploy_workflow(namespace, workflow, replicas)
             logging.info(f"[+] Workflow: [{workflow.name}] was deployed successfully.")
         return submitted
 
-    def deploy_workflow(self, namespace, workflow, replicas: int = 1):
+    def deploy_workflow(self, namespace, workflow, replicas: int = 1, 
+                        backupservice: dict = None):
         """
            deploy workflow by seldon
         """
+        #if self.seldonDeployments is None:
         workflow_name = workflow.name
         self.seldonDeployments = SeldonDeployments(workflow_name, namespace, replicas)
-        
         #volume
         volumes = self.kubeclient.build_volumes(scanflowpath=f"scanflow-{namespace}")
+        
         #env
         ss = ScanflowSecret()
         scc = ScanflowClientConfig()
@@ -63,7 +89,8 @@ class SeldonDeployer(deployer.Deployer):
                     env.update(service.env)
                 containers.append(self.kubeclient.build_container(service.name, 
                                  service.image, env=self.kubeclient.build_env(**env), 
-                                 volume_mounts=self.kubeclient.build_volumeMounts(scanflowpath="/scanflow")))
+                                 volume_mounts=self.kubeclient.build_volumeMounts(scanflowpath="/scanflow"),
+                                 resources=service.resources))
             #predictiveUnit
             predictiveUnits[f"{service.name}"] = PredictiveUnit(service.name, 
                          type=service.service_type, implementation=service.implementation_type,
@@ -76,7 +103,7 @@ class SeldonDeployer(deployer.Deployer):
             spec = self.kubeclient.build_podSpec(containers, volumes=volumes)
             seldonPodSpec.spec = spec
         if workflow.kedaSpec:
-            seldonPodSpec.kedaSpec = kedaSpec
+            seldonPodSpec.kedaSpec = workflow.kedaSpec
         componentSpecs = [seldonPodSpec]
 
         #edges
@@ -102,17 +129,38 @@ class SeldonDeployer(deployer.Deployer):
                 if v == 0:
                     graph_head = k
             logging.info(f"Graph head: {graph_head}")
-            self.predictor = PredictorSpec(workflow_name, predictiveUnits[f"{graph_head}"],
-                                          componentSpecs, replicas)        
+            predictor = PredictorSpec(workflow_name, predictiveUnits[f"{graph_head}"],
+                                          componentSpecs, replicas, engineResources=workflow.resources)        
         else:
-            self.predictor = PredictorSpec(workflow_name, predictiveUnits[f"{workflow.nodes[0].name}"],
-                                            componentSpecs, replicas)   
+            predictor = PredictorSpec(workflow_name, predictiveUnits[f"{workflow.nodes[0].name}"],
+                                            componentSpecs, replicas, engineResources=workflow.resources)   
 
-        self.seldonDeployments.predictors = [self.predictor]     
+        #traffic
+        predictor.traffic = 100
+        
+        if backupservice is not None:
+            backupPredictor = predictor
+            backupPredictor.graph.modelUri = backupservice['modelUri']
+            backupPredictor.name = "backup"
+            backupPredictor.traffic = 0
+            self.seldonDeployments.predictors = [predictor, backupPredictor] 
+        else:
+            self.seldonDeployments.predictors = [predictor]     
 
         #deploy
         logging.info(f"[+++] Workflow: deploying [{workflow_name}] to seldon {self.seldonDeployments.to_dict()}")
         return self.kubeclient.create_seldonDeployment(namespace, self.seldonDeployments.to_dict())
+
+
+    def update_traffic(self,
+                       namespace,
+                       name,
+                       body: dict):
+        oldjson = self.kubeclient.get_virtualservice(namespace, name)
+        oldjson["spec"]["http"][0]["route"] = body["route"]
+        logging.info(f"[++++++++++++++++++++++++++]update traffic {oldjson}")
+        return self.kubeclient.replace_virtualservice(namespace, name, oldjson)
+
 
     ## user can directly use seldonclient to develop their application, here we only wrapped seldon client
     #channel_credentials: SeldonChannelCredentials = None,
