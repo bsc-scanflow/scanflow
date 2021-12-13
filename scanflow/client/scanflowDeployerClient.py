@@ -165,7 +165,7 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app.app_name}-{app.team_name}" 
             return self.deployerbackend.stop_agents(namespace, app.agents)                 
 
-    async def run_application(self,
+    async def run_app(self,
                       app: Application):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/run_app/?deployer={self.deployer}"
@@ -182,7 +182,7 @@ class ScanflowDeployerClient:
             namespace = f"scanflow-{app.app_name}-{app.team_name}"
             return self.deployerbackend.run_workflows(namespace, app.workflows)
 
-    async def delete_application(self,
+    async def delete_app(self,
                          app: Application):
         if self.user_type == "incluster":
             url = f"{self.scanflow_server_uri}/deployer/delete_app/?deployer={self.deployer}"
