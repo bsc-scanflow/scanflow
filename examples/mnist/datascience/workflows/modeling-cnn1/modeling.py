@@ -34,7 +34,12 @@ from scanflow.client import ScanflowTrackerClient
 @click.option("--y_test_path", default='/workflow/load-data/mnist/data/mnist/test_labels.npy', type=str)
 @click.option("--x_newdata_path", default=None, type=str)
 @click.option("--y_newdata_path", default=None, type=str)
-def modeling(model_name, epochs, x_train_path, y_train_path, x_test_path, y_test_path, x_newdata_path, y_newdata_path):
+@click.option("--retrain", default=False, type=bool)
+@click.option("--model_version",  default=None, type=int)
+@click.option("--model_stage",  default='Production', type=str)
+def modeling(model_name, epochs, x_train_path, y_train_path, 
+             x_test_path, y_test_path, x_newdata_path, y_newdata_path,
+             retrain, model_version, model_stage):
     
     # data
     img_rows, img_cols = 28, 28
@@ -69,8 +74,21 @@ def modeling(model_name, epochs, x_train_path, y_train_path, x_test_path, y_test
                                     y=y_train, val_split=0.2, test_split=0,
                                          num_workers=4)
 
-
-        model = MNIST()
+        if retrain:
+            #load model        
+            if model_version is not None:
+                model = mlflow.pytorch.load_model(
+                    model_uri=f"models:/{model_name}/{model_version}"
+                )
+                print(f"Loading model: {model_name}:{model_version}")
+            else:
+                model = mlflow.pytorch.load_model(
+                    model_uri=f"models:/{model_name}/{model_stage}"
+                )
+                print(f"Loading model: {model_name}:{model_stage}")
+        else:
+            model = MNIST()
+            
         trainer = pl.Trainer(max_epochs=epochs, 
                              progress_bar_refresh_rate=20,
                              deterministic=True,
