@@ -73,7 +73,7 @@ class ScanflowDeployerClient:
             return ArgoDeployer(k8s_config_file)
         elif deployer == "volcano":
             from scanflow.deployer.volcanoDeployer import VolcanoDeployer
-            return VolcanoDeployer(k8s_config_file)
+            return VolcanoDeployer(k8s_config_file)      
         elif deployer == "seldon":
             from scanflow.deployer.seldonDeployer import SeldonDeployer
             return SeldonDeployer(k8s_config_file)
@@ -91,7 +91,7 @@ class ScanflowDeployerClient:
             scanflowEnv.tracker_config.TRACKER_ARTIFACT = f"s3://scanflow/{namespace}"
             scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker.{namespace}.svc.cluster.local"
 
-        if self.user_type == "incluster":
+        if self.user_type == "incluster" or self.user_type == "autoconfig":
             url = f"{self.scanflow_server_uri}/deployer/create_environment"
             json_data = {
                 'app': app.to_dict(),
@@ -108,12 +108,15 @@ class ScanflowDeployerClient:
                 return False
 
         else: #local
-            result = self.deployerbackend.create_environment(scanflowEnv.namespace, scanflowEnv.secret.__dict__, scanflowEnv.tracker_config.__dict__, scanflowEnv.client_config.__dict__, app.tracker, app.agents)
+            result = self.deployerbackend.create_environment(
+                scanflowEnv.namespace, scanflowEnv.secret.__dict__, 
+                scanflowEnv.tracker_config.__dict__, scanflowEnv.client_config.__dict__,
+                app.tracker, app.agents)
             return result
 
     async def clean_environment(self, 
                           app: Application):
-        if self.user_type == "incluster":
+        if self.user_type == "incluster" or self.user_type == "autoconfig":
             url = f"{self.scanflow_server_uri}/deployer/clean_environment"
             logging.info(f"{json.dumps(app.to_dict())}")
             async with http_client.session.post(url, data = json.dumps(app.to_dict())) as response:
@@ -263,6 +266,7 @@ class ScanflowDeployerClient:
                      workflow: Workflow):
         if self.user_type == "autoconfig":
             url = f"{self.scanflow_autoconfig_server_uri}/run_autoconfig_workflow/{app_name}/{team_name}?deployer={self.deployer}"
+            #logging.info(json.dumps(workflow.to_dict()))
             async with http_client.session.post(url,
                                                 data= json.dumps(workflow.to_dict()), 
                                                 headers={'Content-Type':'application/json'}) as response:
@@ -273,7 +277,6 @@ class ScanflowDeployerClient:
                 return True
             else:
                 return False
-    
 
     async def delete_workflow(self,
                         app_name: str,

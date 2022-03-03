@@ -15,6 +15,7 @@ from kubernetes.client import V1Affinity, V1NodeAffinity, V1PodAffinity, V1PodAn
 from kubernetes.client import V1LabelSelectorRequirement, V1NodeSelectorTerm, V1PreferredSchedulingTerm, V1NodeSelector, V1LabelSelectorRequirement, V1WeightedPodAffinityTerm, V1NodeSelectorRequirement, V1LabelSelector
 from kubernetes.client import V1PodAffinityTerm
 from kubernetes.client import V1ResourceRequirements
+from scanflow.app.workflow.node import MPIWorkload
 from scanflow.app.workflow.scaler import HpaSpec
 from kubernetes.client import V2beta2MetricSpec, V2beta2ExternalMetricSource, V2beta2ObjectMetricSource, V2beta2PodsMetricSource, V2beta2ResourceMetricSource, V2beta2MetricTarget
 
@@ -112,6 +113,22 @@ class ScanflowClient:
         requirements, dockerfile, base_image, service_type, 
         implementation_type, modelUri, envSecretRefName, endpoint, 
         parameters, resources, affinity)
+        
+    def ScanflowMPIWorkload(self,
+                            name: str,
+                            mainfile: str,
+                            plugins: List[str],
+                            characteristic: str,
+                            nTasks: int,
+                            nNodes: int,
+                            nCpusPerTask: int = 1,
+                            masterName: str = "mpimaster",
+                            workerName: str = "mpiworker",
+                            oversubscribe: bool = False,
+                            body: dict = None):
+        return MPIWorkload(name, mainfile, plugins, characteristic, nTasks,
+                           nNodes, nCpusPerTask, masterName, workerName, oversubscribe,
+                           body)
 
     def ScanflowDependency(self,
                          dependee: str,

@@ -1,3 +1,4 @@
+from telnetlib import SE
 from kubernetes.client import V1ResourceRequirements, V1Affinity
 from typing import List
 
@@ -14,6 +15,47 @@ class Node():
     def __init__(self, name: str, node_type: str):
         self.name = name
         self.node_type = node_type
+
+class MPIWorkload(Node):
+    """
+       extension for MPI workload (volcano job body)
+    """
+    def __init__(self, 
+                 name: str, 
+                 mainfile: str,
+                 plugins: List[str],
+                 characteristic: str,
+                 nTasks: int,
+                 nNodes: int,
+                 nCpusPerTask: int = 1,
+                 masterName: str = "mpimaster",
+                 workerName: str = "mpiworker",
+                 oversubscribe: bool = False,
+                 body: dict = None):
+        super(MPIWorkload, self).__init__(name=name, node_type='mpi')
+        self.mainfile = mainfile
+        self.plugins = plugins
+        self.characteristic = characteristic
+        self.nTasks = nTasks
+        self.nNodes = nNodes
+        self.nCpuPerTask = nCpusPerTask
+        self.masterName = masterName
+        self.workerName = workerName
+        self.oversubscribe = oversubscribe
+        self.body = body
+        
+    def to_dict(self):
+        tmp_dict = {}
+        service_dict = self.__dict__
+        for k, v in service_dict.items():
+            if k == 'plugins' and v is not None:
+                plugin_list = list()
+                for plugin in v:
+                    plugin_list.append(plugin)
+                tmp_dict[k] = plugin_list
+            else:
+                tmp_dict[k] = v 
+        return tmp_dict
 
 class Executor(Node):
     """

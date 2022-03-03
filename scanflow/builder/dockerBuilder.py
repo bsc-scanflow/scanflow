@@ -2,7 +2,9 @@ import logging
 import os
 import docker
 import json
+import yaml
 from textwrap import dedent
+from scanflow.app.workflow.node import MPIWorkload
 
 import scanflow.builder.builder as builder
 
@@ -56,8 +58,17 @@ class DockerBuilder(builder.Builder):
             self.build_ScanflowNode(node)
 
     def build_ScanflowNode(self, node: Node):
-        node.image = self.__build_image_to_registry(node)
+        #for now, MPIWorkload does not provide auto build image, instead it reads the yaml to json
+        if isinstance(node, MPIWorkload):
+            node.body = self.__load_body(node)
+        else:
+            node.image = self.__build_image_to_registry(node)
 
+    def __load_body(self, source):
+        yamlfile = f"{self.paths['workflows_dir']}/{source.name}/{source.mainfile}"
+        with open(yamlfile, 'r') as yaml_in:
+            yaml_object = yaml.safe_load(yaml_in)
+            return yaml_object
 
     def __build_image_to_registry(self, source):
 

@@ -39,6 +39,17 @@ class Node(BaseModel):
     modelUri: Optional[str] = None
     envSecretRefName: Optional[str] = None
     endpoint: Optional[dict] = None
+    
+    body: Optional[dict] = None
+    mainfile: Optional[str] = None
+    plugins: Optional[List[str]] = None
+    characteristic: str = None
+    nTasks: Optional[int] = None
+    nNodes: Optional[int] = None
+    nCpusPerTask: Optional[int] = None
+    masterName: Optional[str] = None
+    workerName: Optional[str] = None
+    oversubscribe: Optional[bool] = False
 
 
 class Executor(BaseModel):
@@ -73,6 +84,19 @@ class Service(BaseModel):
     resources: Optional[dict] = None
     affinity: Optional[dict] = None
 
+class MPIWorkload(BaseModel):
+    name:str
+    node_type: str
+    body: dict
+    mainfile: Optional[str] = None
+    plugins: Optional[List[str]] = None
+    characteristic: str = None
+    nTasks: Optional[int] = None
+    nNodes: Optional[int] = None
+    nCpusPerTask: Optional[int] = None
+    masterName: Optional[str] = None
+    workerName: Optional[str] = None
+    oversubscribe: Optional[bool] = False
 
 class Edge(BaseModel):
     dependee: str

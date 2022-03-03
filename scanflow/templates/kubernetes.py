@@ -627,7 +627,6 @@ class Kubernetes:
             logging.error("Failed to submit workflow to seldon")
             raise e
 
-
     def delete_seldonDeployment(self, namespace, name):
     
         api_client = client.CustomObjectsApi()
@@ -642,6 +641,45 @@ class Kubernetes:
             )
         except client.api_client.rest.ApiException as e:
             raise Exception("Exception when deleting the workflow: %s\n" % e)
+
+
+    #volcanojob
+    def create_volcanoJob(self, namespace, body):
+        api_client = client.CustomObjectsApi()
+        logging.info(f"volcano job {body}")
+        logging.info("Submitting workflow to volcano")
+        try:
+            response = api_client.create_namespaced_custom_object(
+                "batch.volcano.sh",
+                "v1alpha1",
+                namespace,
+                "jobs",
+                body,
+                #pretty='pretty_example'
+            )
+            logging.info(
+                'Workflow %s has been submitted in "%s" namespace!'
+                % (response.get("metadata", {}).get("name"), namespace)
+            )
+            return response
+        except Exception as e:
+            logging.error("Failed to submit workflow to volcano")
+            raise e
+
+    def delete_volcanoJob(self, namespace, name):
+        api_client = client.CustomObjectsApi()
+        try:
+            return api_client.delete_namespaced_custom_object(
+                "batch.volcano.sh",
+                "v1alpha1",
+                namespace,
+                "jobs",
+                name,
+                body=client.V1DeleteOptions(propagation_policy="Foreground", grace_period_seconds=5),
+            )
+        except client.api_client.rest.ApiException as e:
+            raise Exception("Exception when deleting the vj workflow: %s\n" % e)    
+
         
     def get_virtualservice(self, namespace, name):
         

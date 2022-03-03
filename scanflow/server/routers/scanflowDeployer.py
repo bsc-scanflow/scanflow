@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from fastapi import FastAPI, Response, status, HTTPException
+from scanflow.deployer import volcanoDeployer
 
 from ..schemas.app import Application, Workflow, Node, Executor
 from ..schemas.deploy_env import ScanflowEnvironment
@@ -23,12 +24,13 @@ from scanflow.client import ScanflowTrackerClient
 
 from scanflow.deployer.deployer import Deployer
 from scanflow.deployer.argoDeployer import ArgoDeployer
-#from scanflow.deployer.volcanoDeployer import VolcanoDeployer
+from scanflow.deployer.volcanoDeployer import VolcanoDeployer
 from scanflow.deployer.seldonDeployer import SeldonDeployer
 
 deployer = Deployer()
 argodeployer = ArgoDeployer()
 seldondeployer = SeldonDeployer()
+volcanodeployer = VolcanoDeployer()
 
 @router.on_event("startup")
 async def startup():
@@ -36,6 +38,8 @@ async def startup():
     deployer = Deployer()
     argodeployer = ArgoDeployer()
     seldondeployer = SeldonDeployer()
+    volcanoDeployer = VolcanoDeployer()
+    
 
 @router.on_event("shutdown")
 async def shutdown():
@@ -347,5 +351,7 @@ def __get_deployer(deployer):
         return argodeployer
     elif deployer == "seldon":
         return seldondeployer
+    elif deployer == "volcano":
+        return volcanodeployer
     else:
         raise ValueError("unknown deployer: " + deployer)
