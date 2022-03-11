@@ -19,22 +19,37 @@ def enable_granularity_strategy(node: Node):
     
     ##granularity-aware
     if not node.oversubscribe:
+        nWorkers = 1
         for i, task in enumerate(body['spec']['tasks']):
             if task['name'] == node.workerName:
                 if node.characteristic == "network":
                     body['spec']['tasks'][i]['replicas'] = node.nNodes
+                    nWorkers = node.nNodes
                 elif node.characteristic == "cpu":
                     body['spec']['tasks'][i]['replicas'] = node.nTasks
+                    nWorkers = node.nTasks
                 elif node.characteristic == "memory":
                     body['spec']['tasks'][i]['replicas'] = node.nTasks
+                    nWorkers = node.nTasks
                 else:
                     logging.info(f"unknown node characteristic")
                     body['spec']['tasks'][i]['replicas'] = node.nNodes
+                    nWorkers = node.nNodes
+                    
+        print(f"{node.nCpusPerTask}")
+        #mpi settings
+        mpiplugins = [f"--oversubscribe={node.oversubscribe}",
+                      f"--masterName={node.masterName}",
+                      f"--workerName={node.workerName}",
+                      f"--nTasks={node.nTasks}",
+                      f"--nWorkers={nWorkers}",
+                      f"--nCpusPerTask={node.nCpusPerTask}",
+                      f"--memoryPerTask={node.memoryPerTask}"]
+        body['spec']['plugins']['mpi'] = mpiplugins
             
-    ##resources limits/requests
-    
-    #"resources": {"requests": {"cpu": 8, "memory": "40Gi"}, "limits": {"cpu": 8, "memory": "40Gi"}}
-    
+        body['metadata']['annotations'] = {
+            "volcano.sh/task-groups" : f"{node.workerName}:{node.nNodes}"
+        }
    
     logging.info(f"new body: {body}")
     node.body = body

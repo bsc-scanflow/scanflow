@@ -1,25 +1,12 @@
 apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
 metadata:
-  name: hpccfft
-  metadata:
-    annotations:
-      volcano.sh/job-characteristic: "network"
+  name: hpccfft-exp1-morecontainer
 spec:
   schedulerName: volcano
   plugins:
-    mpi: ["--granularity=true", "--nTasks=16", "--nNodes=4"]
     ssh: []
     svc: []
-# Comment out the following section to enable volumes for job input/output.
-  volumes:
-    - mountPath: "/home"
-      #volumeClaimName: "mpi-pvc"
-      volumeClaim:
-        accessModes: [ "ReadWriteMany" ]
-        resources:
-          requests:
-            storage: 1Gi
   tasks:
     - replicas: 1
       name: mpimaster
@@ -38,8 +25,7 @@ spec:
                   mkdir -p /var/run/sshd; /usr/sbin/sshd;
                   cp /opt/results/hpccinf.txt /home;
                   sleep 60;
-                  mpirun --allow-run-as-root --hostfile ${MPI_HOST} --nooversubscribe --mca mpi_yield_when_idle 0 --mca btl ^openib,uct --mca pml ucx --display-devel-map --display-allocation --report-bindings -np 16  /opt/HPCC1.5.0-MPI/bin/hpccfft > hpccfft-2.log 2>&1;
-                  mv hpccoutf.txt hpccfft-2.out;
+                  mpirun --allow-run-as-root --hostfile ${MPI_HOST} --nooversubscribe --mca mpi_yield_when_idle 0 --mca btl ^openib,uct --mca pml ucx --display-devel-map --display-allocation --report-bindings --bind-to none -np 16  /opt/HPCC1.5.0-MPI/bin/hpccfft > hpccfft.log 2>&1;
               image: mpinetworktrace
               name: mpimaster
               ports:

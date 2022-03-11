@@ -1,12 +1,13 @@
 apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
 metadata:
-  name: hpccfft
+  name: hpccfft-exp1-baseline
 spec:
   schedulerName: volcano
   plugins:
     ssh: []
     svc: []
+    mpi: ["--nTasks=16","--nWorkers=4"]
   tasks:
     - replicas: 1
       name: mpimaster
@@ -34,10 +35,20 @@ spec:
               workingDir: /home
               imagePullPolicy: IfNotPresent
           restartPolicy: OnFailure
-    - replicas: 1
+    - replicas: 4
       name: mpiworker
       template:
         spec:
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: volcano.sh/task-spec
+                    operator: In
+                    values:
+                    - mpiworker
+                topologyKey: "kubernetes.io/hostname"
           containers:
             - command:
                 - /bin/sh

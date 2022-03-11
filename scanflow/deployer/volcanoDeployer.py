@@ -61,6 +61,9 @@ class VolcanoDeployer(deployer.Deployer):
             volumestr = [{'mountPath': output_dir, 'volumeClaimName': workflow_name}]
             vj_body['spec']['volumes'] = volumestr
             
+            #2. name
+            vj_body['metadata']['name'] = workflow_name
+            
             vj = self.kubeclient.create_volcanoJob(namespace, vj_body)
             logging.info(f"[+++] Workflow: [{workflow_name}] has been submitted to volcano {vj}")
 

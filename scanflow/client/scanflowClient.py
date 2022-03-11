@@ -117,17 +117,18 @@ class ScanflowClient:
     def ScanflowMPIWorkload(self,
                             name: str,
                             mainfile: str,
-                            plugins: List[str],
-                            characteristic: str,
-                            nTasks: int,
-                            nNodes: int,
+                            plugins: List[str] = None,
+                            characteristic: str = None,
+                            nTasks: int = 1,
+                            nNodes: int = 1,
                             nCpusPerTask: int = 1,
+                            memoryPerTask: str = "5Gi",
                             masterName: str = "mpimaster",
                             workerName: str = "mpiworker",
                             oversubscribe: bool = False,
                             body: dict = None):
         return MPIWorkload(name, mainfile, plugins, characteristic, nTasks,
-                           nNodes, nCpusPerTask, masterName, workerName, oversubscribe,
+                           nNodes, nCpusPerTask, memoryPerTask, masterName, workerName, oversubscribe,
                            body)
 
     def ScanflowDependency(self,

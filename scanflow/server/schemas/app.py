@@ -47,6 +47,7 @@ class Node(BaseModel):
     nTasks: Optional[int] = None
     nNodes: Optional[int] = None
     nCpusPerTask: Optional[int] = None
+    memoryPerTask: Optional[str] = None
     masterName: Optional[str] = None
     workerName: Optional[str] = None
     oversubscribe: Optional[bool] = False
@@ -94,6 +95,7 @@ class MPIWorkload(BaseModel):
     nTasks: Optional[int] = None
     nNodes: Optional[int] = None
     nCpusPerTask: Optional[int] = None
+    memoryPerTask: Optional[str] = None
     masterName: Optional[str] = None
     workerName: Optional[str] = None
     oversubscribe: Optional[bool] = False

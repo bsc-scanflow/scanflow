@@ -28,6 +28,7 @@ class MPIWorkload(Node):
                  nTasks: int,
                  nNodes: int,
                  nCpusPerTask: int = 1,
+                 memoryPerTask: str = "5Gi",
                  masterName: str = "mpimaster",
                  workerName: str = "mpiworker",
                  oversubscribe: bool = False,
@@ -38,7 +39,8 @@ class MPIWorkload(Node):
         self.characteristic = characteristic
         self.nTasks = nTasks
         self.nNodes = nNodes
-        self.nCpuPerTask = nCpusPerTask
+        self.nCpusPerTask = nCpusPerTask
+        self.memoryPerTask = memoryPerTask
         self.masterName = masterName
         self.workerName = workerName
         self.oversubscribe = oversubscribe
