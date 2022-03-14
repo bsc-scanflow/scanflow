@@ -13,6 +13,30 @@ def select_strategy(plugins: List[str]):
     #now we only have one "granularity"
     return plugins[0]
 
+def no_strategy(node: Node):
+    body = node.body
+    
+    if not node.oversubscribe:
+        nWorkers = 1
+        for i, task in enumerate(body['spec']['tasks']):
+            if task['name'] == node.workerName:
+                body['spec']['tasks'][i]['replicas'] = node.nNodes
+                nWorkers = node.nNodes
+                    
+        #mpi settings
+        mpiplugins = [f"--oversubscribe={node.oversubscribe}",
+                      f"--masterName={node.masterName}",
+                      f"--workerName={node.workerName}",
+                      f"--nTasks={node.nTasks}",
+                      f"--nWorkers={nWorkers}",
+                      f"--nCpusPerTask={node.nCpusPerTask}",
+                      f"--memoryPerTask={node.memoryPerTask}"]
+        body['spec']['plugins']['mpi'] = mpiplugins
+   
+    logging.info(f"new body: {body}")
+    node.body = body
+    
+
 def enable_granularity_strategy(node: Node):
     body = node.body
     logging.info(f"old body: {body}") 
@@ -36,7 +60,6 @@ def enable_granularity_strategy(node: Node):
                     body['spec']['tasks'][i]['replicas'] = node.nNodes
                     nWorkers = node.nNodes
                     
-        print(f"{node.nCpusPerTask}")
         #mpi settings
         mpiplugins = [f"--oversubscribe={node.oversubscribe}",
                       f"--masterName={node.masterName}",

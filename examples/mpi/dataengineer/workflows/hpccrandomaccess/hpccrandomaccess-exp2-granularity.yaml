@@ -1,0 +1,55 @@
+apiVersion: batch.volcano.sh/v1alpha1
+kind: Job
+metadata:
+  name: hpccrandomaccess-exp2-granularity
+spec:
+  schedulerName: volcano
+  plugins:
+    ssh: []
+    svc: []
+  tasks:
+    - replicas: 1
+      name: mpimaster
+      policies:
+        - event: TaskCompleted
+          action: CompleteJob
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/sh
+                - -c
+                - |
+                  MPI_HOST="/etc/volcano/mpi/HOSTFILE";
+                  echo `cat ${MPI_HOST}`
+                  mkdir -p /var/run/sshd; /usr/sbin/sshd;
+                  cp /opt/results/hpccinf.txt /home;
+                  sleep 60;
+                  mpirun --allow-run-as-root --hostfile ${MPI_HOST} --nooversubscribe --mca mpi_yield_when_idle 0 --mca btl ^openib,uct --mca pml ucx --display-devel-map --display-allocation --report-bindings --bind-to none -np 16  /opt/HPCC1.5.0-MPI/bin/hpccrandomaccess > hpccrandomaccess.log 2>&1;
+              image: mpinetworktrace
+              name: mpimaster
+              ports:
+                - containerPort: 22
+                  name: mpijob-port
+              workingDir: /home
+              imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure
+    - replicas: 1
+      name: mpiworker
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/sh
+                - -c
+                - |
+                  cp /opt/results/hpccinf.txt /home;
+                  mkdir -p /var/run/sshd; /usr/sbin/sshd -D;
+              image: mpinetworktrace
+              name: mpiworker
+              ports:
+                - containerPort: 22
+                  name: mpijob-port
+              workingDir: /home
+              imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure

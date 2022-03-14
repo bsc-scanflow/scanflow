@@ -31,12 +31,16 @@ async def sensors_run_autoconfig_workflow(app_name: str,
                                           deployer: Optional[str]="volcano"):
     if workflow.type == "mpi":
         for node in workflow.nodes:
-            
-            strategy = select_strategy(node.plugins)
-            if strategy=="granularity":
-                node = enable_granularity_strategy(node)
+                 
+            if node.plugins is None:
+                node = no_strategy(node)
             else:
-                logging.info(f"cannot find suitable strategy")
+                strategy = select_strategy(node.plugins)
+                if strategy=="granularity":
+                    node = enable_granularity_strategy(node)
+                else:
+                    logging.info(f"cannot find suitable strategy")
+                
            
             await call_run_workflow(app_name=app_name,
                                     team_name=team_name,
