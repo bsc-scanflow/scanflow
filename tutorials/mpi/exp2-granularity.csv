@@ -1,2 +1,0 @@
-benchmark,times,nTasks,nNodes,nWorkers,Pending,Running,Completing,Completed,duration,performance
-hpccstream,9,16,3,16,2022-03-15T17:18:04Z,2022-03-15T17:18:14Z,2022-03-15T17:20:33Z,2022-03-15T17:20:33Z,3m10.225753578s,7.92616
