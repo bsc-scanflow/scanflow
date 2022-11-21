@@ -1,0 +1,7 @@
+
+
+FROM python:3.7-slim 
+
+COPY predictor-online /app
+WORKDIR /app
+EXPOSE 5000

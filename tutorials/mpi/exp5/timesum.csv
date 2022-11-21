@@ -1,0 +1,11 @@
+benchmark,nTasks,init_sum,run_sum,final_sum,duration_sum,scenario
+hpccrandomringbw,16,2469.0,485200.00000000006,3.0,487843.5479225541,volcano
+hpccdgemm,16,4494.0,3899.0000000000005,5.0,8572.191098449,volcano
+hpccstream,16,3774.0,1038.0,5.0,4982.754891962,volcano
+minife,16,3276.0,4715.0,6.0,8162.404911177,volcano
+hpccfft,16,5166.0,21709.0,3.0,27047.959362745,volcano
+hpccrandomringbw,1,604.0,1295.0,0.0,2334.0,kubeflow
+hpccdgemm,1,682.0,4768.0,0.0,5450.0,kubeflow
+hpccstream,1,424.0,1774.0,0.0,2198.0,kubeflow
+minife,1,645.0,4514.0,0.0,5159.0,kubeflow
+hpccfft,1,467.0,947.0000000000001,0.0,1414.0,kubeflow

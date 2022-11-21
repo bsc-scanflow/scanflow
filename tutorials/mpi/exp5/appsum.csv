@@ -1,0 +1,3 @@
+scenario,init_sum,run_sum,final_sum,duration_sum
+volcano,19179.0,516561.00000000006,22.0,536608.8581868871
+kubeflow,2822.0,13298.0,0.0,16555.0

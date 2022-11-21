@@ -1,0 +1,10 @@
+
+FROM 172.30.0.49:5000/scanflow-agent
+
+ENV AGENT_NAME planner
+ENV AGENT_TYPE planner
+
+RUN mkdir /agent
+COPY planner /agent
+
+CMD [ "cp /agent/* /scanflow/scanflow/scanflow/agent/template/planner && uvicorn main:agent --reload --host 0.0.0.0 --port 8080" ]

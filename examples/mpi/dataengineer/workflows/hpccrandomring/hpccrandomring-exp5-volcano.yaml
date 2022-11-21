@@ -1,0 +1,63 @@
+apiVersion: batch.volcano.sh/v1alpha1
+kind: Job
+metadata:
+  name: hpccrandomring-exp5-volcano
+spec:
+  schedulerName: volcano
+  plugins:
+    ssh: []
+    svc: []
+  tasks:
+    - replicas: 1
+      name: mpimaster
+      policies:
+        - event: TaskCompleted
+          action: CompleteJob
+      template:
+        spec:
+          nodeName: nxt2030
+          containers:
+            - command:
+                - /bin/sh
+                - -c
+                - |
+                  MPI_HOST=`cat /etc/volcano/mpiworker.host | tr "\n" ","`;
+                  mkdir -p /var/run/sshd; /usr/sbin/sshd;
+                  str=`cat /etc/volcano/mpiworker.host | tr "\n" " "`
+                  for i in $str; do until ssh $i hostname; do echo wait $i; sleep 2; done; done
+                  sleep 5;
+                  mpirun --allow-run-as-root --host ${MPI_HOST} --mca pml ob1 --mca btl ^openib,uct  --mca btl_tcp_if_include eth0 --mca btl_vader_single_copy_mechanism none  --bind-to none -np 16  bin/hpccrandomring > hpccrandomring.log 2>&1;
+              image: mpinetworktrace
+              name: mpimaster
+              ports:
+                - containerPort: 22
+                  name: mpijob-port
+              workingDir: /opt/results
+              imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure
+    - replicas: 16
+      name: mpiworker
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/sh
+                - -c
+                - |
+                  mkdir -p /var/run/sshd; /usr/sbin/sshd -D;
+              image: mpinetworktrace
+
+              name: mpiworker
+              ports:
+                - containerPort: 22
+                  name: mpijob-port
+              resources:
+                limits:
+                  cpu: 1
+                  memory: 5Gi
+                requests:
+                  cpu: 1
+                  memory: 5Gi
+              workingDir: /opt/results
+              imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure

@@ -38,16 +38,6 @@ spec:
       name: mpiworker
       template:
         spec:
-          affinity:
-            podAntiAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                  - key: volcano.sh/task-spec
-                    operator: In
-                    values:
-                    - mpiworker
-                topologyKey: "kubernetes.io/hostname"
           containers:
             - command:
                 - /bin/sh

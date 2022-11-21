@@ -1,0 +1,11 @@
+index,benchmark,times,nTasks,nNodes,starttime,characteristic
+0,hpccdgemm,0,16,4,0,cpu
+1,hpccdgemm,1,16,4,1,cpu
+2,hpccdgemm,2,16,4,2,cpu
+3,hpccdgemm,3,16,4,3,cpu
+4,hpccdgemm,4,16,4,4,cpu
+5,hpccdgemm,5,16,4,5,cpu
+6,hpccdgemm,6,16,4,6,cpu
+7,hpccdgemm,7,16,4,7,cpu
+8,hpccdgemm,8,16,4,8,cpu
+9,hpccdgemm,9,16,4,9,cpu

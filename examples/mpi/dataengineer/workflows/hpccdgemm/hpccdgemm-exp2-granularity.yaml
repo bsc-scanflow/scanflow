@@ -1,7 +1,7 @@
 apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
 metadata:
-  name: hpccdgemm-exp2-morecontainers
+  name: hpccdgemm-exp2-granularity
 spec:
   schedulerName: volcano
   plugins:
@@ -15,6 +15,7 @@ spec:
           action: CompleteJob
       template:
         spec:
+          nodeName: nxt2030
           containers:
             - command:
                 - /bin/sh
@@ -23,15 +24,18 @@ spec:
                   MPI_HOST="/etc/volcano/mpi/HOSTFILE";
                   echo `cat ${MPI_HOST}`
                   mkdir -p /var/run/sshd; /usr/sbin/sshd;
-                  cp /opt/results/hpccinf.txt /home;
-                  sleep 60;
-                  mpirun --allow-run-as-root --hostfile ${MPI_HOST} --nooversubscribe --mca mpi_yield_when_idle 0 --mca btl ^openib,uct --mca pml ucx --display-devel-map --display-allocation --report-bindings --bind-to none -np 16  /opt/HPCC1.5.0-MPI/bin/hpccdgemm > hpccdgemm.log 2>&1;
+                  str=`cat /etc/volcano/mpiworker.host | tr "\n" " "`
+                  for i in $str; do until ssh $i hostname; do echo wait $i; sleep 2; done; done
+                  #cp /opt/results/hpccinf.txt /home;
+                  sleep 5;
+                  #mpirun --allow-run-as-root --hostfile ${MPI_HOST} --nooversubscribe --mca mpi_yield_when_idle 0 --mca btl ^openib,uct --mca pml ucx --display-devel-map --display-allocation --report-bindings --bind-to none -np 16  /opt/HPCC1.5.0-MPI/bin/hpccdgemm > hpccdgemm.log 2>&1;
+                  mpirun --allow-run-as-root --hostfile ${MPI_HOST} --mca pml ob1 --mca btl ^openib,uct  --mca btl_tcp_if_include eth0 --mca btl_vader_single_copy_mechanism none  --bind-to none -np 16  bin/hpccdgemm > hpccdgemm.log 2>&1;
               image: mpinetworktrace
               name: mpimaster
               ports:
                 - containerPort: 22
                   name: mpijob-port
-              workingDir: /home
+              workingDir: /opt/results
               imagePullPolicy: IfNotPresent
           restartPolicy: OnFailure
     - replicas: 1
@@ -43,13 +47,13 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  cp /opt/results/hpccinf.txt /home;
+                  #cp /opt/results/hpccinf.txt /home;
                   mkdir -p /var/run/sshd; /usr/sbin/sshd -D;
               image: mpinetworktrace
               name: mpiworker
               ports:
                 - containerPort: 22
                   name: mpijob-port
-              workingDir: /home
+              workingDir: /opt/results
               imagePullPolicy: IfNotPresent
           restartPolicy: OnFailure

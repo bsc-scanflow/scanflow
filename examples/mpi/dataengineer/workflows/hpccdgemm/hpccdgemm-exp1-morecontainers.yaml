@@ -2,8 +2,8 @@ apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
 metadata:
   name: hpccdgemm-exp1-morecontainers
-  annotations:
-    volcano.sh/task-groups: mpiworker:4
+  #annotations:
+  #  volcano.sh/task-groups: mpiworker:4
 spec:
   schedulerName: volcano
   plugins:
@@ -18,6 +18,7 @@ spec:
           action: CompleteJob
       template:
         spec:
+          nodeName: nxt2030
           containers:
             - command:
                 - /bin/sh

@@ -147,7 +147,8 @@ class Service(Node):
         self.dockerfile = dockerfile
         self.base_image = base_image
         #1. componentSpecs:spec:containers
-
+        self.resources = resources
+        self.affinity = affinity
         #2. graph
         #MODEL, TRANSFORMER, COMBINER, ROUTER, OUTPUT_TRANSFORMER
         self.service_type = service_type
@@ -158,8 +159,6 @@ class Service(Node):
         self.envSecretRefName = envSecretRefName
         self.endpoint = endpoint
         self.parameters = parameters
-        self.resources = resources
-        self.affinity = affinity
 
     def to_dict(self):
         tmp_dict = {}

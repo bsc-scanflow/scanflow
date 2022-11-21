@@ -1,0 +1,7 @@
+benchmark,nTasks,nNodes,nWorkers,model_time_mean,model_time_std,scenario
+hpccdgemm,16,1,1,25.30693,1.6538809449594616,none
+hpccdgemm,16,1,1,30.87712,0.7229852582176209,cpumem
+hpccdgemm,16,4,4,33.25831,0.8927579072178529,cpumem-scale
+hpccdgemm,16,4,16,37.019189999999995,0.5275680912451013,cpumem-granularity
+hpccdgemm,16,4,4,32.89374,0.9668048098763266,cpumem-scale-notg
+hpccdgemm,16,4,16,36.94405,0.8620153365805041,cpumem-granularity-notg

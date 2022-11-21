@@ -34,6 +34,12 @@ spec:
                   name: mpijob-port
               workingDir: /home
               imagePullPolicy: IfNotPresent
+              # securityContext:
+              #   capabilities:
+              #     add: [ "IPC_LOCK" ]
+              # resources:
+              #   limits:
+              #     rdma/hca_shared_devices_a: 1
           restartPolicy: OnFailure
     - replicas: 4
       name: mpiworker
@@ -63,4 +69,10 @@ spec:
                   name: mpijob-port
               workingDir: /home
               imagePullPolicy: IfNotPresent
+              # securityContext:
+              #   capabilities:
+              #     add: [ "IPC_LOCK" ]
+              # resources:
+              #   limits:
+              #     rdma/hca_shared_devices_a: 1
           restartPolicy: OnFailure

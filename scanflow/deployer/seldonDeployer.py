@@ -91,6 +91,7 @@ class SeldonDeployer(deployer.Deployer):
                                  service.image, env=self.kubeclient.build_env(**env), 
                                  volume_mounts=self.kubeclient.build_volumeMounts(scanflowpath="/scanflow"),
                                  resources=service.resources))
+                logging.info(f"[?] container: [{service.name} - {containers}]")
             #predictiveUnit
             predictiveUnits[f"{service.name}"] = PredictiveUnit(service.name, 
                          type=service.service_type, implementation=service.implementation_type,
