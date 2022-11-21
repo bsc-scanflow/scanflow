@@ -1,5 +1,0 @@
-scenario,init_sum,run_sum,final_sum,duration_sum
-none,4793.0,15385.0,1.0,2568.0
-cpumem,4629.0,15224.0,2.0,3139.0
-cpumem-scale,4426.0,12884.0,0.0,2476.0
-cpumem-granularity,4283.0,12647.0,0.0,2583.0

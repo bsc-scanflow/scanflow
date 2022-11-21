@@ -1,7 +1,0 @@
-benchmark,nTasks,init_sum,run_sum,final_sum,duration_sum,scenario
-hpccdgemm,16,2098.0,15214.0,0.0,17673.716916546,none
-hpccdgemm,16,1507.0,11805.0,0.0,13684.176557971,cpumem
-hpccdgemm,16,1405.0,11305.0,1.0,13084.038858657,cpumem-scale
-hpccdgemm,16,1235.0,9985.000000000002,0.0,11631.109424266,cpumem-granularity
-hpccdgemm,16,1432.0,11391.0,0.0,13206.929683249,cpumem-scale-notg
-hpccdgemm,16,1274.0,10198.0,1.0,11877.470053526002,cpumem-granularity-notg
