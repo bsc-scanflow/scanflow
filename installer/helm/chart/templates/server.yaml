@@ -11,8 +11,12 @@ spec:
     storage: 1Gi
   accessModes:
     - ReadWriteMany
+  storageClassName: local-path
+  claimRef:
+    namespace: scanflow-server
+    name: pvc-scanflow-server
   hostPath:
-    path: "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini"
+    path: "/home/rocky/k8s_resources"
 
 ---
 
@@ -24,6 +28,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
+  storageClassName: local-path
   resources:
     requests:
       storage: 1Gi 
@@ -47,6 +52,7 @@ spec:
       labels:
         app: scanflow-server
     spec:
+      nodeName: cloudskin-k8s-control-plane-0.novalocal
       volumes:
         - name: pvc-scanflow-server
           persistentVolumeClaim:
@@ -90,7 +96,7 @@ spec:
   - port: 80
     protocol: TCP
     targetPort: 8080
-    nodePort: 46666
+    nodePort: 32767
   selector:
     app: scanflow-server
   type: NodePort

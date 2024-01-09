@@ -16,7 +16,7 @@ from kubernetes.client import V1LabelSelectorRequirement, V1NodeSelectorTerm, V1
 from kubernetes.client import V1PodAffinityTerm
 from kubernetes.client import V1ResourceRequirements
 from scanflow.app.workflow.scaler import HpaSpec
-from kubernetes.client import V2beta2MetricSpec, V2beta2ExternalMetricSource, V2beta2ObjectMetricSource, V2beta2PodsMetricSource, V2beta2ResourceMetricSource, V2beta2MetricTarget
+from kubernetes.client import V2MetricSpec, V2ExternalMetricSource, V2ObjectMetricSource, V2PodsMetricSource, V2ResourceMetricSource, V2MetricTarget
 
 
 # scanflow graph
@@ -41,7 +41,7 @@ logging.getLogger().setLevel(logging.INFO)
 class ScanflowClient:
     def __init__(self,
                  builder: str = "docker",
-                 registry : str = "172.30.0.49:5000",
+                 registry : str = "registry.gitlab.bsc.es/datacentric-computing/cloudskin-project/cloudskin-registry",
                  scanflow_server_uri : str = None,
                  verbose=True):
         """
@@ -200,31 +200,31 @@ class ScanflowClient:
         return ScalerTrigger(type, metadata.__dict__)
     
     def HpaSpec(self,
-                metrics: V2beta2MetricSpec,
+                metrics: V2MetricSpec,
                 minReplica: int = 0,
                 maxReplica: int = 10):
         return HpaSpec(minReplica, maxReplica, metrics)
     
-    #https://github.com/kubernetes-client/python/blob/d3de7a85a63fa6bec6518d1cc75dc5e9458b9bbc/kubernetes/docs/V2beta2MetricSpec.md
+    #https://github.com/kubernetes-client/python/blob/v28.1.0/kubernetes/README.md
     def AutoscalingMetric(self,
                           type: str,
-                          external: V2beta2ExternalMetricSource = None,
-                          object: V2beta2ObjectMetricSource = None,
-                          pods: V2beta2PodsMetricSource = None,
-                          resource: V2beta2ResourceMetricSource = None):
-        return V2beta2MetricSpec(external,object,pods,resource,type)
+                          external: V2ExternalMetricSource = None,
+                          object: V2ObjectMetricSource = None,
+                          pods: V2PodsMetricSource = None,
+                          resource: V2ResourceMetricSource = None):
+        return V2MetricSpec(external,object,pods,resource,type)
     
     def ResourceMetricSource(self,
                              name: str,
-                             target: V2beta2MetricTarget):
-        return V2beta2ResourceMetricSource(name, target)
+                             target: V2MetricTarget):
+        return V2ResourceMetricSource(name, target)
     
     def MetricTarget(self,
                      average_utilization : int,
                      average_value: str,
                      type: str,
                      value: str):
-        return V2beta2MetricTarget(average_utilization, average_value, type, value)
+        return V2MetricTarget(average_utilization, average_value, type, value)
     
 
 #resources

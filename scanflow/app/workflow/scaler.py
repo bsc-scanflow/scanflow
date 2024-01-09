@@ -1,5 +1,5 @@
 from typing import Optional, List
-from kubernetes.client import V2beta2MetricSpec
+from kubernetes.client import V2MetricSpec
 
 class ScalerTrigger():
     def __init__(self,
@@ -56,7 +56,7 @@ class HpaSpec():
     def __init__(self,
                  minReplica: Optional[int],
                  maxReplica: Optional[int],
-                 metrics: List[V2beta2MetricSpec]):
+                 metrics: List[V2MetricSpec]):
         """
         default
            minreplica:

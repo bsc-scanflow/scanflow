@@ -4,7 +4,8 @@ LABEL maintainer='scanflow'
 ENV MLFLOW_HOST  0.0.0.0
 ENV MLFLOW_PORT  5000
 
-RUN pip install mlflow==1.14.1
+#2.9.2
+RUN pip install mlflow
 #postgre
 RUN pip install psycopg2-binary 
 #minio

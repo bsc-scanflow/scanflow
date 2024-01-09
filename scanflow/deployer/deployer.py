@@ -59,7 +59,7 @@ class Deployer():
         #scanflow volume, we have to pack scanflow, now we mount the volume
         #name pv-scanflow-server "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini"
         logging.info(f"[TEMPO: Because we dont have scanflow pip install now, we need to mount scanflow]")
-        pv = self.kubeclient.build_persistentvolume(f"scanflow-{namespace}", "1Gi", "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini")
+        pv = self.kubeclient.build_persistentvolume(f"scanflow-{namespace}", "1Gi", "/home/rocky/k8s_resources")
         step1 = self.kubeclient.create_persistentvolume(body=pv)
         pvc = self.kubeclient.build_persistentvolumeclaim(namespace, f"scanflow-{namespace}", None, "ReadWriteMany","1Gi")
         step2 = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)

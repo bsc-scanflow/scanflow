@@ -8,12 +8,12 @@ RUN mkdir /workflow
 ENV SCANFLOW_WORKFLOW_OUTPUT_DIR /workflow
 
 #RUN pip install scanflow
-RUN pip install git+https://github.com/peiniliu/couler.git
-RUN pip install kubernetes==12.0.1
+RUN python3 -m pip install git+https://github.com/couler-proj/couler --ignore-installed
+RUN pip install kubernetes==28.1.0
 RUN pip install aiohttp
 RUN pip install pyaml
 
-RUN pip install mlflow==1.14.1
+RUN pip install mlflow==2.9.2
 #minio
 RUN pip install boto3
 

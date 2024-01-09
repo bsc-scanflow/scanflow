@@ -8,11 +8,12 @@ ENV SCANFLOW_PATH  /scanflow/scanflow
 ENV SERVER_HOME  ${SCANFLOW_PATH}/scanflow/server
 
 #scanflow
-RUN pip install git+https://github.com/peiniliu/couler.git
-RUN pip install kubernetes==12.0.1
+RUN python3 -m pip install git+https://github.com/couler-proj/couler --ignore-installed
+RUN pip install kubernetes==28.1.0
+RUN pip install pyaml
 #minio
 RUN pip install boto3
-RUN pip install mlflow==1.14.1
+RUN pip install mlflow==2.9.2
 
 #server
 RUN pip install fastapi

@@ -156,7 +156,7 @@ class DockerBuilder(builder.Builder):
             template += base_image_template
         else:
             base_image_template = dedent(f'''
-                    FROM 172.30.0.49:5000/scanflow-executor
+                    FROM {self.registry}/scanflow-executor
             ''')
             template += base_image_template
 
@@ -248,7 +248,7 @@ class DockerBuilder(builder.Builder):
  
     def __dockerfile_template_agent(self, agent):
         template = dedent(f'''
-                    FROM 172.30.0.49:5000/scanflow-agent
+                    FROM {self.registry}/scanflow-agent
 
                     ENV AGENT_NAME {agent.name}
                     ENV AGENT_TYPE {agent.template}
