@@ -16,7 +16,7 @@ import torch
 import pytorch_lightning as pl
 from torch import nn
 from torch.nn import functional as F
-from pytorch_lightning.metrics.functional import accuracy
+from torchmetrics.functional import accuracy
 from pl_bolts.datamodules import SklearnDataModule, SklearnDataset
 
 
@@ -90,10 +90,12 @@ def modeling(model_name, epochs, x_train_path, y_train_path,
             model = MNIST()
             
         trainer = pl.Trainer(max_epochs=epochs, 
-                             progress_bar_refresh_rate=20,
+                            #  progress_bar_refresh_rate=20,
                              deterministic=True,
-                             checkpoint_callback=False, logger=False)
-        trainer.fit(model, train_dataloader=loaders_train.train_dataloader(), 
+                            #  checkpoint_callback=False, 
+                             logger=False)
+        trainer.fit(model, 
+                    train_dataloaders=loaders_train.train_dataloader(), 
                     val_dataloaders=loaders_train.val_dataloader())
 
 
@@ -163,7 +165,7 @@ class MNIST(pl.LightningModule):
         logits = self(x)
         loss = F.nll_loss(logits, y)
         preds = torch.argmax(logits, dim=1)
-        acc = accuracy(preds, y)
+        acc = self.accuracy(preds, y, task="multiclass", num_classes=self.num_classes)
 
         print(f"val_acc={acc}")
         return loss
@@ -183,7 +185,7 @@ def evaluate(model, x_test, y_test):
     
     logits = model(x_test_tensor)
     preds = torch.argmax(logits, dim=1)
-    score = accuracy(preds, y_test_tensor)
+    score = accuracy(preds, y_test_tensor,task="multiclass", num_classes=10)
     
     return score.cpu().detach().tolist()
     

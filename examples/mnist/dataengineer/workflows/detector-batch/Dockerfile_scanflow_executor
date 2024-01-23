@@ -1,6 +1,6 @@
 
 
-FROM 172.30.0.49:5000/checker:latest
+FROM registry.gitlab.bsc.es/datacentric-computing/cloudskin-project/cloudskin-registry/checker:latest
 
 COPY detector-batch /app/detector-batch
 

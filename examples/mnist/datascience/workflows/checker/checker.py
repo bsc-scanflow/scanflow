@@ -147,7 +147,7 @@ def checker(model_name, epochs, x_train_path):
                                                     x_train)
 
         #log run
-        mlflow.keras.log_model(detector, artifact_path=model_name, 
+        mlflow.tensorflow.log_model(detector, artifact_path=model_name, 
                                    registered_model_name=model_name)
         mlflow.log_param(key='THRESHOLD_HIGH', value=THRESHOLD_HIGH)
         mlflow.log_param(key='THRESHOLD_LOW', value=THRESHOLD_LOW)

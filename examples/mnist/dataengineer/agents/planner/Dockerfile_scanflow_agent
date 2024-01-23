@@ -1,5 +1,5 @@
 
-FROM 172.30.0.49:5000/scanflow-agent
+FROM registry.gitlab.bsc.es/datacentric-computing/cloudskin-project/cloudskin-registry/scanflow-agent
 
 ENV AGENT_NAME planner
 ENV AGENT_TYPE planner

@@ -1,6 +1,6 @@
 
 
-FROM 172.30.0.49:5000/scanflow-executor
+FROM registry.gitlab.bsc.es/datacentric-computing/cloudskin-project/cloudskin-registry/scanflow-executor
 
 COPY modeling-cnn1 /app/modeling-cnn1
 
