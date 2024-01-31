@@ -2,6 +2,7 @@ import yaml
 import couler.argo as couler
 from couler.argo_submitter import ArgoSubmitter
 from couler.core.templates.volume import VolumeMount, Volume
+from couler.core.constants import ImagePullPolicy
 
 
 import logging
@@ -40,11 +41,13 @@ class ArgoWorkflows:
             volumeMounts.append(volumeMount)
         return volumeMounts
 
-    def argoExecutor(self, name, image, args, env, volumeMounts, resources):
+    def argoExecutor(self, name, image, image_pull_policy, command, args, env, volumeMounts, resources):
+        logging.info(f" argo executor: {image_pull_policy}")
         return lambda: couler.run_container(
             image = image,
+            image_pull_policy = ImagePullPolicy.Always,
             step_name = name,
-            #command = command,
+            command = command,
             args = args,
             env = env,
             resources=resources,
