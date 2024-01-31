@@ -7,7 +7,7 @@ from scanflow.app import Workflow, Executor
 import scanflow.deployer.deployer as deployer
 from scanflow.templates import ArgoWorkflows
 from scanflow.deployer.env import ScanflowSecret, ScanflowClientConfig
-from scanflow.tools.param import format_parameters
+from scanflow.tools.param import format_parameters, format_command
 
 from kubernetes.client import V1ResourceRequirements
 
@@ -64,9 +64,10 @@ class ArgoDeployer(deployer.Deployer):
                 set_output_dir(workflow.output_dir)
             output_dir = get_output_dir()
             logging.info(f"[+] output dir {output_dir}")
-            logging.info(f"[+] Create {workflow_name} output PV")
-            pv = self.kubeclient.build_persistentvolume(workflow_name, "1Gi", f"/gpfs/bsc_home/xpliu/pv/scanflow-output/{workflow_name}-output")
-            step1 = self.kubeclient.create_persistentvolume(body=pv)
+            # logging.info(f"[+] Create {workflow_name} output PV")
+            # pv = self.kubeclient.build_persistentvolume(workflow_name, "1Gi", f"/gpfs/bsc_home/xpliu/pv/scanflow-output/{workflow_name}-output")
+            # step1 = self.kubeclient.create_persistentvolume(body=pv)
+            step1 = True
             logging.info(f"[+] Create {workflow_name} output PVC")
             pvc = self.kubeclient.build_persistentvolumeclaim(namespace, workflow_name, None,"ReadWriteMany", "512Mi")
             step2 = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
@@ -98,15 +99,22 @@ class ArgoDeployer(deployer.Deployer):
                     logging.info(f"{executor.resources.to_dict().get('limits')}")
                     argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
                              image = executor.image,
-                             args = format_parameters(executor.parameters),
+                             image_pull_policy = None,
+                             command = format_command({'python': f'/app/{executor.name}/{executor.mainfile}'})+format_parameters(executor.parameters),
+                             args = [],
+                            #  args = format_parameters(executor.parameters),
                              env = env, 
                              volumeMounts = volumeMounts,
                              resources = executor.resources.to_dict().get('limits'))
                 else:
-                    logging.info(f"{format_parameters(executor.parameters)}")
+                    logging.info(f" parameters: {format_parameters(executor.parameters)}")
+                    logging.info(f" command: {format_command({'python': f'/app/{executor.name}/{executor.mainfile}'})}")
                     argoContainers[f"{executor.name}"] = self.argoclient.argoExecutor(name = executor.name, 
                              image = executor.image,
-                             args = format_parameters(executor.parameters),
+                             image_pull_policy = None,
+                             command = format_command({'python': f'/app/{executor.name}/{executor.mainfile}'})+format_parameters(executor.parameters),
+                            #  args = format_parameters(executor.parameters),
+                             args = [],
                              env = env, 
                              volumeMounts = volumeMounts,
                              resources=None)
