@@ -165,7 +165,7 @@ class MNIST(pl.LightningModule):
         logits = self(x)
         loss = F.nll_loss(logits, y)
         preds = torch.argmax(logits, dim=1)
-        acc = self.accuracy(preds, y, task="multiclass", num_classes=self.num_classes)
+        acc = accuracy(preds, y, task="multiclass", num_classes=10)
 
         print(f"val_acc={acc}")
         return loss

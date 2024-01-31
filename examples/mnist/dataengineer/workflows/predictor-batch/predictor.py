@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import pytorch_lightning as pl
 from pathlib import Path
+from pytorch_lightning.core.module import LightningModule
 
 
 import sys
