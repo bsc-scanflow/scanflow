@@ -16,5 +16,5 @@ tracker:
   scanflow_tracker_storage_password: "scanflow123"
   scanflow_tracker_artifact_backend: "s3"
   scanflow_tracker_artifact_url: "http://minio.scanflow-server.svc.cluster.local"
-  scanflow_tracker_artifact_username: "myKyz8grR4KDHDjj"
-  scanflow_tracker_artifact_password: "rUGHtW2hHVe8HeX4AIWraFlKDvx0WIJV"
+  scanflow_tracker_artifact_username: "scanflow"
+  scanflow_tracker_artifact_password: "scanflow123"

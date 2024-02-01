@@ -21,6 +21,7 @@ RUN pip install fastapi
 RUN pip install uvicorn
 RUN pip install aiohttp
 RUN pip install aiodns
+RUN pip install pydantic==1.10.14
 
 WORKDIR $AGENT_HOME
 

@@ -17,7 +17,6 @@ spec:
       labels:
         app: scanflow-tracker
     spec:
-      nodeName: cloudskin-k8s-control-plane-0.novalocal
       containers:
         - image: {{.Values.basic.scanflow_tracker_image_name}}:{{.Values.basic.image_tag_version}}
           imagePullPolicy: Always
