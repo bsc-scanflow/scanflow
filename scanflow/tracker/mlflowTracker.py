@@ -106,12 +106,12 @@ class MlflowTracker(Tracker):
             mv = client.get_latest_versions(model_name, stages=["Production"])
         if not os.path.exists(f"/tmp/model/{model_name}"):
             os.makedirs(f"/tmp/model/{model_name}")
-        local_path = client.download_artifacts(mv[0].run_id, path=model_name, dst_path=f"/tmp/model/{model_name}")
+        local_path = client.download_artifacts(mv.run_id, path=model_name, dst_path=f"/tmp/model/{model_name}")
         #logging.info("Artifacts downloaded in: {}".format(local_path))
         #logging.info("Artifacts: {}".format(os.listdir(local_path)))
 
         #get run
-        run = mlflow.get_run(mv[0].run_id)
+        run = mlflow.get_run(mv.run_id)
         metrics = run.data.metrics
         params = run.data.params
         logging.info(f"{metrics}--{params}")
@@ -130,8 +130,8 @@ class MlflowTracker(Tracker):
             except:
                 logging.info(f"{model_name} exists")
             model_uri = "runs:/{}/{}".format(run.info.run_id, model_name)
-            mv_new = client.create_model_version(model_name, model_uri, run.info.run_id, mv[0].tags)
-            client.transition_model_version_stage(model_name, mv_new.version, "Production",  archive_existing_versions=True)
+            mv_new = client.create_model_version(model_name, model_uri, run.info.run_id, mv.tags)
+            client.set_registered_model_alias(model_name, "Production", mv_new.version)
 
     #tested
     def download_app_model(self, model_name, model_version):
@@ -144,12 +144,12 @@ class MlflowTracker(Tracker):
             mv = client.get_latest_versions(model_name, stages=["Production"])
         if not os.path.exists(f"/tmp/model/{model_name}"):
             os.makedirs(f"/tmp/model/{model_name}")
-        local_path = client.download_artifacts(mv[0].run_id, path=model_name, dst_path=f"/tmp/model/{model_name}")
+        local_path = client.download_artifacts(mv.run_id, path=model_name, dst_path=f"/tmp/model/{model_name}")
         #logging.info("Artifacts downloaded in: {}".format(local_path))
         #logging.info("Artifacts: {}".format(os.listdir(local_path)))
         
         #get run
-        run = mlflow.get_run(mv[0].run_id)
+        run = mlflow.get_run(mv.run_id)
         run_name = run.data.tags['mlflow.runName']
         experiment = mlflow.get_experiment(run.info.experiment_id)
         experiment_name = experiment.name
@@ -171,7 +171,7 @@ class MlflowTracker(Tracker):
             except:
                 logging.info(f"{model_name} exists")
             model_uri = "runs:/{}/{}".format(run.info.run_id, model_name)
-            mv_new = client.create_model_version(model_name, model_uri, run.info.run_id, mv[0].tags)
+            mv_new = client.create_model_version(model_name, model_uri, run.info.run_id, mv.tags)
             #client.transition_model_version_stage(model_name, mv_new.version, "Production",  archive_existing_versions=True)
 
     #tested
