@@ -1,22 +1,21 @@
-from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 
-class ScanflowSecret(BaseModel):
-    AWS_ACCESS_KEY_ID : Optional[str] = "myKyz8grR4KDHDjj"
-    AWS_SECRET_ACCESS_KEY : Optional[str] = "rUGHtW2hHVe8HeX4AIWraFlKDvx0WIJV"
-    MLFLOW_S3_ENDPOINT_URL : Optional[str] = "http://scanflow-minio-hl.scanflow-server.svc.cluster.local:9000"
-    AWS_ENDPOINT_URL: Optional[str] = "http://scanflow-minio-hl.scanflow-server.svc.cluster.local:9000"
+class ScanflowSecret():
+    AWS_ACCESS_KEY_ID : Optional[str] = "scanflow"
+    AWS_SECRET_ACCESS_KEY : Optional[str] = "scanflow123"
+    MLFLOW_S3_ENDPOINT_URL : Optional[str] = "http://minio.scanflow-server.svc.cluster.local"
+    AWS_ENDPOINT_URL: Optional[str] = "http://minio.scanflow-server.svc.cluster.local"
 
-class ScanflowTrackerConfig(BaseModel):
+class ScanflowTrackerConfig():
     TRACKER_STORAGE: Optional[str] = "postgresql://postgres:scanflow123@scanflow-postgres.scanflow-server.svc.cluster.local/scanflow-default"
     TRACKER_ARTIFACT: Optional[str] = "s3://scanflow-default"
 
-class ScanflowClientConfig(BaseModel):
-    SCANFLOW_TRACKER_URI : Optional[str] = "http://scanflow-server-tracker-service.scanflow-server.svc.cluster.local"
-    SCANFLOW_SERVER_URI : Optional[str] = "http://scanflow-server-server-service.scanflow-server.svc.cluster.local"
+class ScanflowClientConfig():
+    SCANFLOW_TRACKER_URI : Optional[str] = "http://scanflow-tracker-service.scanflow-server.svc.cluster.local"
+    SCANFLOW_SERVER_URI : Optional[str] = "http://scanflow-server-service.scanflow-server.svc.cluster.local"
     SCANFLOW_TRACKER_LOCAL_URI : Optional[str] = "http://scanflow-tracker.scanflow-default.svc.cluster.local"
 
-class ScanflowEnvironment(BaseModel):
+class ScanflowEnvironment():
     namespace: Optional[str] = "scanflow-default" 
     #role: now we start with default
     #secret

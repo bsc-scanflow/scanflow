@@ -27,7 +27,8 @@ mlflow.set_tracking_uri(client.get_tracker_uri(True))
 custom_sensor_router = APIRouter()
 
 @custom_sensor_router.post("/analyze_check_predictions",
-                            status_code= status.HTTP_200_OK)
+                            status_code= status.HTTP_200_OK
+                            headers = {'Content-Type': 'application/json'})
 async def sensors_analyze_predictions(info: tuple = Depends(sensor_dependency)):
     run = info[0]
     print("Active run_id: {}".format(run.info.run_id))

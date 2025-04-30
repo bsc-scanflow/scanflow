@@ -29,21 +29,22 @@ class actuator:
         async def make_call(*args, **kwargs):
             print(type(args))
             print(type(kwargs))
-            print(args)
-            print(kwargs)
+            # logging.info(args)
+            # logging.info(kwargs)
 
             args, kwargs = func(args=args, kwargs=kwargs)
 
             url = f"http://{self.depender}.{self.namespace}.svc.cluster.local{self.path}"
-            #url = f"http://172.30.0.49:4005{self.path}"
             logging.info(f"sending request to {url}") 
             requestData = RequestData(
                               args = args,
                               kwargs = kwargs)
-            #print(json.dumps(request.dict()))
-            async with http_client.session.post(url, data=json.dumps(requestData.dict())) as response:
+            logging.info(json.dumps(requestData.dict()))
+            headers = {'Content-Type': 'application/json'}
+            async with http_client.session.post(url, data=json.dumps(requestData.dict()), headers=headers) as response:
                 status = response.status
                 text = await response.json()
+                logging.info(f"request response:{response}") 
  
             await self.save_message(
                 ActuatorMessage(type="actuator",

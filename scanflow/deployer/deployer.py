@@ -58,16 +58,21 @@ class Deployer():
     def __create_scanflow_volume(self,namespace):
         #scanflow volume, we have to pack scanflow, now we mount the volume
         #name pv-scanflow-server "/gpfs/bsc_home/xpliu/pv/jupyterhubpeini"
-        logging.info(f"[TEMPO: Because we dont have scanflow pip install now, we need to mount scanflow]")
-        pv = self.kubeclient.build_persistentvolume(f"scanflow-{namespace}", "1Gi", "/home/rocky/k8s_resources")
-        step1 = self.kubeclient.create_persistentvolume(body=pv)
+        # logging.info(f"[TEMPO: Because we dont have scanflow pip install now, we need to mount scanflow]")
+        # pv = self.kubeclient.build_persistentvolume(f"scanflow-{namespace}", "1Gi", "/home/rocky/k8s_resources")
+        # step1 = self.kubeclient.create_persistentvolume(body=pv)
+        
+        # ln -s /home/rocky/k8s_resources/scanflow /nfsfileshare/scanflow-mnist-datascience-scanflow-scanflow-mnist-datascience-pvc-d0a4c05e-f710-416e-9d5e-fff12eac0f91/scanflow
+
+        step1 = True
         pvc = self.kubeclient.build_persistentvolumeclaim(namespace, f"scanflow-{namespace}", None, "ReadWriteMany","1Gi")
         step2 = self.kubeclient.create_persistentvolumeclaim(namespace, pvc)
         return step1 and step2
     
     def __delete_scanflow_volume(self, namespace):
         step1 = self.kubeclient.delete_persistentvolumeclaim(namespace, f"scanflow-{namespace}")
-        step2 = self.kubeclient.delete_persistentvolume(f"scanflow-{namespace}")
+        # step2 = self.kubeclient.delete_persistentvolume(f"scanflow-{namespace}")
+        step2 = True
         return step1 and step2
 
     def clean_environment(self,

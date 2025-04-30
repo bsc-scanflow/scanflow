@@ -87,7 +87,7 @@ class ScanflowDeployerClient:
             scanflowEnv = ScanflowEnvironment()
             namespace = f"scanflow-{app.app_name}-{app.team_name}" 
             scanflowEnv.namespace = namespace
-            scanflowEnv.tracker_config.TRACKER_STORAGE = f"postgresql://scanflow:scanflow123@postgresql-service.postgresql.svc.cluster.local/{namespace}"
+            scanflowEnv.tracker_config.TRACKER_STORAGE = f"postgresql://postgres:scanflow123@scanflow-postgres.scanflow-server.svc.cluster.local/{namespace}"
             scanflowEnv.tracker_config.TRACKER_ARTIFACT = f"s3://scanflow/{namespace}"
             scanflowEnv.client_config.SCANFLOW_TRACKER_LOCAL_URI = f"http://scanflow-tracker.{namespace}.svc.cluster.local"
 

@@ -68,6 +68,7 @@ class DockerBuilder(builder.Builder):
 
         try:
             image = self.client.images.get(image_name)
+            logging.info(f"[+] Image [{image_name}] has been found in repository. {image.tags[0]}.")
             return image.tags[0]
     
         except docker.api.client.DockerException as e:
@@ -94,8 +95,15 @@ class DockerBuilder(builder.Builder):
                                           dockerfile=dockerfile,
                                         tag=image_name)
                     logging.info(f'[+] Image [{source.name}] was built successfully. image_tag {image.tags}')
-                    self.client.images.push(image_name)
-                    logging.info(f'[+] Image [{source.name}] was pushed to registry successfully.')
+
+                    try:
+                        # self.client.images.push(image_name)
+                        self.client.images.push(repository=f"{self.registry}/{image_name}", 
+                                                tag=image.tags, 
+                                                auth_config={'username': 'cloudskin-ncloud2', 'password': 'Y2xvdWRza2luLW5jbG91ZDI6cE54emZQNm5TWWJMeEJWM1lHaGk='})
+                        logging.info(f'[+] Image [{source.name}] was pushed to registry successfully.')
+                    except docker.api.client.DockerException as e:
+                        logging.info(f'[+] Image [{source.name}] push failed.')
 
                     return image.tags[0]
             except docker.api.client.DockerException as e:
